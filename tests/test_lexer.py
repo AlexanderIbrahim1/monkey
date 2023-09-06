@@ -78,9 +78,7 @@ class TestLexer:
             Token(token_types.EOF, ""),
         ]
 
-        actual = [
-            lexer.next_token() for _ in range(len(expected))
-        ]
+        actual = [lexer.next_token() for _ in range(len(expected))]
 
         assert expected == actual
 
@@ -88,3 +86,7 @@ class TestLexer:
         input_text = r"~"
         lexer = Lexer(input_text)
         assert lexer.next_token().token_type == token_types.ILLEGAL
+
+    def test_read_identifier(self):
+        lexer = Lexer(r"hello")
+        assert lexer.next_token() == Token(token_types.IDENTIFIER, "hello")
