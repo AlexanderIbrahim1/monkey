@@ -4,6 +4,8 @@ Token instances for a later step in the interpreter.
 """
 
 from monkey.tokens import Token
+from monkey.tokens import TokenType
+from monkey.tokens import token_maps
 from monkey.tokens import token_types
 
 # NULL_BYTE = b"\x00"
@@ -54,7 +56,8 @@ class Lexer:
             token = Token(token_types.EOF, c)
         elif _is_identifier_character(c):
             identifier = self._read_identifier()
-            token = Token(token_types.IDENTIFIER, identifier)
+            tok_type = _lookup_identifier_token_type(identifier)
+            token = Token(tok_type, identifier)
         else:
             token = Token(token_types.ILLEGAL, c)
 
@@ -77,3 +80,11 @@ class Lexer:
 
 def _is_identifier_character(char: str) -> bool:
     return "a" <= char <= "z" or "A" <= char <= "Z" or char == "_"
+
+
+def _lookup_identifier_token_type(possible_keyword: str) -> TokenType:
+    """
+    Check if the identifier is one of the special reserved keywords, or if it
+    is a user-defined identifier.
+    """
+    return token_maps.KEYWORD_TO_TOKEN.get(possible_keyword, token_types.IDENTIFIER)

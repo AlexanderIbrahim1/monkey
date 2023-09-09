@@ -90,3 +90,14 @@ class TestLexer:
     def test_read_identifier(self):
         lexer = Lexer(r"hello")
         assert lexer.next_token() == Token(token_types.IDENTIFIER, "hello")
+
+    @pytest.mark.parametrize(
+        "keyword, token",
+        [
+            ("let", Token(token_types.LET, "let")),
+            ("fn", Token(token_types.FUNCTION, "fn")),
+        ]
+    )
+    def test_read_keyword(self, keyword: str, token: Token):
+        lexer = Lexer(keyword)
+        assert lexer.next_token() == token
