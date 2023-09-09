@@ -20,16 +20,7 @@ class Lexer:
         self._read_position = 0
         self._char = NULL_CHAR
 
-        self.read_char()
-
-    def read_char(self) -> None:
-        if self._read_position >= self._max_size:
-            self._char = NULL_CHAR
-        else:
-            self._char = self._text_input[self._read_position]
-
-        self._position = self._read_position
-        self._read_position += 1
+        self._read_char()
 
     def next_token(self) -> Token:
         # NOTE: the contents of this function seems to be temporary; it looks like they'll
@@ -37,11 +28,17 @@ class Lexer:
 
         self._skip_whitespace()
 
-        flag_read_char = True
+        flag__read_char = True
 
         c = self._char
         if c == "=":
-            token = Token(token_types.ASSIGN, c)
+            if self._peek_char() == "=":
+                char1 = c
+                self._read_char()
+                char2 = self._char
+                token = Token(token_types.EQ, f"{char1}{char2}")
+            else:
+                token = Token(token_types.ASSIGN, c)
         elif c == ";":
             token = Token(token_types.SEMICOLON, c)
         elif c == "(":
@@ -59,7 +56,13 @@ class Lexer:
         elif c == "-":
             token = Token(token_types.MINUS, c)
         elif c == "!":
-            token = Token(token_types.BANG, c)
+            if self._peek_char() == "=":
+                char1 = c
+                self._read_char()
+                char2 = self._char
+                token = Token(token_types.NOT_EQ, f"{char1}{char2}")
+            else:
+                token = Token(token_types.BANG, c)
         elif c == "*":
             token = Token(token_types.ASTERISK, c)
         elif c == "/":
@@ -72,11 +75,11 @@ class Lexer:
             identifier = self._read_identifier()
             tok_type = _lookup_identifier_token_type(identifier)
             token = Token(tok_type, identifier)
-            flag_read_char = False  # had to read 1 past the identifier to identify it; don't read again
+            flag__read_char = False  # had to read 1 past the identifier to identify it; don't read again
         elif _is_digit_character(c):
             integer = self._read_number()
             token = Token(token_types.INT, integer)
-            flag_read_char = (
+            flag__read_char = (
                 False  # had to read 1 past the number to identify it; don't read again
             )
         elif c == NULL_CHAR:
@@ -84,16 +87,31 @@ class Lexer:
         else:
             token = Token(token_types.ILLEGAL, c)
 
-        if flag_read_char:
-            self.read_char()
+        if flag__read_char:
+            self._read_char()
 
         return token
+
+    def _read_char(self) -> None:
+        if self._read_position >= self._max_size:
+            self._char = NULL_CHAR
+        else:
+            self._char = self._text_input[self._read_position]
+
+        self._position = self._read_position
+        self._read_position += 1
+
+    def _peek_char(self) -> str:
+        if self._read_position >= self._max_size:
+            return NULL_CHAR
+        else:
+            return self._text_input[self._read_position]
 
     def _read_identifier(self) -> str:
         start_position = self._position
 
         while _is_identifier_character(self._char):
-            self.read_char()
+            self._read_char()
 
         end_position = self._position
 
@@ -105,7 +123,7 @@ class Lexer:
         start_position = self._position
 
         while _is_digit_character(self._char):
-            self.read_char()
+            self._read_char()
 
         end_position = self._position
 
@@ -115,7 +133,7 @@ class Lexer:
 
     def _skip_whitespace(self) -> None:
         while self._char.isspace():
-            self.read_char()
+            self._read_char()
 
 
 def _is_identifier_character(char: str) -> bool:

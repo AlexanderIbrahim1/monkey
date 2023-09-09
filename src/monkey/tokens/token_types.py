@@ -22,6 +22,8 @@ ASTERISK = "*"
 SLASH = "/"
 LT = "<"
 GT = ">"
+EQ = "=="
+NOT_EQ = "!="
 
 # punctuation
 COMMA = ","

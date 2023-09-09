@@ -107,7 +107,7 @@ class TestLexer:
             ("if", Token(token_types.IF, "if")),
             ("else", Token(token_types.ELSE, "else")),
             ("return", Token(token_types.RETURN, "return")),
-        ]
+        ],
     )
     def test_read_keyword(self, keyword: str, token: Token):
         lexer = Lexer(keyword)
@@ -133,9 +133,24 @@ class TestLexer:
         [
             (3, Token(token_types.INT, "3")),
             (5, Token(token_types.INT, "5")),
-            (20, Token(token_types.INT, "20"))
-        ]
+            (20, Token(token_types.INT, "20")),
+        ],
     )
     def test_read_positive_integer(self, integer, token):
         lexer = Lexer(f"{integer}")
         assert lexer.next_token() == token
+
+    @pytest.mark.parametrize(
+        "operator, token",
+        [
+            ("!=", Token(token_types.NOT_EQ, "!=")),
+            ("==", Token(token_types.EQ, "==")),
+        ],
+    )
+    def test_twochar_operators(self, operator, token):
+        lexer = Lexer(f"{operator}")
+        assert lexer.next_token() == token
+
+    def test_assign_only(self):
+        lexer = Lexer("=")
+        assert lexer.next_token() == Token(token_types.ASSIGN, "=")
