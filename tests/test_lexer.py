@@ -116,3 +116,15 @@ class TestLexer:
         actual = [lexer.next_token() for _ in range(len(expected))]
 
         assert expected == actual
+
+    @pytest.mark.parametrize(
+        "integer, token",
+        [
+            (3, Token(token_types.INT, "3")),
+            (5, Token(token_types.INT, "5")),
+            (20, Token(token_types.INT, "20"))
+        ]
+    )
+    def test_read_positive_integer(self, integer, token):
+        lexer = Lexer(f"{integer}")
+        assert lexer.next_token() == token

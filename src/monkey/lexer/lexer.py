@@ -63,6 +63,12 @@ class Lexer:
             tok_type = _lookup_identifier_token_type(identifier)
             token = Token(tok_type, identifier)
             flag_read_char = False  # had to read 1 past the identifier to identify it; don't read again
+        elif _is_digit_character(c):
+            integer = self._read_number()
+            token = Token(token_types.INT, integer)
+            flag_read_char = (
+                False  # had to read 1 past the number to identify it; don't read again
+            )
         else:
             token = Token(token_types.ILLEGAL, c)
 
@@ -83,6 +89,18 @@ class Lexer:
 
         return identifier
 
+    def _read_number(self) -> str:
+        start_position = self._position
+
+        while _is_digit_character(self._char):
+            self.read_char()
+
+        end_position = self._position
+
+        number = self._text_input[start_position:end_position]
+
+        return number
+
     def _skip_whitespace(self) -> None:
         while self._char.isspace():
             self.read_char()
@@ -90,6 +108,10 @@ class Lexer:
 
 def _is_identifier_character(char: str) -> bool:
     return "a" <= char <= "z" or "A" <= char <= "Z" or char == "_"
+
+
+def _is_digit_character(char: str) -> bool:
+    return "0" <= char <= "9"
 
 
 def _lookup_identifier_token_type(possible_keyword: str) -> TokenType:
