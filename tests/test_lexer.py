@@ -102,6 +102,11 @@ class TestLexer:
         [
             ("let", Token(token_types.LET, "let")),
             ("fn", Token(token_types.FUNCTION, "fn")),
+            ("true", Token(token_types.TRUE, "true")),
+            ("false", Token(token_types.FALSE, "false")),
+            ("if", Token(token_types.IF, "if")),
+            ("else", Token(token_types.ELSE, "else")),
+            ("return", Token(token_types.RETURN, "return")),
         ]
     )
     def test_read_keyword(self, keyword: str, token: Token):
