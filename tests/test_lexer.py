@@ -101,3 +101,18 @@ class TestLexer:
     def test_read_keyword(self, keyword: str, token: Token):
         lexer = Lexer(keyword)
         assert lexer.next_token() == token
+
+    def test_read_with_whitespace(self):
+        lexer = Lexer("let x = y;")
+
+        expected = [
+            Token(token_types.LET, "let"),
+            Token(token_types.IDENTIFIER, "x"),
+            Token(token_types.ASSIGN, "="),
+            Token(token_types.IDENTIFIER, "y"),
+            Token(token_types.SEMICOLON, ";"),
+        ]
+
+        actual = [lexer.next_token() for _ in range(len(expected))]
+
+        assert expected == actual

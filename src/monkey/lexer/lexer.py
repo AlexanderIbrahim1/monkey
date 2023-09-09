@@ -35,6 +35,10 @@ class Lexer:
         # NOTE: the contents of this function seems to be temporary; it looks like they'll
         #       be replaced with something easier to work with
 
+        self._skip_whitespace()
+
+        flag_read_char = True
+
         c = self._char
         if c == "=":
             token = Token(token_types.ASSIGN, c)
@@ -58,10 +62,12 @@ class Lexer:
             identifier = self._read_identifier()
             tok_type = _lookup_identifier_token_type(identifier)
             token = Token(tok_type, identifier)
+            flag_read_char = False  # had to read 1 past the identifier to identify it; don't read again
         else:
             token = Token(token_types.ILLEGAL, c)
 
-        self.read_char()
+        if flag_read_char:
+            self.read_char()
 
         return token
 
@@ -76,6 +82,10 @@ class Lexer:
         identifier = self._text_input[start_position:end_position]
 
         return identifier
+
+    def _skip_whitespace(self) -> None:
+        while self._char.isspace():
+            self.read_char()
 
 
 def _is_identifier_character(char: str) -> bool:
