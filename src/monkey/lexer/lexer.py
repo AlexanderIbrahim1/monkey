@@ -56,8 +56,18 @@ class Lexer:
             token = Token(token_types.COMMA, c)
         elif c == "+":
             token = Token(token_types.PLUS, c)
-        elif c == NULL_CHAR:
-            token = Token(token_types.EOF, c)
+        elif c == "-":
+            token = Token(token_types.MINUS, c)
+        elif c == "!":
+            token = Token(token_types.BANG, c)
+        elif c == "*":
+            token = Token(token_types.ASTERISK, c)
+        elif c == "/":
+            token = Token(token_types.SLASH, c)
+        elif c == "<":
+            token = Token(token_types.LT, c)
+        elif c == ">":
+            token = Token(token_types.GT, c)
         elif _is_identifier_character(c):
             identifier = self._read_identifier()
             tok_type = _lookup_identifier_token_type(identifier)
@@ -69,6 +79,8 @@ class Lexer:
             flag_read_char = (
                 False  # had to read 1 past the number to identify it; don't read again
             )
+        elif c == NULL_CHAR:
+            token = Token(token_types.EOF, c)
         else:
             token = Token(token_types.ILLEGAL, c)
 

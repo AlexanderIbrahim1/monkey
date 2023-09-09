@@ -16,6 +16,12 @@ INT = "INT"
 # operators
 ASSIGN = "="
 PLUS = "+"
+MINUS = "-"
+BANG = "!"
+ASTERISK = "*"
+SLASH = "/"
+LT = "<"
+GT = ">"
 
 # punctuation
 COMMA = ","
