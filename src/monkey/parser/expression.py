@@ -5,15 +5,11 @@ in the AST is an expression (produces a value).
 
 from abc import ABC
 from abc import abstractmethod
-from dataclasses import dataclass
 
 from monkey.parser.ast_node import ASTNode
 
 
-@dataclass
-class Expression(ABC):
-    node: ASTNode
-
+class Expression(ASTNode, ABC):
     @abstractmethod
     def expression_node(self) -> None:
         """

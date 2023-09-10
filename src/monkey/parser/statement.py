@@ -5,15 +5,11 @@ in the AST is a statement (produces no value).
 
 from abc import ABC
 from abc import abstractmethod
-from dataclasses import dataclass
 
 from monkey.parser.ast_node import ASTNode
 
 
-@dataclass
-class Statement(ABC):
-    node: ASTNode
-
+class Statement(ASTNode, ABC):
     @abstractmethod
     def statement_node(self) -> None:
         """
