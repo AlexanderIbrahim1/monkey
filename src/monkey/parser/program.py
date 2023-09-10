@@ -1,0 +1,22 @@
+"""
+This module contains the Program class, whose instances act as the root node of
+every AST that the parser produces.
+"""
+
+from monkey.parser.ast_node import ASTNode
+from monkey.parser.constants import DEFAULT_LITERAL
+from monkey.parser.statement import Statement
+from monkey.tokens import Literal
+
+
+class Program(ASTNode):
+    def __init__(self, statements: list[Statement]) -> None:
+        self._statements = statements
+
+    def token_literal(self) -> Literal:
+        at_least_one_statement = len(self._statements) > 0
+
+        if at_least_one_statement:
+            return self._statements[0].token_literal()
+        else:
+            return DEFAULT_LITERAL
