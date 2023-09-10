@@ -6,8 +6,8 @@ NOTE: I can't call this file `token.py`, because it causes an ImportError when u
 
 from dataclasses import dataclass
 
-TokenType = str
-Literal = str
+from monkey.tokens.token_types import Literal
+from monkey.tokens.token_types import TokenType
 
 
 @dataclass

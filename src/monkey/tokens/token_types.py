@@ -3,6 +3,9 @@ This module contains constants representing all the token types recognized by th
 Monkey programming language.
 """
 
+TokenType = str
+Literal = str
+
 # special token types
 ILLEGAL = "ILLEGAL"
 EOF = "EOF"
