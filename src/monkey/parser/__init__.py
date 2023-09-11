@@ -1,3 +1,3 @@
 from monkey.parser.ast_node import ASTNode
-from monkey.parser.expression import Expression
-from monkey.parser.statement import Statement
+from monkey.parser.expressions import Expression
+from monkey.parser.statements import Statement

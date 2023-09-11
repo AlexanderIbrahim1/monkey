@@ -5,7 +5,7 @@ every AST that the parser produces.
 
 from monkey.parser.ast_node import ASTNode
 from monkey.parser.constants import DEFAULT_LITERAL
-from monkey.parser.statement import Statement
+from monkey.parser.statements import Statement
 from monkey.tokens import Literal
 
 
