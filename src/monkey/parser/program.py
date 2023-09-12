@@ -25,3 +25,6 @@ class Program(ASTNode):
             return self._statements[0].token_literal()
         else:
             return DEFAULT_LITERAL
+
+    def append(self, statement: Statement) -> None:
+        self._statements.append(statement)
