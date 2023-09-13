@@ -19,6 +19,7 @@ from monkey.parser.expressions import Identifier
 from monkey.parser.program import Program
 from monkey.parser.statements import Statement
 from monkey.parser.statements import LetStatement
+from monkey.parser.statements import ReturnStatement
 from monkey.tokens import TokenType
 from monkey.tokens import token_constants
 from monkey.tokens import token_types
@@ -61,6 +62,8 @@ class Parser:
         # TODO: add more branches in the future
         if curr_token_type == token_types.LET:
             return self._parse_let_statement()
+        elif curr_token_type == token_types.RETURN:
+            return self._parse_return_statement()
         else:
             return None
 
@@ -81,19 +84,17 @@ class Parser:
 
         # handle the `<identifier>` part
         if not self._expect_peek_and_next(token_types.IDENTIFIER):
-            self._peek_error(token_types.IDENTIFIER)
             return None
 
         stmt_identifier = Identifier(self._current_token, self._current_token.literal)
 
         # handle the `<assign>` part
         if not self._expect_peek_and_next(token_types.ASSIGN):
-            self._peek_error(token_types.ASSIGN)
             return None
 
         # handle the `<expression>` and `<semicolon>` parts
         # TODO: skipping the expressions until we encounter a semicolon
-        while not self._expect_peek_and_next(token_types.SEMICOLON):
+        while not self._current_token_type_is(token_types.SEMICOLON):
             self._parse_next_token()
 
         # TODO: dummy expression until we get a real one later
@@ -101,11 +102,37 @@ class Parser:
 
         return LetStatement(stmt_token, stmt_identifier, stmt_value)
 
+    # TODO: implement
+    def _parse_return_statement(self) -> Optional[ReturnStatement]:
+        """
+        A return statement has the format:
+
+            return <expression>;
+
+        or in an even more verbose fashion:
+
+            <return> <expression> <semicolon>
+        """
+
+        # handle the `<return>` part
+        stmt_token = self._current_token
+
+        # handle the `<expression>` and `<semicolon>` parts
+        # TODO: skipping the expressions until we encounter a semicolon
+        while not self._current_token_type_is(token_types.SEMICOLON):
+            self._parse_next_token()
+
+        # TODO: dummy expression until we get a real one later
+        stmt_value = Identifier(self._current_token, self._current_token.literal)
+
+        return ReturnStatement(stmt_token, stmt_value)
+
     def _expect_peek_and_next(self, ttype: TokenType) -> bool:
         if self._peek_token_type_is(ttype):
             self._parse_next_token()
             return True
         else:
+            self._peek_error(token_types.IDENTIFIER)
             return False
 
     def _peek_error(self, ttype: TokenType) -> None:
