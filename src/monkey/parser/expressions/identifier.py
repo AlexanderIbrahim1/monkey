@@ -13,6 +13,8 @@ an expression. For example, in the statement:
 The book chooses to keep all of these lumped under the same class to simplify things.
 """
 
+from typing import Any
+
 from monkey.parser.expressions.expression import Expression
 from monkey.tokens.monkey_token import Token
 from monkey.tokens.token_types import Literal
@@ -28,3 +30,9 @@ class Identifier(Expression):
 
     def expression_node(self) -> None:
         pass
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Identifier):
+            return NotImplemented
+
+        return (self._token == other._token) and (self._value == other._value)

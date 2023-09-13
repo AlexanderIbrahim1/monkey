@@ -3,6 +3,8 @@ This module contains the LetStatement class, a concrete implementation of the St
 abstract class, for placing `let` statements in the AST.
 """
 
+from typing import Any
+
 from monkey.parser.expressions.expression import Expression
 from monkey.parser.expressions.identifier import Identifier
 from monkey.parser.statements.statement import Statement
@@ -21,3 +23,13 @@ class LetStatement(Statement):
 
     def statement_node(self) -> None:
         pass
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, LetStatement):
+            return NotImplemented
+
+        return (
+            self._token == other._token
+            and self._name == other._name
+            and self._value == other._value
+        )
