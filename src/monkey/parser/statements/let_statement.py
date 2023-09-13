@@ -5,8 +5,8 @@ abstract class, for placing `let` statements in the AST.
 
 from typing import Any
 
-from monkey.parser.expressions.expression import Expression
-from monkey.parser.expressions.identifier import Identifier
+from monkey.parser.expressions import Expression
+from monkey.parser.expressions import Identifier
 from monkey.parser.statements.statement import Statement
 from monkey.tokens.monkey_token import Token
 from monkey.tokens.token_types import Literal

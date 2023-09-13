@@ -15,10 +15,10 @@ NOTE: the overall functionality of the parser seems simple
 from typing import Optional
 
 from monkey.lexer import Lexer
-from monkey.parser.expressions.identifier import Identifier
+from monkey.parser.expressions import Identifier
 from monkey.parser.program import Program
-from monkey.parser.statements.statement import Statement
-from monkey.parser.statements.let_statement import LetStatement
+from monkey.parser.statements import Statement
+from monkey.parser.statements import LetStatement
 from monkey.tokens import TokenType
 from monkey.tokens import token_constants
 from monkey.tokens import token_types
