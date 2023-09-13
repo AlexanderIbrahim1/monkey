@@ -28,3 +28,6 @@ class Program(ASTNode):
 
     def append(self, statement: Statement) -> None:
         self._statements.append(statement)
+
+    def __getitem__(self, index: int) -> Statement:
+        return self._statements[index]
