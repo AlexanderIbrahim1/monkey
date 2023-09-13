@@ -65,7 +65,7 @@ class Parser:
             return None
 
     # TODO: implement
-    def _parse_let_statement(self) -> LetStatement:
+    def _parse_let_statement(self) -> Optional[LetStatement]:
         """
         A let statement has the format:
 
@@ -82,12 +82,14 @@ class Parser:
         # handle the `<identifier>` part
         if not self._expect_peek_and_next(token_types.IDENTIFIER):
             self._peek_error(token_types.IDENTIFIER)
+            return None
 
         stmt_identifier = Identifier(self._current_token, self._current_token.literal)
 
         # handle the `<assign>` part
         if not self._expect_peek_and_next(token_types.ASSIGN):
             self._peek_error(token_types.ASSIGN)
+            return None
 
         # handle the `<expression>` and `<semicolon>` parts
         # TODO: skipping the expressions until we encounter a semicolon
