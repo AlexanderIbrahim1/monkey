@@ -18,6 +18,7 @@ from monkey.lexer import Lexer
 from monkey.parser.program import Program
 from monkey.parser.statements.statement import Statement
 from monkey.tokens import Token
+from monkey.tokens import TokenType
 from monkey.tokens import token_constants
 from monkey.tokens import token_types
 
@@ -26,11 +27,11 @@ class Parser:
     def __init__(self, lexer: Lexer) -> None:
         self._lexer = lexer
 
-        self._current_token: Optional[Token] = None
-        self._peek_token: Optional[Token] = None
+        first_token = self._lexer.next_token()
+        second_token = self._lexer.next_token()
 
-        self._parse_next_token()
-        self._parse_next_token()
+        self._current_token = first_token
+        self._peek_token = second_token
 
     def parse_program(self) -> Program:
         program = Program()
@@ -47,11 +48,6 @@ class Parser:
         self._peek_token = self._lexer.next_token()
 
     def _parse_statement(self) -> Optional[Statement]:
-        if self._current_token is None:
-            raise RuntimeError(
-                "Logical error, where the current token in the Parser is None while parsing"
-            )
-
         curr_token_type = self._current_token.token_type
 
         # TODO: add more branches in the future
@@ -61,5 +57,4 @@ class Parser:
             return None
 
     def _parse_let_statement(self) -> Optional[Statement]:
-        # TODO: continue implementing from page 41 of the book
         return None
