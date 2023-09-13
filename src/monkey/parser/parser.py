@@ -15,9 +15,10 @@ NOTE: the overall functionality of the parser seems simple
 from typing import Optional
 
 from monkey.lexer import Lexer
+from monkey.parser.expressions.identifier import Identifier
 from monkey.parser.program import Program
 from monkey.parser.statements.statement import Statement
-from monkey.tokens import Token
+from monkey.parser.statements.let_statement import LetStatement
 from monkey.tokens import TokenType
 from monkey.tokens import token_constants
 from monkey.tokens import token_types
@@ -26,6 +27,7 @@ from monkey.tokens import token_types
 class Parser:
     def __init__(self, lexer: Lexer) -> None:
         self._lexer = lexer
+        self._errors: list[str] = []
 
         first_token = self._lexer.next_token()
         second_token = self._lexer.next_token()
@@ -37,11 +39,17 @@ class Parser:
         program = Program()
 
         while self._current_token != token_constants.EOF_TOKEN:
-            if (statement := self._parse_statement()) is not None:  # TODO: implement
+            if (statement := self._parse_statement()) is not None:
                 program.append(statement)
             self._parse_next_token()
 
         return program
+
+    def errors(self) -> list[str]:
+        return self._errors
+
+    def has_errors(self) -> bool:
+        return len(self._errors) > 0
 
     def _parse_next_token(self) -> None:
         self._current_token = self._peek_token
@@ -56,5 +64,57 @@ class Parser:
         else:
             return None
 
-    def _parse_let_statement(self) -> Optional[Statement]:
-        return None
+    # TODO: implement
+    def _parse_let_statement(self) -> LetStatement:
+        """
+        A let statement has the format:
+
+            let <identifier> = <expression>;
+
+        or in an even more verbose fashion:
+
+            <let> <identifier> <assign> <expression> <semicolon>
+        """
+
+        # handle the `<let>` part
+        stmt_token = self._current_token
+
+        # handle the `<identifier>` part
+        if not self._expect_peek_and_next(token_types.IDENTIFIER):
+            self._peek_error(token_types.IDENTIFIER)
+
+        stmt_identifier = Identifier(self._current_token, self._current_token.literal)
+
+        # handle the `<assign>` part
+        if not self._expect_peek_and_next(token_types.ASSIGN):
+            self._peek_error(token_types.ASSIGN)
+
+        # handle the `<expression>` and `<semicolon>` parts
+        # TODO: skipping the expressions until we encounter a semicolon
+        while not self._expect_peek_and_next(token_types.SEMICOLON):
+            self._parse_next_token()
+
+        # TODO: dummy expression until we get a real one later
+        stmt_value = Identifier(self._current_token, self._current_token.literal)
+
+        return LetStatement(stmt_token, stmt_identifier, stmt_value)
+
+    def _expect_peek_and_next(self, ttype: TokenType) -> bool:
+        if self._peek_token_type_is(ttype):
+            self._parse_next_token()
+            return True
+        else:
+            return False
+
+    def _peek_error(self, ttype: TokenType) -> None:
+        ttype_expected_str = str(ttype)
+        ttype_found_str = str(self._peek_token.token_type)
+        message = f"Expected next token to be {ttype_expected_str}, got {ttype_found_str} instead"
+
+        self._errors.append(message)
+
+    def _current_token_type_is(self, ttype: TokenType) -> bool:
+        return self._current_token.token_type == ttype
+
+    def _peek_token_type_is(self, ttype: TokenType) -> bool:
+        return self._peek_token.token_type == ttype
