@@ -19,11 +19,14 @@ from monkey.tokens import TokenType
 from monkey.tokens import token_constants
 from monkey.tokens import token_types
 
+from monkey.parser.expressions import Expression
 from monkey.parser.expressions import Identifier
 from monkey.parser.parsing_functions import InfixParsingFunction
 from monkey.parser.parsing_functions import PrefixParsingFunction
+from monkey.parser.precedences import Precedence
 from monkey.parser.program import Program
 from monkey.parser.statements import Statement
+from monkey.parser.statements import ExpressionStatement
 from monkey.parser.statements import LetStatement
 from monkey.parser.statements import ReturnStatement
 
@@ -44,6 +47,8 @@ class Parser:
         self._prefix_parsing_fns: dict[TokenType, PrefixParsingFunction] = {}
         self._infix_parsing_fns: dict[TokenType, InfixParsingFunction] = {}
 
+        self._fill_prefix_parsing_fns()
+
     def parse_program(self) -> Program:
         program = Program()
 
@@ -60,6 +65,9 @@ class Parser:
     def has_errors(self) -> bool:
         return len(self._errors) > 0
 
+    def _fill_prefix_parsing_fns(self) -> None:
+        self._prefix_parsing_fns[token_types.IDENTIFIER] = self._parse_identifier
+
     def _parse_next_token(self) -> None:
         self._current_token = self._peek_token
         self._peek_token = self._lexer.next_token()
@@ -73,7 +81,7 @@ class Parser:
         elif curr_token_type == token_types.RETURN:
             return self._parse_return_statement()
         else:
-            return None
+            return self._parse_expression_statement()
 
     # TODO: implement
     def _parse_let_statement(self) -> Optional[LetStatement]:
@@ -134,6 +142,33 @@ class Parser:
         stmt_value = Identifier(self._current_token, self._current_token.literal)
 
         return ReturnStatement(stmt_token, stmt_value)
+
+    def _parse_expression_statement(self) -> Optional[ExpressionStatement]:
+        stmt_token = self._current_token
+
+        stmt_expr = self._parse_expression(Precedence.LOWEST)
+        if stmt_expr is None:
+            return None
+
+        # `self._parse_expression()` should handle everything up until before the semicolon,
+        # but we still need to make sure we get past it for the next statement
+        while not self._peek_token_type_is(token_types.SEMICOLON):
+            self._parse_next_token()
+
+        return ExpressionStatement(stmt_token, stmt_expr)
+
+    # TODO: implement precedence comparision
+    def _parse_expression(self, precedence: Precedence) -> Optional[Expression]:
+        ttype = self._current_token.token_type
+        parsing_fn = self._prefix_parsing_fns.get(ttype, None)
+
+        if parsing_fn is None:
+            return None
+        else:
+            return parsing_fn()
+
+    def _parse_identifier(self) -> Identifier:
+        return Identifier(self._current_token, self._current_token.literal)
 
     def _expect_peek_and_next(self, ttype: TokenType) -> bool:
         if self._peek_token_type_is(ttype):

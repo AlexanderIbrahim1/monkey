@@ -3,6 +3,7 @@ import pytest
 from monkey.lexer import Lexer
 from monkey.parser.expressions import Identifier
 from monkey.parser.parser import Parser
+from monkey.parser.statements import ExpressionStatement
 from monkey.parser.statements import LetStatement
 from monkey.parser.statements import ReturnStatement
 from monkey.tokens import Token
@@ -52,3 +53,18 @@ def test_parse_return_statement(monkey_code):
     assert statement == expected_statement
     assert not parser.has_errors()
 
+
+def test_identifier_expression():
+    monkey_code = "hello;"
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parser.parse_program()
+
+    expected_token = Token(token_types.IDENTIFIER, "hello")
+    expected_statement = ExpressionStatement(
+        expected_token, Identifier(expected_token, "hello")
+    )
+
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement
+    assert not parser.has_errors()
