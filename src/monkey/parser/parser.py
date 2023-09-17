@@ -15,14 +15,17 @@ NOTE: the overall functionality of the parser seems simple
 from typing import Optional
 
 from monkey.lexer import Lexer
+from monkey.tokens import TokenType
+from monkey.tokens import token_constants
+from monkey.tokens import token_types
+
 from monkey.parser.expressions import Identifier
+from monkey.parser.parsing_functions import InfixParsingFunction
+from monkey.parser.parsing_functions import PrefixParsingFunction
 from monkey.parser.program import Program
 from monkey.parser.statements import Statement
 from monkey.parser.statements import LetStatement
 from monkey.parser.statements import ReturnStatement
-from monkey.tokens import TokenType
-from monkey.tokens import token_constants
-from monkey.tokens import token_types
 
 
 class Parser:
@@ -35,6 +38,11 @@ class Parser:
 
         self._current_token = first_token
         self._peek_token = second_token
+
+        # NOTE: I'll just use `self._prefix_parsing_fns[token] = func` or whatever to
+        #       update these; no need for special methods like the book uses
+        self._prefix_parsing_fns: dict[TokenType, PrefixParsingFunction] = {}
+        self._infix_parsing_fns: dict[TokenType, InfixParsingFunction] = {}
 
     def parse_program(self) -> Program:
         program = Program()
