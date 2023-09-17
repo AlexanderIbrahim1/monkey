@@ -36,3 +36,7 @@ class Identifier(Expression):
             return NotImplemented
 
         return (self._token == other._token) and (self._value == other._value)
+
+    # TODO: implement this fully later, when the book gets to that part
+    def __repr__(self) -> str:
+        return "[EXPRESSION STAND-IN]"

@@ -13,3 +13,7 @@ class ASTNode(ABC):
     @abstractmethod
     def token_literal(self) -> Literal:
         """Returns the literal value of the token for this node."""
+
+    @abstractmethod
+    def __repr__(self) -> str:
+        pass

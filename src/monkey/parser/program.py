@@ -31,3 +31,6 @@ class Program(ASTNode):
 
     def __getitem__(self, index: int) -> Statement:
         return self._statements[index]
+
+    def __repr__(self) -> str:
+        return "\n".join([str(s) for s in self._statements])

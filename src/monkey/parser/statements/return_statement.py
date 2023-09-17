@@ -27,3 +27,6 @@ class ReturnStatement(Statement):
             return NotImplemented
 
         return self._token == other._token and self._value == other._value
+
+    def __repr__(self) -> str:
+        return f"{self.token_literal()} {self._value};"

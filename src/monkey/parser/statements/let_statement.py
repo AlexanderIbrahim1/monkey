@@ -33,3 +33,6 @@ class LetStatement(Statement):
             and self._name == other._name
             and self._value == other._value
         )
+
+    def __repr__(self) -> str:
+        return f"{self.token_literal()} {self._name} = {self._value};"
