@@ -18,6 +18,9 @@ class Program(ASTNode):
         else:
             self._statements = statements
 
+    def number_of_statements(self) -> int:
+        return len(self._statements)
+
     def token_literal(self) -> Literal:
         at_least_one_statement = len(self._statements) > 0
 
