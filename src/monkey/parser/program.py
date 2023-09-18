@@ -3,6 +3,7 @@ This module contains the Program class, whose instances act as the root node of
 every AST that the parser produces.
 """
 
+from typing import Any
 from typing import Optional
 
 from monkey.parser.ast_node import ASTNode
@@ -37,3 +38,9 @@ class Program(ASTNode):
 
     def __repr__(self) -> str:
         return "\n".join([str(s) for s in self._statements])
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, Program):
+            return NotImplemented
+
+        return self._statements == other._statements

@@ -5,6 +5,7 @@ implement.
 
 from abc import ABC
 from abc import abstractmethod
+from typing import Any
 
 from monkey.tokens import Literal
 
@@ -16,4 +17,8 @@ class ASTNode(ABC):
 
     @abstractmethod
     def __repr__(self) -> str:
+        pass
+
+    @abstractmethod
+    def __eq__(self, other: Any) -> bool:
         pass
