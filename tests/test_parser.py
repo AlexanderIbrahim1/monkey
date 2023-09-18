@@ -2,6 +2,7 @@ import pytest
 
 from monkey.lexer import Lexer
 from monkey.parser.expressions import Identifier
+from monkey.parser.expressions import IntegerLiteral
 from monkey.parser.parser import Parser
 from monkey.parser.statements import ExpressionStatement
 from monkey.parser.statements import LetStatement
@@ -68,3 +69,20 @@ def test_identifier_expression():
     assert program.number_of_statements() == 1
     assert program[0] == expected_statement
     assert not parser.has_errors()
+
+
+def test_integer_literal_expression():
+    monkey_code = "5;"
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parser.parse_program()
+
+    expected_token = Token(token_types.INT, "5")
+    expected_statement = ExpressionStatement(
+        expected_token, IntegerLiteral(expected_token, "5")
+    )
+
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement
+    assert not parser.has_errors()
+
