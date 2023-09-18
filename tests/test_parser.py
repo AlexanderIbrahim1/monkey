@@ -3,6 +3,7 @@ import pytest
 from monkey.lexer import Lexer
 from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import IntegerLiteral
+from monkey.parser.expressions import PrefixExpression
 from monkey.parser.parser import Parser
 from monkey.parser.statements import ExpressionStatement
 from monkey.parser.statements import LetStatement
@@ -81,6 +82,46 @@ def test_integer_literal_expression():
     expected_statement = ExpressionStatement(
         expected_token, IntegerLiteral(expected_token, "5")
     )
+
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement
+    assert not parser.has_errors()
+
+
+def test_prefix_expression_bang():
+    monkey_code = "!5;"
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parser.parse_program()
+
+    expected_expression = PrefixExpression(
+        Token(token_types.BANG, "!"),
+        "!",
+        IntegerLiteral(Token(token_types.INT, "5"), "5"),
+    )
+
+    expected_token = Token(token_types.BANG, "!")
+    expected_statement = ExpressionStatement(expected_token, expected_expression)
+
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement
+    assert not parser.has_errors()
+
+
+def test_prefix_expression_minus():
+    monkey_code = "-5;"
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parser.parse_program()
+
+    expected_expression = PrefixExpression(
+        Token(token_types.MINUS, "-"),
+        "-",
+        IntegerLiteral(Token(token_types.INT, "5"), "5"),
+    )
+
+    expected_token = Token(token_types.MINUS, "-")
+    expected_statement = ExpressionStatement(expected_token, expected_expression)
 
     assert program.number_of_statements() == 1
     assert program[0] == expected_statement

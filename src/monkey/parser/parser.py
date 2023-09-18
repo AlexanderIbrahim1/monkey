@@ -22,6 +22,7 @@ from monkey.tokens import token_types
 from monkey.parser.expressions import Expression
 from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import IntegerLiteral
+from monkey.parser.expressions import PrefixExpression
 from monkey.parser.parsing_functions import InfixParsingFunction
 from monkey.parser.parsing_functions import PrefixParsingFunction
 from monkey.parser.precedences import Precedence
@@ -69,6 +70,8 @@ class Parser:
     def _fill_prefix_parsing_fns(self) -> None:
         self._prefix_parsing_fns[token_types.IDENTIFIER] = self._parse_identifier
         self._prefix_parsing_fns[token_types.INT] = self._parse_integer_literal
+        self._prefix_parsing_fns[token_types.BANG] = self._parse_prefix_expression
+        self._prefix_parsing_fns[token_types.MINUS] = self._parse_prefix_expression
 
     def _parse_next_token(self) -> None:
         self._current_token = self._peek_token
@@ -181,16 +184,27 @@ class Parser:
         token = self._current_token
         literal = self._current_token.literal
 
-        # NOTE: because of how the lexer parses integers (by using `.isdigit()`), I don't think
-        # this function itself can ever actually fail
         try:
             int(literal)
+            return IntegerLiteral(token, literal)
         except Exception as e:
             err_msg = f"Unable to parse '{literal}' as an integer."
             self._errors.append(err_msg)
             raise e
 
-        return IntegerLiteral(token, literal)
+    def _parse_prefix_expression(self) -> PrefixExpression:
+        token = self._current_token
+        operator = self._current_token.literal
+
+        self._parse_next_token()
+        expr = self._parse_expression(Precedence.PREFIX)
+
+        if expr is None:
+            err_msg = f"Unable to parse prefix expression beginning with {operator}"
+            self._errors.append(err_msg)
+            raise ValueError(err_msg)
+
+        return PrefixExpression(token, operator, expr)
 
     def _expect_peek_and_next(self, ttype: TokenType) -> bool:
         if self._peek_token_type_is(ttype):
