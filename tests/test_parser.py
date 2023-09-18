@@ -85,4 +85,3 @@ def test_integer_literal_expression():
     assert program.number_of_statements() == 1
     assert program[0] == expected_statement
     assert not parser.has_errors()
-
