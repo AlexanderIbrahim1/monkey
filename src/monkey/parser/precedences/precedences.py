@@ -2,6 +2,8 @@
 This module contains the precedences of operators in the Monkey language.
 """
 
+from typing import Any
+
 import enum
 
 
@@ -16,3 +18,10 @@ class Precedence(enum.Enum):
     PRODUCT = 4
     PREFIX = 5
     CALL = 6
+
+    def __lt__(self, other: Any) -> bool:
+        if not isinstance(other, Precedence):
+            return NotImplemented
+
+        # NOTE: the variants of an enum class are implicitly stored in an attribute called `value`
+        return self.value < other.value
