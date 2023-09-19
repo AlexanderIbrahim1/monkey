@@ -21,11 +21,13 @@ from monkey.tokens import token_types
 
 from monkey.parser.expressions import Expression
 from monkey.parser.expressions import Identifier
+from monkey.parser.expressions import InfixExpression
 from monkey.parser.expressions import IntegerLiteral
 from monkey.parser.expressions import PrefixExpression
 from monkey.parser.parsing_functions import InfixParsingFunction
 from monkey.parser.parsing_functions import PrefixParsingFunction
 from monkey.parser.precedences import Precedence
+from monkey.parser.precedences import PRECEDENCE_MAP
 from monkey.parser.program import Program
 from monkey.parser.statements import Statement
 from monkey.parser.statements import ExpressionStatement
@@ -50,6 +52,7 @@ class Parser:
         self._infix_parsing_fns: dict[TokenType, InfixParsingFunction] = {}
 
         self._fill_prefix_parsing_fns()
+        self._fill_infix_parsing_fns()
 
     def parse_program(self) -> Program:
         program = Program()
@@ -72,6 +75,16 @@ class Parser:
         self._prefix_parsing_fns[token_types.INT] = self._parse_integer_literal
         self._prefix_parsing_fns[token_types.BANG] = self._parse_prefix_expression
         self._prefix_parsing_fns[token_types.MINUS] = self._parse_prefix_expression
+
+    def _fill_infix_parsing_fns(self) -> None:
+        self._infix_parsing_fns[token_types.PLUS] = self._parse_infix_expression
+        self._infix_parsing_fns[token_types.MINUS] = self._parse_infix_expression
+        self._infix_parsing_fns[token_types.SLASH] = self._parse_infix_expression
+        self._infix_parsing_fns[token_types.ASTERISK] = self._parse_infix_expression
+        self._infix_parsing_fns[token_types.LT] = self._parse_infix_expression
+        self._infix_parsing_fns[token_types.GT] = self._parse_infix_expression
+        self._infix_parsing_fns[token_types.EQ] = self._parse_infix_expression
+        self._infix_parsing_fns[token_types.NOT_EQ] = self._parse_infix_expression
 
     def _parse_next_token(self) -> None:
         self._current_token = self._peek_token
@@ -169,11 +182,27 @@ class Parser:
 
         if parsing_fn is None:
             return None
-        else:
-            try:
-                return parsing_fn()
-            except Exception:
+
+        try:
+            expr = parsing_fn()
+        except Exception:
+            return None
+
+        while (
+            not self._peek_token_type_is(token_types.SEMICOLON)
+            and precedence < self._peek_token_precedence()
+        ):
+            peek_ttype = self._peek_token.token_type
+            infix_parsing_fn = self._infix_parsing_fns.get(peek_ttype)
+
+            if infix_parsing_fn is None:
                 return None
+
+            self._parse_next_token()
+
+            expr = infix_parsing_fn(expr)
+
+        return expr
 
     def _parse_identifier(self) -> Identifier:
         token = self._current_token
@@ -206,6 +235,21 @@ class Parser:
 
         return PrefixExpression(token, operator, expr)
 
+    def _parse_infix_expression(self, left_expr: Expression) -> InfixExpression:
+        token = self._current_token
+        operator = self._current_token.literal
+
+        precedence = self._current_token_precedence()
+        self._parse_next_token()
+        right_expr = self._parse_expression(precedence)
+
+        if right_expr is None:
+            err_msg = f"Unable to parse infix expression involving {operator}"
+            self._errors.append(err_msg)
+            raise ValueError(err_msg)
+
+        return InfixExpression(token, left_expr, operator, right_expr)
+
     def _expect_peek_and_next(self, ttype: TokenType) -> bool:
         if self._peek_token_type_is(ttype):
             self._parse_next_token()
@@ -226,3 +270,9 @@ class Parser:
 
     def _peek_token_type_is(self, ttype: TokenType) -> bool:
         return self._peek_token.token_type == ttype
+
+    def _current_token_precedence(self) -> Precedence:
+        return PRECEDENCE_MAP.get(self._current_token.token_type, Precedence.LOWEST)
+
+    def _peek_token_precedence(self) -> Precedence:
+        return PRECEDENCE_MAP.get(self._peek_token.token_type, Precedence.LOWEST)
