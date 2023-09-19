@@ -126,3 +126,43 @@ def test_prefix_expression_minus():
     assert program.number_of_statements() == 1
     assert program[0] == expected_statement
     assert not parser.has_errors()
+
+
+@pytest.mark.parametrize(
+    "monkey_code, left, operator, right",
+    [
+        ("5 + 6;", "5", "+", "6"),
+        ("5 - 6;", "5", "-", "6"),
+        ("5 * 6;", "5", "*", "6"),
+        ("5 / 6;", "5", "/", "6"),
+        ("5 > 6;", "5", ">", "6"),
+        ("5 < 6;", "5", "<", "6"),
+        ("5 == 6;", "5", "==", "6"),
+        ("5 != 6;", "5", "!=", "6"),
+    ]
+)
+@pytest.mark.skip
+def test_parsing_infix_expressions(monkey_code, left, operator, right):
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parser.parse_program()
+
+    assert program.number_of_statements() == 1
+    # TODO: continue writing this test
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
