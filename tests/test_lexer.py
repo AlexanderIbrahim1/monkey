@@ -27,7 +27,6 @@ class TestLexer:
         assert lexer.next_token() == Token(token_types.GT, ">")
         assert lexer.next_token() == Token(token_types.EOF, "")
 
-    @pytest.mark.skip
     def test_sample_monkey_code(self):
         monkey_code = "\n".join(
             [
