@@ -2,6 +2,7 @@ import pytest
 
 from monkey.lexer import Lexer
 from monkey.parser.expressions import Identifier
+from monkey.parser.expressions import InfixExpression
 from monkey.parser.expressions import IntegerLiteral
 from monkey.parser.expressions import PrefixExpression
 from monkey.parser.parser import Parser
@@ -34,7 +35,7 @@ def test_parse_let_statement(monkey_code):
 def test_failed_parse_let_statement(monkey_code):
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
-    program = parser.parse_program()
+    parser.parse_program()
 
     assert parser.has_errors()
 
@@ -129,40 +130,33 @@ def test_prefix_expression_minus():
 
 
 @pytest.mark.parametrize(
-    "monkey_code, left, operator, right",
+    "monkey_code, ttype, left, operator, right",
     [
-        ("5 + 6;", "5", "+", "6"),
-        ("5 - 6;", "5", "-", "6"),
-        ("5 * 6;", "5", "*", "6"),
-        ("5 / 6;", "5", "/", "6"),
-        ("5 > 6;", "5", ">", "6"),
-        ("5 < 6;", "5", "<", "6"),
-        ("5 == 6;", "5", "==", "6"),
-        ("5 != 6;", "5", "!=", "6"),
-    ]
+        ("5 + 6;", token_types.PLUS, "5", "+", "6"),
+        ("5 - 6;", token_types.MINUS, "5", "-", "6"),
+        ("5 * 6;", token_types.ASTERISK, "5", "*", "6"),
+        ("5 / 6;", token_types.SLASH, "5", "/", "6"),
+        ("5 > 6;", token_types.GT, "5", ">", "6"),
+        ("5 < 6;", token_types.LT, "5", "<", "6"),
+        ("5 == 6;", token_types.EQ, "5", "==", "6"),
+        ("5 != 6;", token_types.NOT_EQ, "5", "!=", "6"),
+    ],
 )
-@pytest.mark.skip
-def test_parsing_infix_expressions(monkey_code, left, operator, right):
+def test_parsing_infix_expressions(monkey_code, ttype, left, operator, right):
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
     program = parser.parse_program()
 
+    expected_token = Token(token_types.INT, left)
+    expected_expression = InfixExpression(
+        Token(ttype, operator),
+        IntegerLiteral(Token(token_types.INT, left), left),
+        operator,
+        IntegerLiteral(Token(token_types.INT, right), right),
+    )
+
+    expected_statement = ExpressionStatement(expected_token, expected_expression)
+
     assert program.number_of_statements() == 1
-    # TODO: continue writing this test
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    assert program[0] == expected_statement
+    assert not parser.has_errors()
