@@ -153,3 +153,12 @@ class TestLexer:
     def test_assign_only(self):
         lexer = Lexer("=")
         assert lexer.next_token() == Token(token_types.ASSIGN, "=")
+
+    def test_failed_lexer_empty(self):
+        lexer = Lexer("")
+        assert lexer.has_errors()
+
+    @pytest.mark.parametrize("monkey_text", ["hello", "hello    ", "hello; world  "])
+    def test_failed_lexer_no_semicolon_end(self, monkey_text):
+        lexer = Lexer(monkey_text)
+        assert lexer.has_errors()

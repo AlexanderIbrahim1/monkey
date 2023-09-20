@@ -57,6 +57,11 @@ class Parser:
     def parse_program(self) -> Program:
         program = Program()
 
+        if self._lexer.has_errors():
+            err_msg = "Cannot parse. Lexer has errors."
+            self._errors.append(err_msg)
+            return program
+
         while self._current_token != token_constants.EOF_TOKEN:
             if (statement := self._parse_statement()) is not None:
                 program.append(statement)
@@ -175,7 +180,6 @@ class Parser:
 
         return ExpressionStatement(stmt_token, stmt_expr)
 
-    # TODO: implement precedence comparision
     def _parse_expression(self, precedence: Precedence) -> Optional[Expression]:
         ttype = self._current_token.token_type
         parsing_fn = self._prefix_parsing_fns.get(ttype, None)

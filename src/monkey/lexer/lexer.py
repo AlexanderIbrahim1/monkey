@@ -19,8 +19,18 @@ class Lexer:
         self._position = -1
         self._read_position = 0
         self._char = NULL_CHAR
+        self._errors: list[str] = []
+
+        self._check_text_input_is_not_empty()
+        self._check_text_input_ends_with_semicolon()
 
         self._read_char()
+
+    def errors(self) -> list[str]:
+        return self._errors
+
+    def has_errors(self) -> bool:
+        return len(self._errors) > 0
 
     def next_token(self) -> Token:
         # NOTE: the contents of this function seems to be temporary; it looks like they'll
@@ -134,6 +144,20 @@ class Lexer:
     def _skip_whitespace(self) -> None:
         while self._char.isspace():
             self._read_char()
+
+    def _check_text_input_is_not_empty(self) -> None:
+        rstripped_code = self._text_input.rstrip()
+
+        if len(rstripped_code) == 0:
+            err_msg = "The text input is empty."
+            self._errors.append(err_msg)
+
+    def _check_text_input_ends_with_semicolon(self) -> None:
+        rstripped_code = self._text_input.rstrip()
+
+        if len(rstripped_code) > 0 and rstripped_code[-1] != token_types.SEMICOLON:
+            err_msg = "The next input does not end with a semicolon"
+            self._errors.append(err_msg)
 
 
 def _is_identifier_character(char: str) -> bool:
