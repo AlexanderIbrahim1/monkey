@@ -160,3 +160,29 @@ def test_parsing_infix_expressions(monkey_code, ttype, left, operator, right):
     assert program.number_of_statements() == 1
     assert program[0] == expected_statement
     assert not parser.has_errors()
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected",
+    [
+        ("-a * b;", "((-a) * b)"),
+        ("!-a;", "(!(-a))"),
+        ("a + b + c;", "((a + b) + c)"),
+        ("a + b - c;", "((a + b) - c)"),
+        ("a * b * c;", "((a * b) * c)"),
+        ("a * b / c;", "((a * b) / c)"),
+        ("a + b / c;", "(a + (b / c))"),
+        ("a + b * c + d / e - f;", "(((a + (b * c)) + (d / e)) - f)"),
+        ("3 + 4; -5 * 5;", "(3 + 4)\n((-5) * 5)"),
+        ("5 > 4 == 3 < 4;", "((5 > 4) == (3 < 4))"),
+        ("5 < 4 != 3 > 4;", "((5 < 4) != (3 > 4))"),
+        ("3 + 4 * 5 == 3 * 1 + 4 * 5;", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
+    ]
+)
+def test_operator_precedence_parsing(monkey_code, expected):
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parser.parse_program()
+
+    actual = str(program)
+    assert actual == expected
