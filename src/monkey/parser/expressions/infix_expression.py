@@ -38,4 +38,4 @@ class InfixExpression(Expression):
         )
 
     def __repr__(self) -> str:
-        return f"{self._left} {self._operator} {self._right}"
+        return f"({self._left} {self._operator} {self._right})"
