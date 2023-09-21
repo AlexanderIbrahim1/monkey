@@ -90,19 +90,25 @@ def test_integer_literal_expression():
     assert not parser.has_errors()
 
 
-def test_prefix_expression_bang():
-    monkey_code = "!5;"
+@pytest.mark.parametrize(
+    "monkey_code, ttype, literal",
+    [
+        ("!5;", token_types.BANG, "!"),
+        ("-5;", token_types.MINUS, "-"),
+    ],
+)
+def test_prefix_expression_integer_literal(monkey_code, ttype, literal):
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
     program = parser.parse_program()
 
+    expected_token = Token(ttype, literal)
+    expected_integer_expression = IntegerLiteral(Token(token_types.INT, "5"), "5")
+
     expected_expression = PrefixExpression(
-        Token(token_types.BANG, "!"),
-        "!",
-        IntegerLiteral(Token(token_types.INT, "5"), "5"),
+        expected_token, literal, expected_integer_expression
     )
 
-    expected_token = Token(token_types.BANG, "!")
     expected_statement = ExpressionStatement(expected_token, expected_expression)
 
     assert program.number_of_statements() == 1
@@ -110,20 +116,31 @@ def test_prefix_expression_bang():
     assert not parser.has_errors()
 
 
-def test_prefix_expression_minus():
-    monkey_code = "-5;"
+@pytest.mark.parametrize(
+    "monkey_code, prefix_ttype, prefix_literal, boolean_ttype, boolean_literal",
+    [
+        ("!true;", token_types.BANG, "!", token_types.TRUE, "true"),
+        ("!false;", token_types.BANG, "!", token_types.FALSE, "false"),
+    ],
+)
+def test_prefix_expression_boolean_literal(
+    monkey_code, prefix_ttype, prefix_literal, boolean_ttype, boolean_literal
+):
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
     program = parser.parse_program()
 
-    expected_expression = PrefixExpression(
-        Token(token_types.MINUS, "-"),
-        "-",
-        IntegerLiteral(Token(token_types.INT, "5"), "5"),
+    expected_prefix_token = Token(prefix_ttype, prefix_literal)
+
+    expected_boolean_expression = BooleanLiteral(
+        Token(boolean_ttype, boolean_literal), boolean_literal
     )
 
-    expected_token = Token(token_types.MINUS, "-")
-    expected_statement = ExpressionStatement(expected_token, expected_expression)
+    expected_expression = PrefixExpression(
+        expected_prefix_token, prefix_literal, expected_boolean_expression
+    )
+
+    expected_statement = ExpressionStatement(expected_prefix_token, expected_expression)
 
     assert program.number_of_statements() == 1
     assert program[0] == expected_statement
@@ -178,6 +195,10 @@ def test_parsing_infix_expressions(monkey_code, ttype, left, operator, right):
         ("5 > 4 == 3 < 4;", "((5 > 4) == (3 < 4))"),
         ("5 < 4 != 3 > 4;", "((5 < 4) != (3 > 4))"),
         ("3 + 4 * 5 == 3 * 1 + 4 * 5;", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
+        ("true;", "true"),
+        ("false;", "false"),
+        ("3 > 5 == false;", "((3 > 5) == false)"),
+        ("3 < 5 == true;", "((3 < 5) == true)"),
     ],
 )
 def test_operator_precedence_parsing(monkey_code, expected):
