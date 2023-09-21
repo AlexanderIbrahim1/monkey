@@ -1,6 +1,7 @@
 import pytest
 
 from monkey.lexer import Lexer
+from monkey.parser.expressions import BooleanLiteral
 from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import InfixExpression
 from monkey.parser.expressions import IntegerLiteral
@@ -177,7 +178,7 @@ def test_parsing_infix_expressions(monkey_code, ttype, left, operator, right):
         ("5 > 4 == 3 < 4;", "((5 > 4) == (3 < 4))"),
         ("5 < 4 != 3 > 4;", "((5 < 4) != (3 > 4))"),
         ("3 + 4 * 5 == 3 * 1 + 4 * 5;", "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))"),
-    ]
+    ],
 )
 def test_operator_precedence_parsing(monkey_code, expected):
     lexer = Lexer(monkey_code)
@@ -186,3 +187,24 @@ def test_operator_precedence_parsing(monkey_code, expected):
 
     actual = str(program)
     assert actual == expected
+
+
+@pytest.mark.parametrize(
+    "monkey_code, ttype, literal",
+    [
+        ("true;", token_types.TRUE, "true"),
+        ("false;", token_types.FALSE, "false"),
+    ],
+)
+def test_boolean_literal_expression(monkey_code, ttype, literal):
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parser.parse_program()
+
+    expected_token = Token(ttype, literal)
+    expected_expression = BooleanLiteral(expected_token, literal)
+    expected_statement = ExpressionStatement(expected_token, expected_expression)
+
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement
+    assert not parser.has_errors()

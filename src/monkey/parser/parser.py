@@ -20,6 +20,7 @@ from monkey.tokens import token_constants
 from monkey.tokens import token_types
 
 from monkey.parser.expressions import Expression
+from monkey.parser.expressions import BooleanLiteral
 from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import InfixExpression
 from monkey.parser.expressions import IntegerLiteral
@@ -80,6 +81,8 @@ class Parser:
         self._prefix_parsing_fns[token_types.INT] = self._parse_integer_literal
         self._prefix_parsing_fns[token_types.BANG] = self._parse_prefix_expression
         self._prefix_parsing_fns[token_types.MINUS] = self._parse_prefix_expression
+        self._prefix_parsing_fns[token_types.TRUE] = self._parse_boolean_literal
+        self._prefix_parsing_fns[token_types.FALSE] = self._parse_boolean_literal
 
     def _fill_infix_parsing_fns(self) -> None:
         self._infix_parsing_fns[token_types.PLUS] = self._parse_infix_expression
@@ -224,6 +227,17 @@ class Parser:
             err_msg = f"Unable to parse '{literal}' as an integer."
             self._errors.append(err_msg)
             raise e
+
+    def _parse_boolean_literal(self) -> BooleanLiteral:
+        token = self._current_token
+        literal = self._current_token.literal
+
+        if token.token_type not in [token_types.TRUE, token_types.FALSE]:
+            err_msg = f"Unable to parse '{literal}' as a boolean."
+            self._errors.append(err_msg)
+            raise ValueError(err_msg)
+
+        return BooleanLiteral(token, literal)
 
     def _parse_prefix_expression(self) -> PrefixExpression:
         token = self._current_token
