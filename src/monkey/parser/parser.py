@@ -83,6 +83,7 @@ class Parser:
         self._prefix_parsing_fns[token_types.MINUS] = self._parse_prefix_expression
         self._prefix_parsing_fns[token_types.TRUE] = self._parse_boolean_literal
         self._prefix_parsing_fns[token_types.FALSE] = self._parse_boolean_literal
+        self._prefix_parsing_fns[token_types.LPAREN] = self._parse_grouped_expression
 
     def _fill_infix_parsing_fns(self) -> None:
         self._infix_parsing_fns[token_types.PLUS] = self._parse_infix_expression
@@ -238,6 +239,24 @@ class Parser:
             raise ValueError(err_msg)
 
         return BooleanLiteral(token, literal)
+
+    def _parse_grouped_expression(self) -> Expression:
+        self._parse_next_token()  # we want to start parsing whatever comes after the LPARENS
+
+        # parse everything that comes after this
+        expr = self._parse_expression(Precedence.LOWEST)
+        if expr is None:
+            err_msg = "Unable to parse a grouped expression"
+            self._errors.append(err_msg)
+            raise ValueError(err_msg)
+
+        # the parsing should have ended at an RPARENS
+        if not self._expect_peek_and_next(token_types.RPAREN):
+            err_msg = f"Could not find a right parentheses for the expression {expr}"
+            self._errors.append(err_msg)
+            raise ValueError(err_msg)
+
+        return expr
 
     def _parse_prefix_expression(self) -> PrefixExpression:
         token = self._current_token
