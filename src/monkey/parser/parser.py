@@ -181,11 +181,6 @@ class Parser:
         if stmt_expr is None:
             return None
 
-        # # `self._parse_expression()` should handle everything up until before the semicolon,
-        # # but we still need to make sure we get past it for the next statement
-        # while not self._peek_token_type_is(token_types.SEMICOLON):
-        #     self._parse_next_token()
-
         return ExpressionStatement(stmt_token, stmt_expr)
 
     def _parse_block_statement(self) -> Optional[BlockStatement]:
@@ -316,7 +311,9 @@ class Parser:
         # the condition has to lie within a pair of parentheses
         # - this covers the left side
         if not self._expect_peek_and_next(token_types.LPAREN):
-            err_msg = "Unable to parse if-expression : left parenthesis around the condition"
+            err_msg = (
+                "Unable to parse if-expression : left parenthesis around the condition"
+            )
             self._errors.append(err_msg)
             raise ValueError(err_msg)
 
@@ -331,7 +328,9 @@ class Parser:
         # the condition has to lie within a pair of parentheses
         # - this covers the right side
         if not self._expect_peek_and_next(token_types.RPAREN):
-            err_msg = "Unable to parse if-expression: right parenthesis around the condition"
+            err_msg = (
+                "Unable to parse if-expression: right parenthesis around the condition"
+            )
             self._errors.append(err_msg)
             raise ValueError(err_msg)
 
