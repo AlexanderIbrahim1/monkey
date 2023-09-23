@@ -240,18 +240,14 @@ class Parser:
             int(literal)
             return IntegerLiteral(token, literal)
         except Exception as e:
-            err_msg = f"Unable to parse '{literal}' as an integer."
-            self._errors.append(err_msg)
-            raise e
+            self._error_helper(f"Unable to parse '{literal}' as an integer.")
 
     def _parse_boolean_literal(self) -> BooleanLiteral:
         token = self._current_token
         literal = self._current_token.literal
 
         if token.token_type not in [token_types.TRUE, token_types.FALSE]:
-            err_msg = f"Unable to parse '{literal}' as a boolean."
-            self._errors.append(err_msg)
-            raise ValueError(err_msg)
+            self._error_helper(f"Unable to parse '{literal}' as a boolean.")
 
         return BooleanLiteral(token, literal)
 
@@ -261,15 +257,11 @@ class Parser:
         # parse everything that comes after this
         expr = self._parse_expression(Precedence.LOWEST)
         if expr is None:
-            err_msg = "Unable to parse a grouped expression"
-            self._errors.append(err_msg)
-            raise ValueError(err_msg)
+            self._error_helper("Unable to parse a grouped expression")
 
         # the parsing should have ended at an RPARENS
         if not self._expect_peek_and_next(token_types.RPAREN):
-            err_msg = f"Could not find a right parentheses for the expression {expr}"
-            self._errors.append(err_msg)
-            raise ValueError(err_msg)
+            self._error_helper(f"Could not find a right parentheses for the expression {expr}")
 
         return expr
 
@@ -281,9 +273,7 @@ class Parser:
         expr = self._parse_expression(Precedence.PREFIX)
 
         if expr is None:
-            err_msg = f"Unable to parse prefix expression beginning with {operator}"
-            self._errors.append(err_msg)
-            raise ValueError(err_msg)
+            self._error_helper(f"Unable to parse prefix expression beginning with {operator}")
 
         return PrefixExpression(token, operator, expr)
 
@@ -296,9 +286,7 @@ class Parser:
         right_expr = self._parse_expression(precedence)
 
         if right_expr is None:
-            err_msg = f"Unable to parse infix expression involving {operator}"
-            self._errors.append(err_msg)
-            raise ValueError(err_msg)
+            self._error_helper(f"Unable to parse infix expression involving {operator}")
 
         return InfixExpression(token, left_expr, operator, right_expr)
 
@@ -308,42 +296,28 @@ class Parser:
         # the condition has to lie within a pair of parentheses
         # - this covers the left side
         if not self._expect_peek_and_next(token_types.LPAREN):
-            err_msg = (
-                "Unable to parse if-expression : left parenthesis around the condition"
-            )
-            self._errors.append(err_msg)
-            raise ValueError(err_msg)
+            self._error_helper("Unable to parse if-expression : left parenthesis around the condition")
 
         self._parse_next_token()
 
         expr_condition = self._parse_expression(Precedence.LOWEST)
         if expr_condition is None:
-            err_msg = "Unable to parse the condition of the if-expression"
-            self._errors.append(err_msg)
-            raise ValueError(err_msg)
+            self._error_helper("Unable to parse the condition of the if-expression")
 
         # the condition has to lie within a pair of parentheses
         # - this covers the right side
         if not self._expect_peek_and_next(token_types.RPAREN):
-            err_msg = (
-                "Unable to parse if-expression: right parenthesis around the condition"
-            )
-            self._errors.append(err_msg)
-            raise ValueError(err_msg)
+            self._error_helper("Unable to parse if-expression: right parenthesis around the condition")
 
         # the consequence has to lie within a pair of braces
         # - this covers the left side
         if not self._expect_peek_and_next(token_types.LBRACE):
-            err_msg = "Unable to parse if-expression: left brace of the consequence"
-            self._errors.append(err_msg)
-            raise ValueError(err_msg)
+            self._error_helper("Unable to parse if-expression: left brace of the consequence")
 
         # the parsing of the block statement takes care of the right side
         consequence = self._parse_block_statement()
         if consequence is None:
-            err_msg = "Unable to parse the consequence of the if-expression"
-            self._errors.append(err_msg)
-            raise ValueError(err_msg)
+            self._error_helper("Unable to parse the consequence of the if-expression")
 
         if self._peek_token_type_is(token_types.ELSE):
             self._parse_next_token()
@@ -351,16 +325,12 @@ class Parser:
             # the alternative has to lie within a pair of braces
             # - this covers the left side
             if not self._expect_peek_and_next(token_types.LBRACE):
-                err_msg = "Unable to parse if-expression: left brace of the alternative"
-                self._errors.append(err_msg)
-                raise ValueError(err_msg)
+                self._error_helper("Unable to parse if-expression: left brace of the alternative")
 
             # the parsing of the block statement takes care of the right side
             alternative = self._parse_block_statement()
             if alternative is None:
-                err_msg = "Unable to parse the alternative of the if-expression"
-                self._errors.append(err_msg)
-                raise ValueError(err_msg)
+                self._error_helper("Unable to parse the alternative of the if-expression")
         else:
             alternative = BlockStatement(Token(token_types.LBRACE, "{"), [])
 
@@ -404,3 +374,7 @@ class Parser:
         next_precedence_too_high = precedence >= self._peek_token_precedence()
 
         return is_semicolon or next_precedence_too_high
+
+    def _error_helper(self, err_msg: str) -> None:
+        self._errors.append(err_msg)
+        raise ValueError(err_msg)
