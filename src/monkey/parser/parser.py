@@ -214,10 +214,7 @@ class Parser:
         except Exception:
             return None
 
-        while (
-            not self._peek_token_type_is(token_types.SEMICOLON)
-            and precedence < self._peek_token_precedence()
-        ):
+        while not self._is_end_of_subexpression(precedence):
             peek_ttype = self._peek_token.token_type
             infix_parsing_fn = self._infix_parsing_fns.get(peek_ttype)
 
@@ -401,3 +398,9 @@ class Parser:
         is_eof = self._current_token_type_is(token_types.EOF)
 
         return is_rbrace or is_eof
+
+    def _is_end_of_subexpression(self, precedence: Precedence) -> bool:
+        is_semicolon = self._peek_token_type_is(token_types.SEMICOLON)
+        next_precedence_too_high = precedence >= self._peek_token_precedence()
+
+        return is_semicolon or next_precedence_too_high
