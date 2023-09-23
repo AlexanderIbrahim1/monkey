@@ -12,9 +12,7 @@ from monkey.tokens.token_types import Literal
 
 
 class InfixExpression(Expression):
-    def __init__(
-        self, token: Token, left: Expression, operator: Literal, right: Expression
-    ) -> None:
+    def __init__(self, token: Token, left: Expression, operator: Literal, right: Expression) -> None:
         self._token = token
         self._left = left
         self._operator = operator

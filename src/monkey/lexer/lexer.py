@@ -89,9 +89,7 @@ class Lexer:
         elif _is_digit_character(c):
             integer = self._read_number()
             token = Token(token_types.INT, integer)
-            flag__read_char = (
-                False  # had to read 1 past the number to identify it; don't read again
-            )
+            flag__read_char = False  # had to read 1 past the number to identify it; don't read again
         elif c == NULL_CHAR:
             token = Token(token_types.EOF, c)
         else:

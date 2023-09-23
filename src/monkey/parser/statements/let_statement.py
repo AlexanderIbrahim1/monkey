@@ -28,11 +28,7 @@ class LetStatement(Statement):
         if not isinstance(other, LetStatement):
             return NotImplemented
 
-        return (
-            self._token == other._token
-            and self._name == other._name
-            and self._value == other._value
-        )
+        return self._token == other._token and self._name == other._name and self._value == other._value
 
     def __repr__(self) -> str:
         return f"{self.token_literal()} {self._name} = {self._value};"
