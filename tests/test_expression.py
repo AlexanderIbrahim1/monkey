@@ -22,7 +22,8 @@ def test_infix_expression():
 
 
 def test_if_expression():
-    token = Token(token_types.LBRACE, "{")
+    token = Token(token_types.IF, "if")
+
     condition = InfixExpression(
         Token(token_types.LT, "<"),
         IntegerLiteral(Token(token_types.INT, "3"), "3"),
