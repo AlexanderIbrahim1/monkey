@@ -56,5 +56,5 @@ class Program(ASTNode):
 
         return self._statements == other._statements
 
-    def __iter__(self) -> Iterator:
+    def __iter__(self) -> Iterator[Statement]:
         return iter(self._statements)
