@@ -19,6 +19,7 @@ from monkey.tokens import token_types
 
 from monkey.parser.expressions import Expression
 from monkey.parser.expressions import BooleanLiteral
+from monkey.parser.expressions import CallExpression
 from monkey.parser.expressions import FailedExpression
 from monkey.parser.expressions import FunctionLiteral
 from monkey.parser.expressions import Identifier
@@ -102,6 +103,7 @@ class Parser:
         self._infix_parsing_fns[token_types.GT] = self._parse_infix_expression
         self._infix_parsing_fns[token_types.EQ] = self._parse_infix_expression
         self._infix_parsing_fns[token_types.NOT_EQ] = self._parse_infix_expression
+        self._infix_parsing_fns[token_types.LPAREN] = self._parse_call_expression
 
     def _parse_next_token(self) -> None:
         self._current_token = self._peek_token
@@ -400,6 +402,47 @@ class Parser:
             return [FAIL_EXPR]
 
         return identifiers
+
+    def _parse_call_expression(self, function: Expression) -> CallExpression | FailedExpression:
+        if not (isinstance(function, FunctionLiteral) or isinstance(function, Identifier)):
+            return FAIL_EXPR
+
+        call_token = self._current_token
+
+        arguments = self._parse_call_arguments()
+        if FAIL_EXPR in arguments:
+            return FAIL_EXPR
+
+        return CallExpression(call_token, function, arguments)
+
+    def _parse_call_arguments(self) -> list[Expression]:
+        arguments: list[Expression] = []
+
+        # case: there are no arguments, and you've hit ')'
+        if self._peek_token_type_is(token_types.RPAREN):
+            self._parse_next_token()
+            return arguments
+
+        self._parse_next_token()  # move past current '('
+
+        next_arg = self._parse_expression(Precedence.LOWEST)
+        if next_arg == FAIL_EXPR:
+            return [FAIL_EXPR]
+        arguments.append(next_arg)
+
+        while self._peek_token_type_is(token_types.COMMA):
+            self._parse_next_token()  # move past current argument that was just parsed
+            self._parse_next_token()  # move past current comma
+
+            next_arg = self._parse_expression(Precedence.LOWEST)
+            if next_arg == FAIL_EXPR:
+                return [FAIL_EXPR]
+            arguments.append(next_arg)
+
+        if not self._expect_peek_and_next(token_types.RPAREN):
+            return [FAIL_EXPR]
+
+        return arguments
 
     def _expect_peek_and_next(self, ttype: TokenType) -> bool:
         if self._peek_token_type_is(ttype):

@@ -2,6 +2,7 @@ import pytest
 
 from monkey.lexer import Lexer
 from monkey.parser.expressions import BooleanLiteral
+from monkey.parser.expressions import CallExpression
 from monkey.parser.expressions import FunctionLiteral
 from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import IfExpression
@@ -69,8 +70,6 @@ def test_identifier_expression():
 
     expected_token = Token(token_types.IDENTIFIER, "hello")
     expected_statement = ExpressionStatement(expected_token, Identifier(expected_token, "hello"))
-
-    print(program._statements)
 
     assert program.number_of_statements() == 1
     assert program[0] == expected_statement
@@ -328,6 +327,61 @@ def test_function_literal():
 
     expected_expr = FunctionLiteral(expected_token, expected_parameters, expected_body)
     expected_statement = ExpressionStatement(Token(token_types.FUNCTION, "fn"), expected_expr)
+
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement
+    assert not parser.has_errors()
+
+
+def test_call_expression0():
+    monkey_code = "add(1, 2);"
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parser.parse_program()
+
+    expected_call_token = Token(token_types.LPAREN, "(")
+    expected_function_name = Identifier(Token(token_types.IDENTIFIER, "add"), "add")
+    expected_arguments = [
+        IntegerLiteral(Token(token_types.INT, "1"), "1"),
+        IntegerLiteral(Token(token_types.INT, "2"), "2"),
+    ]
+    expected_call_expr = CallExpression(
+        expected_call_token,
+        expected_function_name,
+        expected_arguments,
+    )
+
+    expected_statement = ExpressionStatement(Token(token_types.IDENTIFIER, "add"), expected_call_expr)
+
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement
+    assert not parser.has_errors()
+
+
+def test_call_expression1():
+    monkey_code = "add(1, 2 + 3);"
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parser.parse_program()
+
+    expected_call_token = Token(token_types.LPAREN, "(")
+    expected_function_name = Identifier(Token(token_types.IDENTIFIER, "add"), "add")
+    expected_arguments = [
+        IntegerLiteral(Token(token_types.INT, "1"), "1"),
+        InfixExpression(
+            Token(token_types.PLUS, "+"),
+            IntegerLiteral(Token(token_types.INT, "2"), "2"),
+            token_types.PLUS,
+            IntegerLiteral(Token(token_types.INT, "3"), "3"),
+        ),
+    ]
+    expected_call_expr = CallExpression(
+        expected_call_token,
+        expected_function_name,
+        expected_arguments,
+    )
+
+    expected_statement = ExpressionStatement(Token(token_types.IDENTIFIER, "add"), expected_call_expr)
 
     assert program.number_of_statements() == 1
     assert program[0] == expected_statement
