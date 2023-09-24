@@ -20,6 +20,7 @@ from monkey.tokens import token_types
 from monkey.parser.expressions import Expression
 from monkey.parser.expressions import BooleanLiteral
 from monkey.parser.expressions import FailedExpression
+from monkey.parser.expressions import FunctionLiteral
 from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import IfExpression
 from monkey.parser.expressions import InfixExpression
@@ -90,6 +91,7 @@ class Parser:
         self._prefix_parsing_fns[token_types.FALSE] = self._parse_boolean_literal
         self._prefix_parsing_fns[token_types.LPAREN] = self._parse_grouped_expression
         self._prefix_parsing_fns[token_types.IF] = self._parse_if_expression
+        self._prefix_parsing_fns[token_types.FUNCTION] = self._parse_function_literal
 
     def _fill_infix_parsing_fns(self) -> None:
         self._infix_parsing_fns[token_types.PLUS] = self._parse_infix_expression
@@ -350,7 +352,54 @@ class Parser:
         else:
             alternative = None
 
+        # ignore reason: already checked for possibilities of FailedStatement and FailedExpression
         return IfExpression(expr_token, expr_condition, consequence, alternative)  # type: ignore
+
+    def _parse_function_literal(self) -> FunctionLiteral | FailedExpression:
+        fn_token = self._current_token
+
+        # function argument list is introduced with '('
+        if not self._expect_peek_and_next(token_types.LPAREN):
+            return FAIL_EXPR
+
+        parameters = self._parse_function_parameters()
+        if FAIL_EXPR in parameters:
+            return FAIL_EXPR
+
+        # the body of the function is introduced with '{'
+        if not self._expect_peek_and_next(token_types.LBRACE):
+            return FAIL_EXPR
+
+        body = self._parse_block_statement()
+        if body == FAIL_EXPR:
+            return FAIL_EXPR
+
+        # ignore reason: already checked for possibilities of 'parameters' and 'body' being FailedExpression
+        return FunctionLiteral(fn_token, parameters, body)  # type: ignore
+
+    def _parse_function_parameters(self) -> list[Identifier | FailedExpression]:
+        identifiers: list[Identifier | FailedExpression] = []
+
+        # case: there are no parameters, and you've hit ')'
+        if self._peek_token_type_is(token_types.RPAREN):
+            self._parse_next_token()
+            return identifiers
+
+        self._parse_next_token()  # move past current '('
+
+        current_identifier = self._parse_identifier()
+        identifiers.append(current_identifier)
+
+        while self._peek_token_type_is(token_types.COMMA):
+            self._parse_next_token()  # move past current identifier
+            self._parse_next_token()  # move past current comma
+            current_identifier = self._parse_identifier()
+            identifiers.append(current_identifier)
+
+        if not self._expect_peek_and_next(token_types.RPAREN):
+            return [FAIL_EXPR]
+
+        return identifiers
 
     def _expect_peek_and_next(self, ttype: TokenType) -> bool:
         if self._peek_token_type_is(ttype):
