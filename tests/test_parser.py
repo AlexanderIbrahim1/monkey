@@ -2,6 +2,7 @@ import pytest
 
 from monkey.lexer import Lexer
 from monkey.parser.expressions import BooleanLiteral
+from monkey.parser.expressions import FunctionLiteral
 from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import IfExpression
 from monkey.parser.expressions import InfixExpression
@@ -267,6 +268,66 @@ def test_parse_if_expression():
     expr = IfExpression(token, condition, consequence, alternative)
 
     expected_statement = ExpressionStatement(Token(token_types.IF, "if"), expr)
+
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement
+    assert not parser.has_errors()
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected_parameter_literals",
+    [
+        ("fn() {};", []),
+        ("fn(x) {};", ["x"]),
+        ("fn(x, y, z) {};", ["x", "y", "z"]),
+    ],
+)
+def test_function_literal_parameters(monkey_code, expected_parameter_literals):
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parser.parse_program()
+
+    expected_token = Token(token_types.FUNCTION, "fn")
+    expected_parameters = [
+        Identifier(Token(token_types.IDENTIFIER, lit), lit) for lit in expected_parameter_literals
+    ]
+    expected_body = BlockStatement(Token(token_types.LBRACE, "{"), [])
+
+    expected_expr = FunctionLiteral(expected_token, expected_parameters, expected_body)
+    expected_statement = ExpressionStatement(Token(token_types.FUNCTION, "fn"), expected_expr)
+
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement
+    assert not parser.has_errors()
+
+
+@pytest.mark.skip("Won't work until we remove the TODOs in _parse_return_statement")
+def test_function_literal():
+    monkey_code = "fn(x, y) { return x + y; };"
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parser.parse_program()
+
+    expected_token = Token(token_types.FUNCTION, "fn")
+    expected_parameters = [
+        Identifier(Token(token_types.IDENTIFIER, "x"), "x"),
+        Identifier(Token(token_types.IDENTIFIER, "y"), "y"),
+    ]
+
+    summation = InfixExpression(
+        Token(token_types.PLUS, "+"),
+        Identifier(token_types.IDENTIFIER, "x"),
+        token_types.PLUS,
+        Identifier(token_types.IDENTIFIER, "y"),
+    )
+    ret_statement = ReturnStatement(
+        Token(token_types.RETURN, "return"),
+        summation,
+    )
+    expected_body = BlockStatement(Token(token_types.LBRACE, "{"), [ret_statement])
+
+    expected_expr = FunctionLiteral(expected_token, expected_parameters, expected_body)
+    expected_statement = ExpressionStatement(Token(token_types.FUNCTION, "fn"), expected_expr)
 
     assert program.number_of_statements() == 1
     assert program[0] == expected_statement
