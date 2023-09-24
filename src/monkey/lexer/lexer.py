@@ -154,7 +154,7 @@ class Lexer:
         rstripped_code = self._text_input.rstrip()
 
         if len(rstripped_code) > 0 and rstripped_code[-1] != token_types.SEMICOLON:
-            err_msg = "The next input does not end with a semicolon"
+            err_msg = "The text input does not end with a semicolon"
             self._errors.append(err_msg)
 
 
