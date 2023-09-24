@@ -66,14 +66,14 @@ class Parser:
         program = Program()
 
         if self._lexer.has_errors():
-            err_msg = "Cannot parse. Lexer has errors."
-            self._errors.append(err_msg)
-            return program
+            self._errors.extend(self._lexer.errors())
+        else:
+            while self._current_token != token_constants.EOF_TOKEN:
+                if (statement := self._parse_statement()) != FAIL_STMT:
+                    program.append(statement)
+                self._parse_next_token()
 
-        while self._current_token != token_constants.EOF_TOKEN:
-            if (statement := self._parse_statement()) != FAIL_STMT:
-                program.append(statement)
-            self._parse_next_token()
+        program.add_error(self._errors)
 
         return program
 

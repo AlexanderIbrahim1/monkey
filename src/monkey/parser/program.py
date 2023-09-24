@@ -5,7 +5,7 @@ every AST that the parser produces.
 
 from typing import Any
 from typing import Iterator
-from typing import Optional
+from typing import Sequence
 
 from monkey.parser.ast_node import ASTNode
 from monkey.parser.constants import DEFAULT_LITERAL
@@ -14,11 +14,21 @@ from monkey.tokens import Literal
 
 
 class Program(ASTNode):
-    def __init__(self, statements: Optional[list[Statement]] = None) -> None:
-        if statements is None:
-            self._statements: list[Statement] = list()
+    def __init__(self) -> None:
+        self._statements: list[Statement] = list()
+        self._errors: list[str] = list()
+
+    def has_errors(self) -> bool:
+        return len(self._errors) > 0
+
+    def errors(self) -> list[str]:
+        return self._errors
+
+    def add_error(self, error: str | Sequence[str]) -> None:
+        if isinstance(error, str):
+            self._errors.append(error)
         else:
-            self._statements = statements
+            self._errors.extend(error)
 
     def number_of_statements(self) -> int:
         return len(self._statements)
