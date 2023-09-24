@@ -15,7 +15,6 @@ NOTE: the overall functionality of the parser seems simple
 from typing import Optional
 
 from monkey.lexer import Lexer
-from monkey.tokens import Token
 from monkey.tokens import TokenType
 from monkey.tokens import token_constants
 from monkey.tokens import token_types
@@ -209,14 +208,13 @@ class Parser:
         if parsing_fn is None:
             return None
 
-        try:
-            expr = parsing_fn()
-        except Exception:
+        expr = parsing_fn()
+        if expr is None:
             return None
 
         while not self._is_end_of_subexpression(precedence):
             peek_ttype = self._peek_token.token_type
-            infix_parsing_fn = self._infix_parsing_fns.get(peek_ttype)
+            infix_parsing_fn = self._infix_parsing_fns.get(peek_ttype, None)
 
             if infix_parsing_fn is None:
                 return None
@@ -224,48 +222,54 @@ class Parser:
             self._parse_next_token()
 
             expr = infix_parsing_fn(expr)
+            if expr is None:
+                return None
 
         return expr
 
-    def _parse_identifier(self) -> Identifier:
+    def _parse_identifier(self) -> Optional[Identifier]:
         token = self._current_token
         literal = self._current_token.literal
         return Identifier(token, literal)
 
-    def _parse_integer_literal(self) -> IntegerLiteral:
+    def _parse_integer_literal(self) -> Optional[IntegerLiteral]:
         token = self._current_token
         literal = self._current_token.literal
 
         try:
             int(literal)
             return IntegerLiteral(token, literal)
-        except Exception as e:
-            self._error_helper(f"Unable to parse '{literal}' as an integer.")
+        except Exception:
+            self._errors.append(f"Unable to parse '{literal}' as an integer.")
+            return None
 
-    def _parse_boolean_literal(self) -> BooleanLiteral:
+    def _parse_boolean_literal(self) -> Optional[BooleanLiteral]:
         token = self._current_token
         literal = self._current_token.literal
 
         if token.token_type not in [token_types.TRUE, token_types.FALSE]:
-            self._error_helper(f"Unable to parse '{literal}' as a boolean.")
+            self._errors.append(f"Unable to parse '{literal}' as a boolean.")
+            return None
 
         return BooleanLiteral(token, literal)
 
-    def _parse_grouped_expression(self) -> Expression:
+    def _parse_grouped_expression(self) -> Optional[Expression]:
         self._parse_next_token()  # we want to start parsing whatever comes after the LPARENS
 
         # parse everything that comes after this
         expr = self._parse_expression(Precedence.LOWEST)
         if expr is None:
-            self._error_helper("Unable to parse a grouped expression")
+            self._errors.append("Unable to parse a grouped expression")
+            return None
 
         # the parsing should have ended at an RPARENS
         if not self._expect_peek_and_next(token_types.RPAREN):
-            self._error_helper(f"Could not find a right parentheses for the expression {expr}")
+            self._errors.append(f"Could not find a right parentheses for the expression {expr}")
+            return None
 
         return expr
 
-    def _parse_prefix_expression(self) -> PrefixExpression:
+    def _parse_prefix_expression(self) -> Optional[PrefixExpression]:
         token = self._current_token
         operator = self._current_token.literal
 
@@ -273,11 +277,12 @@ class Parser:
         expr = self._parse_expression(Precedence.PREFIX)
 
         if expr is None:
-            self._error_helper(f"Unable to parse prefix expression beginning with {operator}")
+            self._errors.append(f"Unable to parse prefix expression beginning with {operator}")
+            return None
 
         return PrefixExpression(token, operator, expr)
 
-    def _parse_infix_expression(self, left_expr: Expression) -> InfixExpression:
+    def _parse_infix_expression(self, left_expr: Expression) -> Optional[InfixExpression]:
         token = self._current_token
         operator = self._current_token.literal
 
@@ -286,38 +291,44 @@ class Parser:
         right_expr = self._parse_expression(precedence)
 
         if right_expr is None:
-            self._error_helper(f"Unable to parse infix expression involving {operator}")
+            self._errors.append(f"Unable to parse infix expression involving {operator}")
+            return None
 
         return InfixExpression(token, left_expr, operator, right_expr)
 
-    def _parse_if_expression(self) -> IfExpression:
+    def _parse_if_expression(self) -> Optional[IfExpression]:
         expr_token = self._current_token
 
         # the condition has to lie within a pair of parentheses
         # - this covers the left side
         if not self._expect_peek_and_next(token_types.LPAREN):
-            self._error_helper("Unable to parse if-expression : left parenthesis around the condition")
+            self._errors.append("Unable to parse if-expression : left parenthesis around the condition")
+            return None
 
         self._parse_next_token()
 
         expr_condition = self._parse_expression(Precedence.LOWEST)
         if expr_condition is None:
-            self._error_helper("Unable to parse the condition of the if-expression")
+            self._errors.append("Unable to parse the condition of the if-expression")
+            return None
 
         # the condition has to lie within a pair of parentheses
         # - this covers the right side
         if not self._expect_peek_and_next(token_types.RPAREN):
-            self._error_helper("Unable to parse if-expression: right parenthesis around the condition")
+            self._errors.append("Unable to parse if-expression: right parenthesis around the condition")
+            return None
 
         # the consequence has to lie within a pair of braces
         # - this covers the left side
         if not self._expect_peek_and_next(token_types.LBRACE):
-            self._error_helper("Unable to parse if-expression: left brace of the consequence")
+            self._errors.append("Unable to parse if-expression: left brace of the consequence")
+            return None
 
         # the parsing of the block statement takes care of the right side
         consequence = self._parse_block_statement()
         if consequence is None:
-            self._error_helper("Unable to parse the consequence of the if-expression")
+            self._errors.append("Unable to parse the consequence of the if-expression")
+            return None
 
         if self._peek_token_type_is(token_types.ELSE):
             self._parse_next_token()
@@ -325,14 +336,16 @@ class Parser:
             # the alternative has to lie within a pair of braces
             # - this covers the left side
             if not self._expect_peek_and_next(token_types.LBRACE):
-                self._error_helper("Unable to parse if-expression: left brace of the alternative")
+                self._errors.append("Unable to parse if-expression: left brace of the alternative")
+                return None
 
             # the parsing of the block statement takes care of the right side
             alternative = self._parse_block_statement()
             if alternative is None:
-                self._error_helper("Unable to parse the alternative of the if-expression")
+                self._errors.append("Unable to parse the alternative of the if-expression")
+                return None
         else:
-            alternative = BlockStatement(Token(token_types.LBRACE, "{"), [])
+            alternative = None
 
         return IfExpression(expr_token, expr_condition, consequence, alternative)
 
@@ -374,7 +387,3 @@ class Parser:
         next_precedence_too_high = precedence >= self._peek_token_precedence()
 
         return is_semicolon or next_precedence_too_high
-
-    def _error_helper(self, err_msg: str) -> None:
-        self._errors.append(err_msg)
-        raise ValueError(err_msg)

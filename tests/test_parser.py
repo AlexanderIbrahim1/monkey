@@ -67,9 +67,7 @@ def test_identifier_expression():
     program = parser.parse_program()
 
     expected_token = Token(token_types.IDENTIFIER, "hello")
-    expected_statement = ExpressionStatement(
-        expected_token, Identifier(expected_token, "hello")
-    )
+    expected_statement = ExpressionStatement(expected_token, Identifier(expected_token, "hello"))
 
     assert program.number_of_statements() == 1
     assert program[0] == expected_statement
@@ -83,9 +81,7 @@ def test_integer_literal_expression():
     program = parser.parse_program()
 
     expected_token = Token(token_types.INT, "5")
-    expected_statement = ExpressionStatement(
-        expected_token, IntegerLiteral(expected_token, "5")
-    )
+    expected_statement = ExpressionStatement(expected_token, IntegerLiteral(expected_token, "5"))
 
     assert program.number_of_statements() == 1
     assert program[0] == expected_statement
@@ -107,9 +103,7 @@ def test_prefix_expression_integer_literal(monkey_code, ttype, literal):
     expected_token = Token(ttype, literal)
     expected_integer_expression = IntegerLiteral(Token(token_types.INT, "5"), "5")
 
-    expected_expression = PrefixExpression(
-        expected_token, literal, expected_integer_expression
-    )
+    expected_expression = PrefixExpression(expected_token, literal, expected_integer_expression)
 
     expected_statement = ExpressionStatement(expected_token, expected_expression)
 
@@ -134,13 +128,9 @@ def test_prefix_expression_boolean_literal(
 
     expected_prefix_token = Token(prefix_ttype, prefix_literal)
 
-    expected_boolean_expression = BooleanLiteral(
-        Token(boolean_ttype, boolean_literal), boolean_literal
-    )
+    expected_boolean_expression = BooleanLiteral(Token(boolean_ttype, boolean_literal), boolean_literal)
 
-    expected_expression = PrefixExpression(
-        expected_prefix_token, prefix_literal, expected_boolean_expression
-    )
+    expected_expression = PrefixExpression(expected_prefix_token, prefix_literal, expected_boolean_expression)
 
     expected_statement = ExpressionStatement(expected_prefix_token, expected_expression)
 

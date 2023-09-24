@@ -4,6 +4,7 @@ class, and represents both `if` and `if-else` expressions.
 """
 
 from typing import Any
+from typing import Optional
 
 from monkey.parser.expressions.expression import Expression
 from monkey.parser.statements import BlockStatement
@@ -17,7 +18,7 @@ class IfExpression(Expression):
         token: Token,
         condition: Expression,
         consequence: BlockStatement,
-        alternative: BlockStatement,
+        alternative: Optional[BlockStatement] = None,
     ) -> None:
         self._token = token
         self._condition = condition
@@ -43,10 +44,6 @@ class IfExpression(Expression):
 
     def __repr__(self) -> str:
         if_part = f"if {self._condition} {self._consequence}"
-
-        if (alt_str := str(self._alternative)) != "":
-            else_part = f"else {alt_str}"
-        else:
-            else_part = ""
+        else_part = f"else {self._alternative}" if self._alternative is not None else ""
 
         return f"{if_part} {else_part}"

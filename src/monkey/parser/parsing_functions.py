@@ -7,8 +7,9 @@ the `__call__()` method can be used.
 """
 
 from typing import Callable
+from typing import Optional
 
 from monkey.parser.expressions import Expression
 
-PrefixParsingFunction = Callable[[], Expression]
-InfixParsingFunction = Callable[[Expression], Expression]
+PrefixParsingFunction = Callable[[], Optional[Expression]]
+InfixParsingFunction = Callable[[Expression], Optional[Expression]]
