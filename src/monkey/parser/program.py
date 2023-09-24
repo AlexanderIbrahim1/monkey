@@ -4,6 +4,7 @@ every AST that the parser produces.
 """
 
 from typing import Any
+from typing import Iterator
 from typing import Optional
 
 from monkey.parser.ast_node import ASTNode
@@ -44,3 +45,6 @@ class Program(ASTNode):
             return NotImplemented
 
         return self._statements == other._statements
+
+    def __iter__(self) -> Iterator:
+        return iter(self._statements)

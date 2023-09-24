@@ -3,7 +3,7 @@ This module contains our REPL for the Monkey language.
 """
 
 from monkey import Lexer
-from monkey import token_types
+from monkey import Parser
 
 EMPTY_INPUTS = ["", "\n", "\r\n"]
 
@@ -19,11 +19,16 @@ def main() -> None:
             break
 
         lexer = Lexer(user_input)
+        parser = Parser(lexer)
+        program = parser.parse_program()
 
-        token = lexer.next_token()
-        while token.token_type != token_types.EOF:
-            print(token)
-            token = lexer.next_token()
+        if parser.has_errors():
+            print("PARSING ERROR")
+            print(parser.errors())
+            continue
+
+        for statement in program:
+            print(statement)
 
     print("Goodbye!")
 
