@@ -22,9 +22,9 @@ def main() -> None:
         parser = Parser(lexer)
         program = parser.parse_program()
 
-        if parser.has_errors():
+        if program.has_errors():
             print("PARSING ERROR")
-            print(parser.errors())
+            print(program.errors())
             continue
 
         for statement in program:
