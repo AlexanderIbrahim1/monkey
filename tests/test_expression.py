@@ -1,11 +1,14 @@
 import pytest
 
 from monkey.parser.expressions import Expression
+from monkey.parser.expressions import FunctionLiteral
+from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import IfExpression
 from monkey.parser.expressions import InfixExpression
 from monkey.parser.expressions import IntegerLiteral
 from monkey.parser.statements import BlockStatement
 from monkey.parser.statements import ExpressionStatement
+from monkey.parser.statements import ReturnStatement
 from monkey.tokens import Token
 from monkey.tokens import token_types
 
@@ -54,3 +57,26 @@ def test_if_expression():
     expr = IfExpression(token, condition, consequence, alternative)
 
     assert str(expr) == "if (3 < 5) { 10 } else { 20 }"
+
+
+def test_function_literal():
+    token = Token(token_types.FUNCTION, "fn")
+
+    parameters = [
+        Identifier(Token(token_types.IDENTIFIER, "x"), "x"),
+        Identifier(Token(token_types.IDENTIFIER, "y"), "y"),
+    ]
+
+    summation = InfixExpression(
+        Token(token_types.PLUS, "+"),
+        Identifier(Token(token_types.IDENTIFIER, "x"), "x"),
+        token_types.PLUS,
+        Identifier(Token(token_types.IDENTIFIER, "y"), "y"),
+    )
+
+    ret_statement = ReturnStatement(Token(token_types.RETURN, "return"), summation)
+    body = BlockStatement(Token(token_types.LBRACE, "{"), [ret_statement])
+
+    expr = FunctionLiteral(token, parameters, body)
+
+    assert str(expr) == "fn(x, y) { return (x + y); }"
