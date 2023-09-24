@@ -69,6 +69,8 @@ def test_identifier_expression():
     expected_token = Token(token_types.IDENTIFIER, "hello")
     expected_statement = ExpressionStatement(expected_token, Identifier(expected_token, "hello"))
 
+    print(program._statements)
+
     assert program.number_of_statements() == 1
     assert program[0] == expected_statement
     assert not parser.has_errors()

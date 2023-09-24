@@ -12,8 +12,6 @@ NOTE: the overall functionality of the parser seems simple
 - repeat until there are no more statements and expressions
 """
 
-from typing import Optional
-
 from monkey.lexer import Lexer
 from monkey.tokens import TokenType
 from monkey.tokens import token_constants
@@ -21,6 +19,7 @@ from monkey.tokens import token_types
 
 from monkey.parser.expressions import Expression
 from monkey.parser.expressions import BooleanLiteral
+from monkey.parser.expressions import FailedExpression
 from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import IfExpression
 from monkey.parser.expressions import InfixExpression
@@ -34,8 +33,12 @@ from monkey.parser.program import Program
 from monkey.parser.statements import Statement
 from monkey.parser.statements import BlockStatement
 from monkey.parser.statements import ExpressionStatement
+from monkey.parser.statements import FailedStatement
 from monkey.parser.statements import LetStatement
 from monkey.parser.statements import ReturnStatement
+
+from monkey.parser.constants import FAIL_EXPR
+from monkey.parser.constants import FAIL_STMT
 
 
 class Parser:
@@ -66,7 +69,7 @@ class Parser:
             return program
 
         while self._current_token != token_constants.EOF_TOKEN:
-            if (statement := self._parse_statement()) is not None:
+            if (statement := self._parse_statement()) != FAIL_STMT:
                 program.append(statement)
             self._parse_next_token()
 
@@ -102,7 +105,7 @@ class Parser:
         self._current_token = self._peek_token
         self._peek_token = self._lexer.next_token()
 
-    def _parse_statement(self) -> Optional[Statement]:
+    def _parse_statement(self) -> Statement:
         curr_token_type = self._current_token.token_type
 
         # TODO: add more branches in the future
@@ -114,7 +117,7 @@ class Parser:
             return self._parse_expression_statement()
 
     # TODO: implement
-    def _parse_let_statement(self) -> Optional[LetStatement]:
+    def _parse_let_statement(self) -> LetStatement | FailedStatement:
         """
         A let statement has the format:
 
@@ -130,13 +133,13 @@ class Parser:
 
         # handle the `<identifier>` part
         if not self._expect_peek_and_next(token_types.IDENTIFIER):
-            return None
+            return FAIL_STMT
 
         stmt_identifier = Identifier(self._current_token, self._current_token.literal)
 
         # handle the `<assign>` part
         if not self._expect_peek_and_next(token_types.ASSIGN):
-            return None
+            return FAIL_STMT
 
         # handle the `<expression>` and `<semicolon>` parts
         # TODO: skipping the expressions until we encounter a semicolon
@@ -149,7 +152,7 @@ class Parser:
         return LetStatement(stmt_token, stmt_identifier, stmt_value)
 
     # TODO: implement
-    def _parse_return_statement(self) -> Optional[ReturnStatement]:
+    def _parse_return_statement(self) -> ReturnStatement | FailedStatement:
         """
         A return statement has the format:
 
@@ -173,16 +176,16 @@ class Parser:
 
         return ReturnStatement(stmt_token, stmt_value)
 
-    def _parse_expression_statement(self) -> Optional[ExpressionStatement]:
+    def _parse_expression_statement(self) -> ExpressionStatement | FailedStatement:
         stmt_token = self._current_token
 
         stmt_expr = self._parse_expression(Precedence.LOWEST)
-        if stmt_expr is None:
-            return None
+        if stmt_expr == FAIL_EXPR:
+            return FAIL_STMT
 
         return ExpressionStatement(stmt_token, stmt_expr)
 
-    def _parse_block_statement(self) -> Optional[BlockStatement]:
+    def _parse_block_statement(self) -> BlockStatement | FailedStatement:
         """
         Keep parsing statements into a block statement until a '}' or an EOF is hit.
         """
@@ -193,46 +196,46 @@ class Parser:
         while not self._is_end_of_block_statement():
             stmt = self._parse_statement()
 
-            if stmt is None:
-                return None
+            if stmt == FAIL_STMT:
+                return FAIL_STMT
 
             statements.append(stmt)
             self._parse_next_token()
 
         return BlockStatement(stmt_token, statements)
 
-    def _parse_expression(self, precedence: Precedence) -> Optional[Expression]:
+    def _parse_expression(self, precedence: Precedence) -> Expression:
         ttype = self._current_token.token_type
         parsing_fn = self._prefix_parsing_fns.get(ttype, None)
 
         if parsing_fn is None:
-            return None
+            return FAIL_EXPR
 
         expr = parsing_fn()
-        if expr is None:
-            return None
+        if expr == FAIL_EXPR:
+            return FAIL_EXPR
 
         while not self._is_end_of_subexpression(precedence):
             peek_ttype = self._peek_token.token_type
             infix_parsing_fn = self._infix_parsing_fns.get(peek_ttype, None)
 
             if infix_parsing_fn is None:
-                return None
+                return FAIL_EXPR
 
             self._parse_next_token()
 
             expr = infix_parsing_fn(expr)
-            if expr is None:
-                return None
+            if expr == FAIL_EXPR:
+                return FAIL_EXPR
 
         return expr
 
-    def _parse_identifier(self) -> Optional[Identifier]:
+    def _parse_identifier(self) -> Identifier | FailedExpression:
         token = self._current_token
         literal = self._current_token.literal
         return Identifier(token, literal)
 
-    def _parse_integer_literal(self) -> Optional[IntegerLiteral]:
+    def _parse_integer_literal(self) -> IntegerLiteral | FailedExpression:
         token = self._current_token
         literal = self._current_token.literal
 
@@ -241,48 +244,48 @@ class Parser:
             return IntegerLiteral(token, literal)
         except Exception:
             self._errors.append(f"Unable to parse '{literal}' as an integer.")
-            return None
+            return FAIL_EXPR
 
-    def _parse_boolean_literal(self) -> Optional[BooleanLiteral]:
+    def _parse_boolean_literal(self) -> BooleanLiteral | FailedExpression:
         token = self._current_token
         literal = self._current_token.literal
 
         if token.token_type not in [token_types.TRUE, token_types.FALSE]:
             self._errors.append(f"Unable to parse '{literal}' as a boolean.")
-            return None
+            return FAIL_EXPR
 
         return BooleanLiteral(token, literal)
 
-    def _parse_grouped_expression(self) -> Optional[Expression]:
+    def _parse_grouped_expression(self) -> Expression | FailedExpression:
         self._parse_next_token()  # we want to start parsing whatever comes after the LPARENS
 
         # parse everything that comes after this
         expr = self._parse_expression(Precedence.LOWEST)
-        if expr is None:
+        if expr == FAIL_EXPR:
             self._errors.append("Unable to parse a grouped expression")
-            return None
+            return FAIL_EXPR
 
         # the parsing should have ended at an RPARENS
         if not self._expect_peek_and_next(token_types.RPAREN):
             self._errors.append(f"Could not find a right parentheses for the expression {expr}")
-            return None
+            return FAIL_EXPR
 
         return expr
 
-    def _parse_prefix_expression(self) -> Optional[PrefixExpression]:
+    def _parse_prefix_expression(self) -> PrefixExpression | FailedExpression:
         token = self._current_token
         operator = self._current_token.literal
 
         self._parse_next_token()
         expr = self._parse_expression(Precedence.PREFIX)
 
-        if expr is None:
+        if expr == FAIL_EXPR:
             self._errors.append(f"Unable to parse prefix expression beginning with {operator}")
-            return None
+            return FAIL_EXPR
 
         return PrefixExpression(token, operator, expr)
 
-    def _parse_infix_expression(self, left_expr: Expression) -> Optional[InfixExpression]:
+    def _parse_infix_expression(self, left_expr: Expression) -> InfixExpression | FailedExpression:
         token = self._current_token
         operator = self._current_token.literal
 
@@ -290,45 +293,45 @@ class Parser:
         self._parse_next_token()
         right_expr = self._parse_expression(precedence)
 
-        if right_expr is None:
+        if right_expr == FAIL_EXPR:
             self._errors.append(f"Unable to parse infix expression involving {operator}")
-            return None
+            return FAIL_EXPR
 
         return InfixExpression(token, left_expr, operator, right_expr)
 
-    def _parse_if_expression(self) -> Optional[IfExpression]:
+    def _parse_if_expression(self) -> IfExpression | FailedExpression:
         expr_token = self._current_token
 
         # the condition has to lie within a pair of parentheses
         # - this covers the left side
         if not self._expect_peek_and_next(token_types.LPAREN):
             self._errors.append("Unable to parse if-expression : left parenthesis around the condition")
-            return None
+            return FAIL_EXPR
 
         self._parse_next_token()
 
         expr_condition = self._parse_expression(Precedence.LOWEST)
-        if expr_condition is None:
+        if expr_condition == FAIL_EXPR:
             self._errors.append("Unable to parse the condition of the if-expression")
-            return None
+            return FAIL_EXPR
 
         # the condition has to lie within a pair of parentheses
         # - this covers the right side
         if not self._expect_peek_and_next(token_types.RPAREN):
             self._errors.append("Unable to parse if-expression: right parenthesis around the condition")
-            return None
+            return FAIL_EXPR
 
         # the consequence has to lie within a pair of braces
         # - this covers the left side
         if not self._expect_peek_and_next(token_types.LBRACE):
             self._errors.append("Unable to parse if-expression: left brace of the consequence")
-            return None
+            return FAIL_EXPR
 
         # the parsing of the block statement takes care of the right side
         consequence = self._parse_block_statement()
-        if consequence is None:
+        if consequence == FAIL_STMT:
             self._errors.append("Unable to parse the consequence of the if-expression")
-            return None
+            return FAIL_EXPR
 
         if self._peek_token_type_is(token_types.ELSE):
             self._parse_next_token()
@@ -337,17 +340,17 @@ class Parser:
             # - this covers the left side
             if not self._expect_peek_and_next(token_types.LBRACE):
                 self._errors.append("Unable to parse if-expression: left brace of the alternative")
-                return None
+                return FAIL_EXPR
 
             # the parsing of the block statement takes care of the right side
             alternative = self._parse_block_statement()
-            if alternative is None:
+            if consequence == FAIL_STMT:
                 self._errors.append("Unable to parse the alternative of the if-expression")
-                return None
+                return FAIL_EXPR
         else:
             alternative = None
 
-        return IfExpression(expr_token, expr_condition, consequence, alternative)
+        return IfExpression(expr_token, expr_condition, consequence, alternative)  # type: ignore
 
     def _expect_peek_and_next(self, ttype: TokenType) -> bool:
         if self._peek_token_type_is(ttype):
