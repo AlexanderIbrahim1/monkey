@@ -1,6 +1,3 @@
-import pytest
-
-from monkey.parser.expressions import Expression
 from monkey.parser.expressions import FunctionLiteral
 from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import IfExpression

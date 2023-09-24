@@ -27,12 +27,11 @@ def test_parse_let_statement(monkey_code):
     expected_statement = LetStatement(
         Token(token_types.LET, "let"),
         Identifier(Token(token_types.IDENTIFIER, "x"), "x"),
-        Identifier(Token(token_types.SEMICOLON, ";"), ";"),
+        IntegerLiteral(Token(token_types.INT, "5"), "5"),
     )
 
-    statement = program[0]
-
-    assert statement == expected_statement
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement
     assert not parser.has_errors()
 
 
@@ -53,7 +52,7 @@ def test_parse_return_statement(monkey_code):
 
     expected_statement = ReturnStatement(
         Token(token_types.RETURN, "return"),
-        Identifier(Token(token_types.SEMICOLON, ";"), ";"),
+        IntegerLiteral(Token(token_types.INT, "25"), "25"),
     )
 
     statement = program[0]
@@ -300,7 +299,6 @@ def test_function_literal_parameters(monkey_code, expected_parameter_literals):
     assert not parser.has_errors()
 
 
-@pytest.mark.skip("Won't work until we remove the TODOs in _parse_return_statement")
 def test_function_literal():
     monkey_code = "fn(x, y) { return x + y; };"
     lexer = Lexer(monkey_code)
@@ -315,9 +313,9 @@ def test_function_literal():
 
     summation = InfixExpression(
         Token(token_types.PLUS, "+"),
-        Identifier(token_types.IDENTIFIER, "x"),
+        Identifier(Token(token_types.IDENTIFIER, "x"), "x"),
         token_types.PLUS,
-        Identifier(token_types.IDENTIFIER, "y"),
+        Identifier(Token(token_types.IDENTIFIER, "y"), "y"),
     )
     ret_statement = ReturnStatement(
         Token(token_types.RETURN, "return"),

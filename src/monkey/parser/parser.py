@@ -112,7 +112,6 @@ class Parser:
     def _parse_statement(self) -> Statement:
         curr_token_type = self._current_token.token_type
 
-        # TODO: add more branches in the future
         if curr_token_type == token_types.LET:
             return self._parse_let_statement()
         elif curr_token_type == token_types.RETURN:
@@ -120,7 +119,6 @@ class Parser:
         else:
             return self._parse_expression_statement()
 
-    # TODO: implement
     def _parse_let_statement(self) -> LetStatement | FailedStatement:
         """
         A let statement has the format:
@@ -145,17 +143,19 @@ class Parser:
         if not self._expect_peek_and_next(token_types.ASSIGN):
             return FAIL_STMT
 
-        # handle the `<expression>` and `<semicolon>` parts
-        # TODO: skipping the expressions until we encounter a semicolon
-        while not self._current_token_type_is(token_types.SEMICOLON):
-            self._parse_next_token()
+        self._parse_next_token()
 
-        # TODO: dummy expression until we get a real one later
-        stmt_value = Identifier(self._current_token, self._current_token.literal)
+        # handle the `<expression>` part
+        stmt_expr = self._parse_expression(Precedence.LOWEST)
+        if stmt_expr == FAIL_EXPR:
+            return FAIL_STMT
 
-        return LetStatement(stmt_token, stmt_identifier, stmt_value)
+        # make sure there's a semicolon to end it
+        if not self._expect_peek_and_next(token_types.SEMICOLON):
+            return FAIL_STMT
 
-    # TODO: implement
+        return LetStatement(stmt_token, stmt_identifier, stmt_expr)
+
     def _parse_return_statement(self) -> ReturnStatement | FailedStatement:
         """
         A return statement has the format:
@@ -170,15 +170,18 @@ class Parser:
         # handle the `<return>` part
         stmt_token = self._current_token
 
-        # handle the `<expression>` and `<semicolon>` parts
-        # TODO: skipping the expressions until we encounter a semicolon
-        while not self._current_token_type_is(token_types.SEMICOLON):
-            self._parse_next_token()
+        self._parse_next_token()
 
-        # TODO: dummy expression until we get a real one later
-        stmt_value = Identifier(self._current_token, self._current_token.literal)
+        # handle the `<expression>` part
+        stmt_expr = self._parse_expression(Precedence.LOWEST)
+        if stmt_expr == FAIL_EXPR:
+            return FAIL_STMT
 
-        return ReturnStatement(stmt_token, stmt_value)
+        # make sure there's a semicolon to end it
+        if not self._expect_peek_and_next(token_types.SEMICOLON):
+            return FAIL_STMT
+
+        return ReturnStatement(stmt_token, stmt_expr)
 
     def _parse_expression_statement(self) -> ExpressionStatement | FailedStatement:
         stmt_token = self._current_token

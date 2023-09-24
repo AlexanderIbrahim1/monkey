@@ -1,5 +1,3 @@
-import pytest
-
 from monkey.parser.precedences import Precedence
 
 
