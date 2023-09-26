@@ -4,6 +4,8 @@ This module contains our REPL for the Monkey language.
 
 from monkey import Lexer
 from monkey import Parser
+from monkey import evaluate
+import monkey.object as objs
 
 EMPTY_INPUTS = ["", "\n", "\r\n"]
 
@@ -27,8 +29,9 @@ def main() -> None:
             print(program.errors())
             continue
 
-        for statement in program:
-            print(statement)
+        evaluated = evaluate(program)
+        if evaluated != objs.NullObject():
+            print(f"{evaluated}")
 
     print("Goodbye!")
 
