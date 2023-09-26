@@ -3,6 +3,7 @@ This module contains the FunctionLiteral class, which implements the Expression 
 class, and represents an `fn`-expression.
 """
 
+from dataclasses import dataclass
 from typing import Any
 
 from monkey.parser.statements import BlockStatement
@@ -13,19 +14,14 @@ from monkey.parser.expressions.expression import Expression
 from monkey.parser.expressions.identifier import Identifier
 
 
+@dataclass(frozen=True)
 class FunctionLiteral(Expression):
-    def __init__(
-        self,
-        token: Token,
-        parameters: list[Identifier],
-        body: BlockStatement,
-    ) -> None:
-        self._token = token
-        self._parameters = parameters
-        self._body = body
+    token: Token
+    parameters: list[Identifier]
+    body: BlockStatement
 
     def token_literal(self) -> Literal:
-        return self._token.literal
+        return self.token.literal
 
     def expression_node(self) -> None:
         pass
@@ -35,12 +31,12 @@ class FunctionLiteral(Expression):
             return NotImplemented
 
         return (
-            (self._token == other._token)
-            and (self._parameters == other._parameters)
-            and (self._body == other._body)
+            (self.token == other.token)
+            and (self.parameters == other.parameters)
+            and (self.body == other.body)
         )
 
     def __repr__(self) -> str:
-        parameters_list = ", ".join([str(param) for param in self._parameters])
+        parameters_list = ", ".join([str(param) for param in self.parameters])
 
-        return f"fn({parameters_list}) {self._body}"
+        return f"fn({parameters_list}) {self.body}"

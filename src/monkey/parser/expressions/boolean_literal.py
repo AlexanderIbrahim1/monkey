@@ -3,20 +3,22 @@ This module contains the BooleanLiteral class, which is an Expression that repre
 a simple boolean literal.
 """
 
+from dataclasses import dataclass
 from typing import Any
 
-from monkey.parser.expressions.expression import Expression
 from monkey.tokens.monkey_token import Token
 from monkey.tokens.token_types import Literal
 
+from monkey.parser.expressions.expression import Expression
 
+
+@dataclass(frozen=True)
 class BooleanLiteral(Expression):
-    def __init__(self, token: Token, value: Literal) -> None:
-        self._token = token
-        self._value = value
+    token: Token
+    value: Literal
 
     def token_literal(self) -> Literal:
-        return self._token.literal
+        return self.token.literal
 
     def expression_node(self) -> None:
         pass
@@ -25,7 +27,7 @@ class BooleanLiteral(Expression):
         if not isinstance(other, BooleanLiteral):
             return NotImplemented
 
-        return (self._token == other._token) and (self._value == other._value)
+        return (self.token == other.token) and (self.value == other.value)
 
     def __repr__(self) -> str:
-        return f"{self._value}"
+        return f"{self.value}"

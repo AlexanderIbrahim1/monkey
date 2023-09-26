@@ -3,6 +3,7 @@ This module contains the IfExpression class, which implements the Expression abs
 class, and represents both `if` and `if-else` expressions.
 """
 
+from dataclasses import dataclass
 from typing import Any
 from typing import Optional
 
@@ -12,21 +13,15 @@ from monkey.tokens.monkey_token import Token
 from monkey.tokens.token_types import Literal
 
 
+@dataclass(frozen=True)
 class IfExpression(Expression):
-    def __init__(
-        self,
-        token: Token,
-        condition: Expression,
-        consequence: BlockStatement,
-        alternative: Optional[BlockStatement] = None,
-    ) -> None:
-        self._token = token
-        self._condition = condition
-        self._consequence = consequence
-        self._alternative = alternative
+    token: Token
+    condition: Expression
+    consequence: BlockStatement
+    alternative: Optional[BlockStatement] = None
 
     def token_literal(self) -> Literal:
-        return self._token.literal
+        return self.token.literal
 
     def expression_node(self) -> None:
         pass
@@ -36,14 +31,14 @@ class IfExpression(Expression):
             return NotImplemented
 
         return (
-            (self._token == other._token)
-            and (self._condition == other._condition)
-            and (self._consequence == other._consequence)
-            and (self._alternative == other._alternative)
+            (self.token == other.token)
+            and (self.condition == other.condition)
+            and (self.consequence == other.consequence)
+            and (self.alternative == other.alternative)
         )
 
     def __repr__(self) -> str:
-        if_part = f"if {self._condition} {self._consequence}"
-        else_part = f"else {self._alternative}" if self._alternative is not None else ""
+        if_part = f"if {self.condition} {self.consequence}"
+        else_part = f"else {self.alternative}" if self.alternative is not None else ""
 
         return f"{if_part} {else_part}"

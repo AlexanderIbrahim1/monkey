@@ -3,6 +3,7 @@ This module contains the PrefixExpression class, which implements the Expression
 class, and represents an expression where there is a prefix operator and an operand.
 """
 
+from dataclasses import dataclass
 from typing import Any
 
 from monkey.parser.expressions.expression import Expression
@@ -10,14 +11,14 @@ from monkey.tokens.monkey_token import Token
 from monkey.tokens.token_types import Literal
 
 
+@dataclass(frozen=True)
 class PrefixExpression(Expression):
-    def __init__(self, token: Token, operator: Literal, expr: Expression) -> None:
-        self._token = token
-        self._operator = operator
-        self._expr = expr
+    token: Token
+    operator: Literal
+    expr: Expression
 
     def token_literal(self) -> Literal:
-        return self._token.literal
+        return self.token.literal
 
     def expression_node(self) -> None:
         pass
@@ -26,11 +27,7 @@ class PrefixExpression(Expression):
         if not isinstance(other, PrefixExpression):
             return NotImplemented
 
-        return (
-            (self._token == other._token)
-            and (self._operator == other._operator)
-            and (self._expr == other._expr)
-        )
+        return (self.token == other.token) and (self.operator == other.operator) and (self.expr == other.expr)
 
     def __repr__(self) -> str:
-        return f"({self._operator}{self._expr})"
+        return f"({self.operator}{self.expr})"

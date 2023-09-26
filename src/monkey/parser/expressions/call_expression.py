@@ -3,6 +3,7 @@ This module contains the CallExpression class, which implements the Expression a
 class, and represents the `(<arguments>)` for calling a function.
 """
 
+from dataclasses import dataclass
 from typing import Any
 
 from monkey.tokens.monkey_token import Token
@@ -13,16 +14,14 @@ from monkey.parser.expressions.identifier import Identifier
 from monkey.parser.expressions.function_literal import FunctionLiteral
 
 
+@dataclass(frozen=True)
 class CallExpression(Expression):
-    def __init__(
-        self, token: Token, function: Identifier | FunctionLiteral, arguments: list[Expression]
-    ) -> None:
-        self._token = token  # '(' token
-        self._function = function
-        self._arguments = arguments
+    token: Token  # '(' token
+    function: Identifier | FunctionLiteral
+    arguments: list[Expression]
 
     def token_literal(self) -> Literal:
-        return self._token.literal
+        return self.token.literal
 
     def expression_node(self) -> None:
         pass
@@ -32,12 +31,12 @@ class CallExpression(Expression):
             return NotImplemented
 
         return (
-            (self._token == other._token)
-            and (self._function == other._function)
-            and (self._arguments == other._arguments)
+            (self.token == other.token)
+            and (self.function == other.function)
+            and (self.arguments == other.arguments)
         )
 
     def __repr__(self) -> str:
-        arguments_list = ", ".join([str(arg) for arg in self._arguments])
+        arguments_list = ", ".join([str(arg) for arg in self.arguments])
 
-        return f"{self._function}({arguments_list})"
+        return f"{self.function}({arguments_list})"

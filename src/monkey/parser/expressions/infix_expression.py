@@ -4,6 +4,7 @@ class, and represents an expression with a left and right subexpression, and an 
 in the middle of them.
 """
 
+from dataclasses import dataclass
 from typing import Any
 
 from monkey.parser.expressions.expression import Expression
@@ -11,15 +12,15 @@ from monkey.tokens.monkey_token import Token
 from monkey.tokens.token_types import Literal
 
 
+@dataclass
 class InfixExpression(Expression):
-    def __init__(self, token: Token, left: Expression, operator: Literal, right: Expression) -> None:
-        self._token = token
-        self._left = left
-        self._operator = operator
-        self._right = right
+    token: Token
+    left: Expression
+    operator: Literal
+    right: Expression
 
     def token_literal(self) -> Literal:
-        return self._token.literal
+        return self.token.literal
 
     def expression_node(self) -> None:
         pass
@@ -29,11 +30,11 @@ class InfixExpression(Expression):
             return NotImplemented
 
         return (
-            (self._token == other._token)
-            and (self._left == other._left)
-            and (self._operator == other._operator)
-            and (self._right == other._right)
+            (self.token == other.token)
+            and (self.left == other.left)
+            and (self.operator == other.operator)
+            and (self.right == other.right)
         )
 
     def __repr__(self) -> str:
-        return f"({self._left} {self._operator} {self._right})"
+        return f"({self.left} {self.operator} {self.right})"
