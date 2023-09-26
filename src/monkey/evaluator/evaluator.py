@@ -26,7 +26,7 @@ def evaluate(node: ASTNode) -> Object:
 
 
 def _evaluate_program_statements(program: Program) -> Object:
-    result: Object = objs.NullObject()
+    result: Object = objs.NULL_OBJ
 
     for statement in program:
         result = evaluate(statement)
@@ -40,7 +40,7 @@ def _evaluate_statement(node: Statement) -> Object:
     if isinstance(node, stmts.ExpressionStatement):
         return evaluate(node.value)
     else:
-        return objs.NullObject()
+        return objs.NULL_OBJ
 
 
 def _evaluate_expression(node: Expression) -> Object:
@@ -48,5 +48,10 @@ def _evaluate_expression(node: Expression) -> Object:
     # recursively call `evaluate()` to split the expression up into smaller ones
     if isinstance(node, exprs.IntegerLiteral):
         return objs.IntegerObject(int(node.value))
+    if isinstance(node, exprs.BooleanLiteral):
+        if node.value == "true":
+            return objs.TRUE_BOOL_OBJ
+        else:
+            return objs.FALSE_BOOL_OBJ
     else:
-        return objs.NullObject()
+        return objs.NULL_OBJ
