@@ -21,8 +21,8 @@ class Object(ABC):
 
     @abstractmethod
     def __eq__(self, other: Any) -> bool:
-        pass
+        """"""
 
     @abstractmethod
     def __repr__(self) -> str:
-        pass
+        """"""
