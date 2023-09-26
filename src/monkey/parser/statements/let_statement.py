@@ -3,6 +3,7 @@ This module contains the LetStatement class, a concrete implementation of the St
 abstract class, for placing `let` statements in the AST.
 """
 
+from dataclasses import dataclass
 from typing import Any
 
 from monkey.parser.expressions import Expression
@@ -12,14 +13,14 @@ from monkey.tokens.monkey_token import Token
 from monkey.tokens.token_types import Literal
 
 
+@dataclass(frozen=True)
 class LetStatement(Statement):
-    def __init__(self, token: Token, name: Identifier, value: Expression) -> None:
-        self._token = token
-        self._name = name
-        self._value = value
+    token: Token
+    name: Identifier
+    value: Expression
 
     def token_literal(self) -> Literal:
-        return self._token.literal
+        return self.token.literal
 
     def statement_node(self) -> None:
         pass
@@ -28,7 +29,7 @@ class LetStatement(Statement):
         if not isinstance(other, LetStatement):
             return NotImplemented
 
-        return self._token == other._token and self._name == other._name and self._value == other._value
+        return self.token == other.token and self.name == other.name and self.value == other.value
 
     def __repr__(self) -> str:
-        return f"{self.token_literal()} {self._name} = {self._value};"
+        return f"{self.token_literal()} {self.name} = {self.value};"

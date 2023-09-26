@@ -9,6 +9,7 @@ x + 10;
 - in other words, we have a single line consisting of only an expression
 """
 
+from dataclasses import dataclass
 from typing import Any
 
 from monkey.parser.expressions import Expression
@@ -18,13 +19,13 @@ from monkey.tokens.token_types import Literal
 from monkey.parser.statements.statement import Statement
 
 
+@dataclass(frozen=True)
 class ExpressionStatement(Statement):
-    def __init__(self, token: Token, value: Expression) -> None:
-        self._token = token
-        self._value = value
+    token: Token
+    value: Expression
 
     def token_literal(self) -> Literal:
-        return self._token.literal
+        return self.token.literal
 
     def statement_node(self) -> None:
         pass
@@ -33,7 +34,7 @@ class ExpressionStatement(Statement):
         if not isinstance(other, ExpressionStatement):
             return NotImplemented
 
-        return self._token == other._token and self._value == other._value
+        return self.token == other.token and self.value == other.value
 
     def __repr__(self) -> str:
-        return f"{self._value}"
+        return f"{self.value}"

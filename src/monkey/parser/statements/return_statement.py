@@ -3,6 +3,7 @@ This module contains the ReturnStatement class, a concrete implementation of the
 abstract class, for placing `return` statements in the AST.
 """
 
+from dataclasses import dataclass
 from typing import Any
 
 from monkey.parser.expressions.expression import Expression
@@ -11,13 +12,13 @@ from monkey.tokens.monkey_token import Token
 from monkey.tokens.token_types import Literal
 
 
+@dataclass(frozen=True)
 class ReturnStatement(Statement):
-    def __init__(self, token: Token, value: Expression) -> None:
-        self._token = token
-        self._value = value
+    token: Token
+    value: Expression
 
     def token_literal(self) -> Literal:
-        return self._token.literal
+        return self.token.literal
 
     def statement_node(self) -> None:
         pass
@@ -26,7 +27,7 @@ class ReturnStatement(Statement):
         if not isinstance(other, ReturnStatement):
             return NotImplemented
 
-        return self._token == other._token and self._value == other._value
+        return self.token == other.token and self.value == other.value
 
     def __repr__(self) -> str:
-        return f"{self.token_literal()} {self._value};"
+        return f"{self.token_literal()} {self.value};"
