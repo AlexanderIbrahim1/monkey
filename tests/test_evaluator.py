@@ -25,3 +25,21 @@ def test_evaluate_boolean_literal(monkey_code, value):
 
     assert not program.has_errors()
     assert evaluate(program) == objs.BooleanObject(value)
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected_value",
+    [
+        ("!true;", False),
+        ("!false;", True),
+        ("!5;", False),
+        ("!!true;", True),
+        ("!!false;", False),
+        ("!!123;", True),
+    ],
+)
+def test_bang_operator(monkey_code, expected_value):
+    program = Parser(Lexer(monkey_code)).parse_program()
+
+    assert not program.has_errors()
+    assert evaluate(program) == objs.BooleanObject(expected_value)

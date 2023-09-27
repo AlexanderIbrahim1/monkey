@@ -7,6 +7,8 @@ from monkey.parser import ASTNode
 from monkey.parser import Expression
 from monkey.parser import Program
 from monkey.parser import Statement
+from monkey.tokens import Literal
+import monkey.tokens.token_types as token_types
 import monkey.parser.expressions as exprs
 import monkey.parser.statements as stmts
 
@@ -53,5 +55,26 @@ def _evaluate_expression(node: Expression) -> Object:
             return objs.TRUE_BOOL_OBJ
         else:
             return objs.FALSE_BOOL_OBJ
+    if isinstance(node, exprs.PrefixExpression):
+        argument = evaluate(node.expr)
+        return _evaluate_prefix_expression(node.operator, argument)
     else:
         return objs.NULL_OBJ
+
+
+def _evaluate_prefix_expression(operator: Literal, argument: Object) -> Object:
+    if operator == token_types.BANG:
+        return _evaluate_band_operator_expression(argument)
+    else:
+        return objs.NULL_OBJ
+
+
+def _evaluate_band_operator_expression(argument: Object) -> Object:
+    if argument == objs.TRUE_BOOL_OBJ:
+        return objs.FALSE_BOOL_OBJ
+    elif argument == objs.FALSE_BOOL_OBJ:
+        return objs.TRUE_BOOL_OBJ
+    elif argument == objs.NULL_OBJ:
+        return objs.TRUE_BOOL_OBJ
+    else:
+        return objs.FALSE_BOOL_OBJ
