@@ -16,6 +16,7 @@ import monkey.object as objs
 from monkey.evaluator._evaluate_prefix_expression import evaluate_prefix_expression
 from monkey.evaluator._evaluate_boolean_literal import evaluate_boolean_literal
 from monkey.evaluator._evaluate_integer_literal import evaluate_integer_literal
+from monkey.evaluator._evaluate_infix_expression import evaluate_infix_expression
 
 
 # from monkey.tokens import Literal
@@ -60,6 +61,12 @@ def _evaluate_expression(node: Expression) -> Object:
         return evaluate_boolean_literal(node)
     if isinstance(node, exprs.PrefixExpression):
         argument = evaluate(node.expr)
-        return evaluate_prefix_expression(node.operator, argument)
+        operator = node.operator
+        return evaluate_prefix_expression(operator, argument)
+    if isinstance(node, exprs.InfixExpression):
+        left = evaluate(node.left)
+        right = evaluate(node.right)
+        operator = node.operator
+        return evaluate_infix_expression(operator, left, right)
     else:
         return objs.NULL_OBJ
