@@ -43,3 +43,21 @@ def test_bang_operator(monkey_code, expected_value):
 
     assert not program.has_errors()
     assert evaluate(program) == objs.BooleanObject(expected_value)
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected_value",
+    [
+        ("5;", 5),
+        ("-5;", -5),
+        ("10;", 10),
+        ("-10;", -10),
+        ("-0;", 0),
+        ("0;", 0),
+    ],
+)
+def test_minus_operator(monkey_code, expected_value):
+    program = Parser(Lexer(monkey_code)).parse_program()
+
+    assert not program.has_errors()
+    assert evaluate(program) == objs.IntegerObject(expected_value)
