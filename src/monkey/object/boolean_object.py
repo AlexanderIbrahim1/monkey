@@ -3,15 +3,16 @@ This module contains the BooleanObject class, which implements the Object abstra
 class, and represents a boolean literal object during evaluation.
 """
 
+from dataclasses import dataclass
 from typing import Any
 
 from monkey.object.object_type import ObjectType
 from monkey.object.object import Object
 
 
+@dataclass(frozen=True)
 class BooleanObject(Object):
-    def __init__(self, value: bool) -> None:
-        self._value = value
+    value: bool
 
     def data_type(self) -> ObjectType:
         return ObjectType.BOOLEAN
@@ -23,7 +24,7 @@ class BooleanObject(Object):
         if not isinstance(other, BooleanObject):
             return NotImplemented
 
-        return self._value == other._value
+        return self.value == other.value
 
     def __repr__(self) -> str:
-        return f"{self._value}"
+        return f"{self.value}"
