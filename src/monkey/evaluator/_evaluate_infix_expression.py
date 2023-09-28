@@ -13,7 +13,7 @@ INTEGER_ALGEBRAIC_OPERATION_DICT = {
     token_types.PLUS: operator_lib.add,
     token_types.MINUS: operator_lib.sub,
     token_types.ASTERISK: operator_lib.mul,
-    token_types.SLASH: operator_lib.truediv,
+    token_types.SLASH: operator_lib.floordiv,
 }
 
 INTEGER_LOGICAL_OPERATION_DICT = {
