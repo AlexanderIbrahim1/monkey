@@ -23,10 +23,17 @@ INTEGER_LOGICAL_OPERATION_DICT = {
     token_types.NOT_EQ: operator_lib.ne,
 }
 
+BOOLEAN_OPERATION_DICT = {
+    token_types.EQ: operator_lib.eq,
+    token_types.NOT_EQ: operator_lib.ne,
+}
+
 
 def evaluate_infix_expression(operator: Literal, left: objs.Object, right: objs.Object) -> objs.Object:
     if isinstance(left, objs.IntegerObject) and isinstance(right, objs.IntegerObject):
         return _evaluate_integer_infix_expression(operator, left, right)
+    if isinstance(left, objs.BooleanObject) and isinstance(right, objs.BooleanObject):
+        return _evaluate_boolean_infix_expression(operator, left, right)
     else:
         return objs.NULL_OBJ
 
@@ -38,6 +45,17 @@ def _evaluate_integer_infix_expression(
         return _evaluate_integer_algebraic_infix_expression(operator, left, right)
     elif operator in INTEGER_LOGICAL_OPERATION_DICT.keys():
         return _evaluate_integer_logical_infix_expression(operator, left, right)
+    else:
+        return objs.NULL_OBJ
+
+
+def _evaluate_boolean_infix_expression(
+    operator: Literal, left: objs.BooleanObject, right: objs.BooleanObject
+) -> objs.Object:
+    if operator in BOOLEAN_OPERATION_DICT.keys():
+        operation = BOOLEAN_OPERATION_DICT[operator]
+        value = operation(left.value, right.value)
+        return objs.BooleanObject(value)
     else:
         return objs.NULL_OBJ
 

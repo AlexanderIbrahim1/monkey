@@ -106,3 +106,23 @@ def test_integer_logical_infix_expression(monkey_code, expected_value):
 
     assert not program.has_errors()
     assert evaluate(program) == objs.BooleanObject(expected_value)
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected_value",
+    [
+        ("true == true;", True),
+        ("false == false ;", True),
+        ("true != false;", True),
+        ("false != true;", True),
+        ("true != true;", False),
+        ("false != false ;", False),
+        ("true == false;", False),
+        ("false == true;", False),
+    ],
+)
+def test_boolean_infix_expression(monkey_code, expected_value):
+    program = Parser(Lexer(monkey_code)).parse_program()
+
+    assert not program.has_errors()
+    assert evaluate(program) == objs.BooleanObject(expected_value)
