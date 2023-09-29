@@ -18,6 +18,10 @@ class Program(ASTNode):
         self._statements: list[Statement] = list()
         self._errors: list[str] = list()
 
+    @property
+    def statements(self) -> list[Statement]:
+        return self._statements
+
     def has_errors(self) -> bool:
         return len(self._errors) > 0
 
