@@ -3,6 +3,8 @@ This module contains the evalute function, which is what evaluates the nodes of
 the AST that the parser produced.
 """
 
+from typing import Sequence
+
 from monkey.parser import ASTNode
 from monkey.parser import Expression
 from monkey.parser import Program
@@ -17,6 +19,7 @@ from monkey.evaluator._evaluate_prefix_expression import evaluate_prefix_express
 from monkey.evaluator._evaluate_boolean_literal import evaluate_boolean_literal
 from monkey.evaluator._evaluate_integer_literal import evaluate_integer_literal
 from monkey.evaluator._evaluate_infix_expression import evaluate_infix_expression
+from monkey.evaluator._evaluate_if_expression import evaluate_if_expression
 
 
 # from monkey.tokens import Literal
@@ -25,7 +28,7 @@ from monkey.evaluator._evaluate_infix_expression import evaluate_infix_expressio
 
 def evaluate(node: ASTNode) -> Object:
     if isinstance(node, Program):
-        return _evaluate_program_statements(node)
+        return _evaluate_sequence_of_statements(node.statements)
     elif isinstance(node, Statement):
         return _evaluate_statement(node)
     elif isinstance(node, Expression):
@@ -34,22 +37,24 @@ def evaluate(node: ASTNode) -> Object:
         assert False, "unreachable"
 
 
-def _evaluate_program_statements(program: Program) -> Object:
-    result: Object = objs.NULL_OBJ
-
-    for statement in program:
-        result = evaluate(statement)
-
-    return result
-
-
 def _evaluate_statement(node: Statement) -> Object:
     # Each statement is composed of expressions, and thus the role of this function is
     # to recursively call `evaluate()` again for each statement.
     if isinstance(node, stmts.ExpressionStatement):
         return evaluate(node.value)
+    elif isinstance(node, stmts.BlockStatement):
+        return _evaluate_sequence_of_statements(node.statements)
     else:
         return objs.NULL_OBJ
+
+
+def _evaluate_sequence_of_statements(statements: Sequence[Statement]) -> Object:
+    result: Object = objs.NULL_OBJ
+
+    for statement in statements:
+        result = evaluate(statement)
+
+    return result
 
 
 def _evaluate_expression(node: Expression) -> Object:
@@ -68,5 +73,7 @@ def _evaluate_expression(node: Expression) -> Object:
         right = evaluate(node.right)
         operator = node.operator
         return evaluate_infix_expression(operator, left, right)
+    if isinstance(node, exprs.IfExpression):
+        return evaluate_if_expression(evaluate, node)
     else:
         return objs.NULL_OBJ

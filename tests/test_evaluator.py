@@ -126,3 +126,36 @@ def test_boolean_infix_expression(monkey_code, expected_value):
 
     assert not program.has_errors()
     assert evaluate(program) == objs.BooleanObject(expected_value)
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected_value, object_type",
+    [
+        ("if (true) { 10 };", 10, objs.IntegerObject),
+        ("if (1) { 10 };", 10, objs.IntegerObject),
+        ("if (1 < 2) { 10 };", 10, objs.IntegerObject),
+        ("if (1 > 2) { 10 } else { 20 };", 20, objs.IntegerObject),
+        ("if (1 < 2) { 10 } else { 20 };", 10, objs.IntegerObject),
+    ],
+)
+def test_if_else_expression(monkey_code, expected_value, object_type):
+    program = Parser(Lexer(monkey_code)).parse_program()
+
+    assert not program.has_errors()
+    assert evaluate(program) == object_type(expected_value)
+
+
+@pytest.mark.parametrize(
+    "monkey_code",
+    [
+        "if (false) { 10 };",
+        "if (1 > 2) { 20 };",
+        "if (2 < 1) { 30 };",
+        "if (3 != 3) { 40 };",
+    ],
+)
+def test_if_else_expression_for_null(monkey_code):
+    program = Parser(Lexer(monkey_code)).parse_program()
+
+    assert not program.has_errors()
+    assert evaluate(program) == objs.NULL_OBJ
