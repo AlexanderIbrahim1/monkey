@@ -22,10 +22,6 @@ from monkey.evaluator._evaluate_infix_expression import evaluate_infix_expressio
 from monkey.evaluator._evaluate_if_expression import evaluate_if_expression
 
 
-# from monkey.tokens import Literal
-# import monkey.tokens.token_types as token_types
-
-
 def evaluate(node: ASTNode) -> Object:
     if isinstance(node, Program):
         return _evaluate_sequence_of_statements(node.statements)
@@ -34,7 +30,7 @@ def evaluate(node: ASTNode) -> Object:
     elif isinstance(node, Expression):
         return _evaluate_expression(node)
     else:
-        assert False, "unreachable"
+        assert False, f"unreachable; Tried to evaluate something un-evaluable: {node}"
 
 
 def _evaluate_statement(node: Statement) -> Object:
@@ -49,7 +45,8 @@ def _evaluate_statement(node: Statement) -> Object:
         value = evaluate(node.value)
         return objs.ReturnObject(value)
     else:
-        return objs.NULL_OBJ
+        stmt_type = type(node)
+        assert False, f"unreachable; statement with no known evaluation: {stmt_type}\nFound: {node}"
 
 
 def _evaluate_sequence_of_statements(statements: Sequence[Statement]) -> Object:
@@ -118,4 +115,5 @@ def _evaluate_expression(node: Expression) -> Object:
     if isinstance(node, exprs.IfExpression):
         return evaluate_if_expression(evaluate, node)
     else:
-        return objs.NULL_OBJ
+        expr_type = type(node)
+        assert False, f"unreachable; expression with no known evaluation: {expr_type}\nFound: {node}"

@@ -15,3 +15,13 @@ class ObjectType(enum.Enum):
     BOOLEAN = enum.auto()
     NULL = enum.auto()
     RETURN = enum.auto()
+    ERROR = enum.auto()
+
+
+OBJECT_TYPE_DICT: dict[ObjectType, str] = {
+    ObjectType.INTEGER: "INTEGER",
+    ObjectType.BOOLEAN: "BOOLEAN",
+    ObjectType.NULL: "NULL",
+    ObjectType.RETURN: "RETURN",
+    ObjectType.ERROR: "ERROR",
+}

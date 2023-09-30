@@ -28,6 +28,7 @@ def evaluate_if_expression(
     elif if_expr.alternative is not None:
         return eval_func(if_expr.alternative)
     else:
+        # NOTE: this is a proper use of `objs.NULL_OBJ`; an `if-expr` might return nothing!
         return objs.NULL_OBJ
 
 

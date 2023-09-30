@@ -35,7 +35,7 @@ def evaluate_infix_expression(operator: Literal, left: objs.Object, right: objs.
     if isinstance(left, objs.BooleanObject) and isinstance(right, objs.BooleanObject):
         return _evaluate_boolean_infix_expression(operator, left, right)
     else:
-        return objs.NULL_OBJ
+        return objs.TypeMismatchErrorObject(left.data_type(), right.data_type(), operator)
 
 
 def _evaluate_integer_infix_expression(
@@ -46,7 +46,7 @@ def _evaluate_integer_infix_expression(
     elif operator in INTEGER_LOGICAL_OPERATION_DICT.keys():
         return _evaluate_integer_logical_infix_expression(operator, left, right)
     else:
-        return objs.NULL_OBJ
+        return objs.UnknownInfixOperatorErrorObject(left.data_type(), right.data_type(), operator)
 
 
 def _evaluate_boolean_infix_expression(
@@ -57,7 +57,7 @@ def _evaluate_boolean_infix_expression(
         value = operation(left.value, right.value)
         return objs.BooleanObject(value)
     else:
-        return objs.NULL_OBJ
+        return objs.UnknownInfixOperatorErrorObject(left.data_type(), right.data_type(), operator)
 
 
 def _evaluate_integer_algebraic_infix_expression(
