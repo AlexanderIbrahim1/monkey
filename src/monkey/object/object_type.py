@@ -14,3 +14,4 @@ class ObjectType(enum.Enum):
     INTEGER = enum.auto()
     BOOLEAN = enum.auto()
     NULL = enum.auto()
+    RETURN = enum.auto()

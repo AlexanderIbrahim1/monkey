@@ -5,6 +5,7 @@ from monkey.object import ObjectType
 from monkey.object import IntegerObject
 from monkey.object import BooleanObject
 from monkey.object import NullObject
+from monkey.object import ReturnObject
 
 
 def test_integer_object():
@@ -36,3 +37,19 @@ def test_null_object():
     assert null_obj.inspect() == str(null_obj)
     assert null_obj == NullObject()
     assert null_obj != "NULL"
+
+
+@pytest.mark.parametrize(
+    "wrapped_object",
+    [
+        BooleanObject(True),
+        IntegerObject(10),
+        NullObject(),
+    ],
+)
+def test_return_object(wrapped_object):
+    ret_obj = ReturnObject(wrapped_object)
+
+    assert ret_obj.data_type() == ObjectType.RETURN
+    assert ret_obj.inspect() == str(wrapped_object)
+    assert ret_obj != wrapped_object
