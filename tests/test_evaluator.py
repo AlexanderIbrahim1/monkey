@@ -159,3 +159,51 @@ def test_if_else_expression_for_null(monkey_code):
 
     assert not program.has_errors()
     assert evaluate(program) == objs.NULL_OBJ
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected_value",
+    [
+        ("return 10;", 10),
+        ("return 10; 7;", 10),
+        ("7; return 10;", 10),
+        ("7; return 10; 123;", 10),
+    ],
+)
+def test_return_statement(monkey_code, expected_value):
+    program = Parser(Lexer(monkey_code)).parse_program()
+
+    assert not program.has_errors()
+    assert evaluate(program) == objs.IntegerObject(expected_value)
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected_value",
+    [
+        ("if (3 > 2) { return 10; };", 10),
+        ("if (3 > 2) { return 10; } else { return 20; };", 10),
+        ("if (2 > 3) { return 10; } else { return 20; };", 20),
+    ],
+)
+def test_return_in_if_statement(monkey_code, expected_value):
+    program = Parser(Lexer(monkey_code)).parse_program()
+
+    assert not program.has_errors()
+    assert evaluate(program) == objs.IntegerObject(expected_value)
+
+
+def test_return_in_nested_if_statement():
+    monkey_code = """
+    if (10 > 1) {
+        if (10 > 1) {
+            return 123;
+        }
+        return 456;
+    };
+    """
+    expected_value = 123
+
+    program = Parser(Lexer(monkey_code)).parse_program()
+
+    assert not program.has_errors()
+    assert evaluate(program) == objs.IntegerObject(expected_value)

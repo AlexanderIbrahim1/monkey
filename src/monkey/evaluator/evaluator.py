@@ -43,7 +43,11 @@ def _evaluate_statement(node: Statement) -> Object:
     if isinstance(node, stmts.ExpressionStatement):
         return evaluate(node.value)
     elif isinstance(node, stmts.BlockStatement):
-        return _evaluate_sequence_of_statements(node.statements)
+        # return _evaluate_sequence_of_statements(node.statements)
+        return _evaluate_block_statement(node)
+    elif isinstance(node, stmts.ReturnStatement):
+        value = evaluate(node.value)
+        return objs.ReturnObject(value)
     else:
         return objs.NULL_OBJ
 
@@ -53,6 +57,44 @@ def _evaluate_sequence_of_statements(statements: Sequence[Statement]) -> Object:
 
     for statement in statements:
         result = evaluate(statement)
+
+        if isinstance(result, objs.ReturnObject):
+            return result.value
+
+    return result
+
+
+# NOTE: so why can't we use `_evaluate_sequence_of_statements()` for a block statement?
+# - the reason is nested return statements
+# - consider the following block of code:
+# """
+# if (10 > 1) {
+#     if (10 > 1) {
+#         return 123;
+#     }
+#     return 456;
+# };
+# """
+# - if we used `_evaluate_sequence_of_statements()`, the inner block of code would evaluate
+#   directly to `123;`, and this would be equivalent to writing
+# """
+# if (10 > 1) {
+#     123;
+#     return 456;
+# };
+# """
+# - but by returning the `ReturnObject` directly instead of the object it wraps, we allow
+#   the loop in `_evaluate_sequence_of_statements()` to receive the ReturnObject, and *then*
+#   it reaches the `if-statement` within, which returns the wrapped object
+def _evaluate_block_statement(block_stmt: stmts.BlockStatement) -> Object:
+    result: Object = objs.NULL_OBJ
+
+    for statement in block_stmt.statements:
+        result = evaluate(statement)
+
+        # NOTE: this is the only difference between this function and `_evaluate_sequence_of_statements`
+        if result.data_type() == objs.ObjectType.RETURN:
+            return result
 
     return result
 
