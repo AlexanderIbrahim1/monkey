@@ -9,9 +9,10 @@ import monkey.object as objs
 
 def test_evaluate_integer_literal():
     program = Parser(Lexer("5;")).parse_program()
+    env = objs.Environment()
 
     assert not program.has_errors()
-    assert evaluate(program) == objs.IntegerObject(5)
+    assert evaluate(program, env) == objs.IntegerObject(5)
 
 
 @pytest.mark.parametrize(
@@ -23,9 +24,10 @@ def test_evaluate_integer_literal():
 )
 def test_evaluate_boolean_literal(monkey_code, value):
     program = Parser(Lexer(monkey_code)).parse_program()
+    env = objs.Environment()
 
     assert not program.has_errors()
-    assert evaluate(program) == objs.BooleanObject(value)
+    assert evaluate(program, env) == objs.BooleanObject(value)
 
 
 @pytest.mark.parametrize(
@@ -41,9 +43,10 @@ def test_evaluate_boolean_literal(monkey_code, value):
 )
 def test_bang_operator(monkey_code, expected_value):
     program = Parser(Lexer(monkey_code)).parse_program()
+    env = objs.Environment()
 
     assert not program.has_errors()
-    assert evaluate(program) == objs.BooleanObject(expected_value)
+    assert evaluate(program, env) == objs.BooleanObject(expected_value)
 
 
 @pytest.mark.parametrize(
@@ -59,9 +62,10 @@ def test_bang_operator(monkey_code, expected_value):
 )
 def test_minus_operator(monkey_code, expected_value):
     program = Parser(Lexer(monkey_code)).parse_program()
+    env = objs.Environment()
 
     assert not program.has_errors()
-    assert evaluate(program) == objs.IntegerObject(expected_value)
+    assert evaluate(program, env) == objs.IntegerObject(expected_value)
 
 
 @pytest.mark.parametrize(
@@ -84,9 +88,10 @@ def test_minus_operator(monkey_code, expected_value):
 )
 def test_integer_algebraic_infix_expression(monkey_code, expected_value):
     program = Parser(Lexer(monkey_code)).parse_program()
+    env = objs.Environment()
 
     assert not program.has_errors()
-    assert evaluate(program) == objs.IntegerObject(expected_value)
+    assert evaluate(program, env) == objs.IntegerObject(expected_value)
 
 
 @pytest.mark.parametrize(
@@ -104,9 +109,10 @@ def test_integer_algebraic_infix_expression(monkey_code, expected_value):
 )
 def test_integer_logical_infix_expression(monkey_code, expected_value):
     program = Parser(Lexer(monkey_code)).parse_program()
+    env = objs.Environment()
 
     assert not program.has_errors()
-    assert evaluate(program) == objs.BooleanObject(expected_value)
+    assert evaluate(program, env) == objs.BooleanObject(expected_value)
 
 
 @pytest.mark.parametrize(
@@ -124,9 +130,10 @@ def test_integer_logical_infix_expression(monkey_code, expected_value):
 )
 def test_boolean_infix_expression(monkey_code, expected_value):
     program = Parser(Lexer(monkey_code)).parse_program()
+    env = objs.Environment()
 
     assert not program.has_errors()
-    assert evaluate(program) == objs.BooleanObject(expected_value)
+    assert evaluate(program, env) == objs.BooleanObject(expected_value)
 
 
 @pytest.mark.parametrize(
@@ -141,9 +148,10 @@ def test_boolean_infix_expression(monkey_code, expected_value):
 )
 def test_if_else_expression(monkey_code, expected_value, object_type):
     program = Parser(Lexer(monkey_code)).parse_program()
+    env = objs.Environment()
 
     assert not program.has_errors()
-    assert evaluate(program) == object_type(expected_value)
+    assert evaluate(program, env) == object_type(expected_value)
 
 
 @pytest.mark.parametrize(
@@ -157,9 +165,10 @@ def test_if_else_expression(monkey_code, expected_value, object_type):
 )
 def test_if_else_expression_for_null(monkey_code):
     program = Parser(Lexer(monkey_code)).parse_program()
+    env = objs.Environment()
 
     assert not program.has_errors()
-    assert evaluate(program) == objs.NULL_OBJ
+    assert evaluate(program, env) == objs.NULL_OBJ
 
 
 @pytest.mark.parametrize(
@@ -173,9 +182,10 @@ def test_if_else_expression_for_null(monkey_code):
 )
 def test_return_statement(monkey_code, expected_value):
     program = Parser(Lexer(monkey_code)).parse_program()
+    env = objs.Environment()
 
     assert not program.has_errors()
-    assert evaluate(program) == objs.IntegerObject(expected_value)
+    assert evaluate(program, env) == objs.IntegerObject(expected_value)
 
 
 @pytest.mark.parametrize(
@@ -188,9 +198,10 @@ def test_return_statement(monkey_code, expected_value):
 )
 def test_return_in_if_statement(monkey_code, expected_value):
     program = Parser(Lexer(monkey_code)).parse_program()
+    env = objs.Environment()
 
     assert not program.has_errors()
-    assert evaluate(program) == objs.IntegerObject(expected_value)
+    assert evaluate(program, env) == objs.IntegerObject(expected_value)
 
 
 def test_return_in_nested_if_statement():
@@ -205,9 +216,10 @@ def test_return_in_nested_if_statement():
     expected_value = 123
 
     program = Parser(Lexer(monkey_code)).parse_program()
+    env = objs.Environment()
 
     assert not program.has_errors()
-    assert evaluate(program) == objs.IntegerObject(expected_value)
+    assert evaluate(program, env) == objs.IntegerObject(expected_value)
 
 
 @pytest.mark.parametrize(
@@ -223,8 +235,9 @@ def test_return_in_nested_if_statement():
 )
 def test_type_mismatch_error(monkey_code, left_type, right_type, operator):
     program = Parser(Lexer(monkey_code)).parse_program()
+    env = objs.Environment()
 
-    err_output = evaluate(program)
+    err_output = evaluate(program, env)
     assert err_output == objs.TypeMismatchErrorObject(left_type, right_type, operator)
 
 
@@ -240,8 +253,9 @@ def test_type_mismatch_error(monkey_code, left_type, right_type, operator):
 )
 def test_unknown_infix_operator_error(monkey_code, left_type, right_type, operator):
     program = Parser(Lexer(monkey_code)).parse_program()
+    env = objs.Environment()
 
-    err_output = evaluate(program)
+    err_output = evaluate(program, env)
     assert err_output == objs.UnknownInfixOperatorErrorObject(left_type, right_type, operator)
 
 
@@ -253,6 +267,7 @@ def test_unknown_infix_operator_error(monkey_code, left_type, right_type, operat
 )
 def test_unknown_infix_operator_error(monkey_code, left_type, operator):
     program = Parser(Lexer(monkey_code)).parse_program()
+    env = objs.Environment()
 
-    err_output = evaluate(program)
+    err_output = evaluate(program, env)
     assert err_output == objs.UnknownPrefixOperatorErrorObject(left_type, operator)
