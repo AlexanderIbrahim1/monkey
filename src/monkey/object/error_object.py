@@ -1,10 +1,10 @@
 """
-This module contains the ReturnObject class, which implements the Object abstract
-class, and is used to helper handle user or internal errors, for example, wrong
-operators or unsupported operations.
+This module contains different types of -ErrorObject classes. All of these implement
+the Object abstract class. They are used to help handle user or internal errors.
 """
 
 from dataclasses import dataclass
+from dataclasses import astuple
 from typing import Any
 
 from monkey.tokens import Literal
@@ -15,8 +15,10 @@ from monkey.object.object import Object
 
 
 @dataclass(frozen=True)
-class ErrorObject(Object):
-    message: str
+class TypeMismatchErrorObject(Object):
+    object_type0: ObjectType
+    object_type1: ObjectType
+    operator: Literal
 
     def data_type(self) -> ObjectType:
         return ObjectType.ERROR
@@ -25,79 +27,58 @@ class ErrorObject(Object):
         return self.__repr__()
 
     def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, ErrorObject):
+        if not isinstance(other, TypeMismatchErrorObject):
             return NotImplemented
 
-        return self.message == other.message
+        return astuple(self) == astuple(other)
 
     def __repr__(self) -> str:
-        return f"ERROR: {self.message}"
+        type0_str = OBJECT_TYPE_DICT[self.object_type0]
+        type1_str = OBJECT_TYPE_DICT[self.object_type1]
+        return f"ERROR[type mismatch]: {type0_str} {self.operator} {type1_str}"
 
 
-class TypeMismatchErrorObject(ErrorObject):
-    def __init__(self, type0: ObjectType, type1: ObjectType, operator: Literal) -> None:
-        type0_str = OBJECT_TYPE_DICT[type0]
-        type1_str = OBJECT_TYPE_DICT[type1]
-        err_msg = f"type mismatch: {type0_str} {operator} {type1_str}"
+@dataclass(frozen=True)
+class UnknownInfixOperatorErrorObject(Object):
+    object_type0: ObjectType
+    object_type1: ObjectType
+    operator: Literal
 
-        super().__init__(err_msg)
+    def data_type(self) -> ObjectType:
+        return ObjectType.ERROR
 
-        self._type0 = type0
-        self._type1 = type1
-        self._operator = operator
+    def inspect(self) -> str:
+        return self.__repr__()
 
-    @property
-    def object_type0(self) -> ObjectType:
-        return self._type0
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, UnknownInfixOperatorErrorObject):
+            return NotImplemented
 
-    @property
-    def object_type1(self) -> ObjectType:
-        return self._type1
+        return astuple(self) == astuple(other)
 
-    @property
-    def operator(self) -> Literal:
-        return self._operator
-
-
-class UnknownInfixOperatorErrorObject(ErrorObject):
-    def __init__(self, type0: ObjectType, type1: ObjectType, operator: Literal) -> None:
-        type0_str = OBJECT_TYPE_DICT[type0]
-        type1_str = OBJECT_TYPE_DICT[type1]
-        err_msg = f"unknown infix operator: {type0_str} {operator} {type1_str}"
-
-        super().__init__(err_msg)
-
-        self._type0 = type0
-        self._type1 = type1
-        self._operator = operator
-
-    @property
-    def object_type0(self) -> ObjectType:
-        return self._type0
-
-    @property
-    def object_type1(self) -> ObjectType:
-        return self._type1
-
-    @property
-    def operator(self) -> Literal:
-        return self._operator
+    def __repr__(self) -> str:
+        type0_str = OBJECT_TYPE_DICT[self.object_type0]
+        type1_str = OBJECT_TYPE_DICT[self.object_type1]
+        return f"ERROR[unknown infix operator]: {type0_str} {self.operator} {type1_str}"
 
 
-class UnknownPrefixOperatorErrorObject(ErrorObject):
-    def __init__(self, type0: ObjectType, operator: Literal) -> None:
-        type0_str = OBJECT_TYPE_DICT[type0]
-        err_msg = f"unknown operator: {operator}{type0_str}"
+@dataclass(frozen=True)
+class UnknownPrefixOperatorErrorObject(Object):
+    object_type0: ObjectType
+    operator: Literal
 
-        super().__init__(err_msg)
+    def data_type(self) -> ObjectType:
+        return ObjectType.ERROR
 
-        self._type0 = type0
-        self._operator = operator
+    def inspect(self) -> str:
+        return self.__repr__()
 
-    @property
-    def object_type0(self) -> ObjectType:
-        return self._type0
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, UnknownPrefixOperatorErrorObject):
+            return NotImplemented
 
-    @property
-    def operator(self) -> Literal:
-        return self._operator
+        return astuple(self) == astuple(other)
+
+    def __repr__(self) -> str:
+        type0_str = OBJECT_TYPE_DICT[self.object_type0]
+        return f"ERROR[unknown prefix operator]: {self.operator}{type0_str}"
