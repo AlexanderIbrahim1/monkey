@@ -14,6 +14,7 @@ def main() -> None:
     print("Hello! This is the Monkey programming langauge!")
     print("Feel free to type in commands!")
 
+    env = objs.Environment()
     while True:
         user_input = input("\n>> ")
 
@@ -29,8 +30,8 @@ def main() -> None:
             print(program.errors())
             continue
 
-        evaluated = evaluate(program)
-        if evaluated != objs.NullObject():
+        evaluated = evaluate(program, env)
+        if evaluated != objs.NULL_OBJ:
             print(f"{evaluated}")
 
     print("Goodbye!")
