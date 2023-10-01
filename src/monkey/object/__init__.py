@@ -9,8 +9,8 @@ from monkey.object.error_object import UnknownPrefixOperatorErrorObject
 from monkey.object.error_object import is_error_object
 from monkey.object.null_object import NullObject
 from monkey.object.return_object import ReturnObject
-
 from monkey.object.environment import Environment
+from monkey.object.function_object import FunctionObject
 
 from monkey.object.constants import NULL_OBJ
 from monkey.object.constants import TRUE_BOOL_OBJ

@@ -1,11 +1,21 @@
 import pytest
 
+from monkey.tokens import Token
+from monkey.tokens import token_types
+
 from monkey.object import Object
 from monkey.object import ObjectType
 from monkey.object import IntegerObject
 from monkey.object import BooleanObject
 from monkey.object import NullObject
 from monkey.object import ReturnObject
+from monkey.object import FunctionObject
+
+from monkey.parser.expressions import Identifier
+from monkey.parser.expressions import InfixExpression
+from monkey.parser.statements import BlockStatement
+from monkey.parser.statements import ReturnStatement
+import monkey.object as objs
 
 
 def test_integer_object():
@@ -53,3 +63,30 @@ def test_return_object(wrapped_object):
     assert ret_obj.data_type() == ObjectType.RETURN
     assert ret_obj.inspect() == str(wrapped_object)
     assert ret_obj != wrapped_object
+
+
+def test_function_object():
+    parameters = [
+        Identifier(Token(token_types.IDENTIFIER, "x"), "x"),
+        Identifier(Token(token_types.IDENTIFIER, "y"), "y"),
+    ]
+    env = objs.Environment()
+
+    summation = InfixExpression(
+        Token(token_types.PLUS, "+"),
+        Identifier(Token(token_types.IDENTIFIER, "x"), "x"),
+        token_types.PLUS,
+        Identifier(Token(token_types.IDENTIFIER, "y"), "y"),
+    )
+    ret_statement = ReturnStatement(
+        Token(token_types.RETURN, "return"),
+        summation,
+    )
+    body = BlockStatement(Token(token_types.LBRACE, "{"), [ret_statement])
+
+    func_obj = FunctionObject(parameters, body, env)
+
+    print(func_obj)
+
+    assert func_obj.data_type() == ObjectType.FUNCTION
+    assert func_obj.inspect() == "fn(x, y) {\nreturn (x + y);\n}"
