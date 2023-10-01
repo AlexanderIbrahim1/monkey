@@ -3,6 +3,7 @@ import pytest
 from monkey import Lexer
 from monkey import Parser
 from monkey.evaluator.evaluator import evaluate
+from monkey.tokens import token_types
 import monkey.object as objs
 
 
@@ -207,3 +208,51 @@ def test_return_in_nested_if_statement():
 
     assert not program.has_errors()
     assert evaluate(program) == objs.IntegerObject(expected_value)
+
+
+@pytest.mark.parametrize(
+    "monkey_code, left_type, right_type, operator",
+    [
+        ("true + 10;", objs.ObjectType.BOOLEAN, objs.ObjectType.INTEGER, token_types.PLUS),
+        ("if (10 > 1) { true + 10 };", objs.ObjectType.BOOLEAN, objs.ObjectType.INTEGER, token_types.PLUS),
+        ("true + 10; 5;", objs.ObjectType.BOOLEAN, objs.ObjectType.INTEGER, token_types.PLUS),
+        ("10 + false;", objs.ObjectType.INTEGER, objs.ObjectType.BOOLEAN, token_types.PLUS),
+        ("true - 10;", objs.ObjectType.BOOLEAN, objs.ObjectType.INTEGER, token_types.MINUS),
+        ("10 - false;", objs.ObjectType.INTEGER, objs.ObjectType.BOOLEAN, token_types.MINUS),
+    ],
+)
+def test_type_mismatch_error(monkey_code, left_type, right_type, operator):
+    program = Parser(Lexer(monkey_code)).parse_program()
+
+    err_output = evaluate(program)
+    assert err_output == objs.TypeMismatchErrorObject(left_type, right_type, operator)
+
+
+@pytest.mark.parametrize(
+    "monkey_code, left_type, right_type, operator",
+    [
+        ("true / true;", objs.ObjectType.BOOLEAN, objs.ObjectType.BOOLEAN, token_types.SLASH),
+        ("true / true; return 123;", objs.ObjectType.BOOLEAN, objs.ObjectType.BOOLEAN, token_types.SLASH),
+        ("true + true;", objs.ObjectType.BOOLEAN, objs.ObjectType.BOOLEAN, token_types.PLUS),
+        ("true - false;", objs.ObjectType.BOOLEAN, objs.ObjectType.BOOLEAN, token_types.MINUS),
+        ("false * false;", objs.ObjectType.BOOLEAN, objs.ObjectType.BOOLEAN, token_types.ASTERISK),
+    ],
+)
+def test_unknown_infix_operator_error(monkey_code, left_type, right_type, operator):
+    program = Parser(Lexer(monkey_code)).parse_program()
+
+    err_output = evaluate(program)
+    assert err_output == objs.UnknownInfixOperatorErrorObject(left_type, right_type, operator)
+
+
+@pytest.mark.parametrize(
+    "monkey_code, left_type, operator",
+    [
+        ("-true;", objs.ObjectType.BOOLEAN, token_types.MINUS),
+    ],
+)
+def test_unknown_infix_operator_error(monkey_code, left_type, operator):
+    program = Parser(Lexer(monkey_code)).parse_program()
+
+    err_output = evaluate(program)
+    assert err_output == objs.UnknownPrefixOperatorErrorObject(left_type, operator)
