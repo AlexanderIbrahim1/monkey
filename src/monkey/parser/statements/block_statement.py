@@ -32,4 +32,5 @@ class BlockStatement(Statement):
     def __repr__(self) -> str:
         # if I put multiple statements on different lines, it looks kind of bad without
         # the indentations; but that's something I might worry about later
-        return "{ " + " ".join([f"{stmt}" for stmt in self.statements]) + " }"
+        # return "{ " + " ".join([f"{stmt}" for stmt in self.statements]) + " }"
+        return "\n".join([f"{stmt}" for stmt in self.statements])
