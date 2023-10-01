@@ -22,6 +22,8 @@ def evaluate_if_expression(
     if_expr: exprs.IfExpression,
 ) -> objs.Object:
     condition = eval_func(if_expr.condition)
+    if objs.is_error_object(condition):
+        return condition
 
     if _is_truthy(condition):
         return eval_func(if_expr.consequence)

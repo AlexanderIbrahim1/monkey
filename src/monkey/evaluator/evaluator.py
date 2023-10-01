@@ -40,15 +40,19 @@ def _evaluate_statement(node: Statement, env: Environment) -> Object:
     if isinstance(node, stmts.ExpressionStatement):
         return evaluate(node.value, env)
     elif isinstance(node, stmts.BlockStatement):
-        # return _evaluate_sequence_of_statements(node.statements)
         return _evaluate_block_statement(node, env)
     elif isinstance(node, stmts.ReturnStatement):
         value = evaluate(node.value, env)
+        if objs.is_error_object(value):
+            return value
         return objs.ReturnObject(value)
-    #    elif isinstance(node, stmts.LetStatement):
-    #        value = evaluate(node.value)
-    #        if value.data_type() == objs.ObjectType.ERROR:
-    #            return value
+    elif isinstance(node, stmts.LetStatement):
+        value = evaluate(node.value, env)
+        if objs.is_error_object(value):
+            return value
+        identifier_name = node.name.value
+        env.set(identifier_name, value)
+        return objs.NULL_OBJ  # let statements shouldn't return anything?
     else:
         stmt_type = type(node)
         assert False, f"unreachable; statement with no known evaluation: {stmt_type}\nFound: {node}"
@@ -62,7 +66,7 @@ def _evaluate_sequence_of_statements(statements: Sequence[Statement], env: Envir
 
         if isinstance(result, objs.ReturnObject):
             return result.value
-        elif result.data_type() == objs.ObjectType.ERROR:
+        elif objs.is_error_object(result):
             return result
 
     return result
@@ -108,19 +112,27 @@ def _evaluate_expression(node: Expression, env: Environment) -> Object:
     # recursively call `evaluate()` to split the expression up into smaller ones
     if isinstance(node, exprs.IntegerLiteral):
         return evaluate_integer_literal(node)
-    if isinstance(node, exprs.BooleanLiteral):
+    elif isinstance(node, exprs.BooleanLiteral):
         return evaluate_boolean_literal(node)
-    if isinstance(node, exprs.PrefixExpression):
+    elif isinstance(node, exprs.PrefixExpression):
         argument = evaluate(node.expr, env)
+        if objs.is_error_object(argument):
+            return argument
         operator = node.operator
         return evaluate_prefix_expression(operator, argument)
-    if isinstance(node, exprs.InfixExpression):
+    elif isinstance(node, exprs.InfixExpression):
         left = evaluate(node.left, env)
+        if objs.is_error_object(left):
+            return left
         right = evaluate(node.right, env)
+        if objs.is_error_object(right):
+            return right
         operator = node.operator
         return evaluate_infix_expression(operator, left, right)
-    if isinstance(node, exprs.IfExpression):
+    elif isinstance(node, exprs.IfExpression):
         return evaluate_if_expression(lambda n: evaluate(n, env), node)
+    elif isinstance(node, exprs.Identifier):
+        return env.get(node.value)
     else:
         expr_type = type(node)
         assert False, f"unreachable; expression with no known evaluation: {expr_type}\nFound: {node}"
