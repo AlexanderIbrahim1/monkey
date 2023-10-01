@@ -57,6 +57,8 @@ def _evaluate_sequence_of_statements(statements: Sequence[Statement]) -> Object:
 
         if isinstance(result, objs.ReturnObject):
             return result.value
+        elif result.data_type() == objs.ObjectType.ERROR:
+            return result
 
     return result
 
@@ -90,7 +92,7 @@ def _evaluate_block_statement(block_stmt: stmts.BlockStatement) -> Object:
         result = evaluate(statement)
 
         # NOTE: this is the only difference between this function and `_evaluate_sequence_of_statements`
-        if result.data_type() == objs.ObjectType.RETURN:
+        if result.data_type() in [objs.ObjectType.RETURN, objs.ObjectType.ERROR]:
             return result
 
     return result
