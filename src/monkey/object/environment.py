@@ -4,9 +4,9 @@ of an object with the object itself.
 """
 
 import dataclasses
-from typing import Optional
 
 from monkey.object.object import Object
+from monkey.object.error_object import UnknownIdentifierErrorObject
 from monkey.tokens import Literal
 
 
@@ -14,8 +14,8 @@ from monkey.tokens import Literal
 class Environment:
     store: dict[Literal, Object] = dataclasses.field(default_factory=dict)
 
-    def get(self, name: Literal) -> Optional[Object]:
-        return self.store.get(name, None)
+    def get(self, name: Literal) -> Object:
+        return self.store.get(name, UnknownIdentifierErrorObject(name))
 
     def set(self, name: Literal, obj: Object) -> Object:
         self.store[name] = obj

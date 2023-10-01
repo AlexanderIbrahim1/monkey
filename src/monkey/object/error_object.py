@@ -82,3 +82,23 @@ class UnknownPrefixOperatorErrorObject(Object):
     def __repr__(self) -> str:
         type0_str = OBJECT_TYPE_DICT[self.object_type0]
         return f"ERROR[unknown prefix operator]: {self.operator}{type0_str}"
+
+
+@dataclass(frozen=True)
+class UnknownIdentifierErrorObject(Object):
+    identifier: Literal
+
+    def data_type(self) -> ObjectType:
+        return ObjectType.ERROR
+
+    def inspect(self) -> str:
+        return self.__repr__()
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, UnknownIdentifierErrorObject):
+            return NotImplemented
+
+        return self.identifier == other.identifier
+
+    def __repr__(self) -> str:
+        return f"ERROR[unknown identifier]: {self.identifier}"
