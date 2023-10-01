@@ -102,3 +102,7 @@ class UnknownIdentifierErrorObject(Object):
 
     def __repr__(self) -> str:
         return f"ERROR[unknown identifier]: {self.identifier}"
+
+
+def is_error_object(obj: Object):
+    return obj.data_type() == ObjectType.ERROR
