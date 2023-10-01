@@ -273,13 +273,7 @@ def test_unknown_infix_operator_error(monkey_code, left_type, operator):
     assert err_output == objs.UnknownPrefixOperatorErrorObject(left_type, operator)
 
 
-@pytest.mark.parametrize(
-    "monkey_code, identifier_name",
-    [
-        ("a;", "a"),
-        ("a + b;", "a")
-    ]
-)
+@pytest.mark.parametrize("monkey_code, identifier_name", [("a;", "a"), ("a + b;", "a")])
 def test_unknown_identifier_operator_error(monkey_code, identifier_name):
     program = Parser(Lexer(monkey_code)).parse_program()
     env = objs.Environment()
