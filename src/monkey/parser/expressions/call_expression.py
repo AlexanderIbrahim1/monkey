@@ -5,6 +5,7 @@ class, and represents the `(<arguments>)` for calling a function.
 
 from dataclasses import dataclass
 from typing import Any
+from typing import Sequence
 
 from monkey.tokens.monkey_token import Token
 from monkey.tokens.token_types import Literal
@@ -18,7 +19,7 @@ from monkey.parser.expressions.function_literal import FunctionLiteral
 class CallExpression(Expression):
     token: Token  # '(' token
     function: Identifier | FunctionLiteral
-    arguments: list[Expression]
+    arguments: Sequence[Expression]
 
     def token_literal(self) -> Literal:
         return self.token.literal

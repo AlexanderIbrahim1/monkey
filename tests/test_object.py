@@ -3,7 +3,6 @@ import pytest
 from monkey.tokens import Token
 from monkey.tokens import token_types
 
-from monkey.object import Object
 from monkey.object import ObjectType
 from monkey.object import IntegerObject
 from monkey.object import BooleanObject

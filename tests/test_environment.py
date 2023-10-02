@@ -1,5 +1,3 @@
-import pytest
-
 import monkey.object as objs
 
 

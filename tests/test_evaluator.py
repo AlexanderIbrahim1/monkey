@@ -265,7 +265,7 @@ def test_unknown_infix_operator_error(monkey_code, left_type, right_type, operat
         ("-true;", objs.ObjectType.BOOLEAN, token_types.MINUS),
     ],
 )
-def test_unknown_infix_operator_error(monkey_code, left_type, operator):
+def test_unknown_prefix_operator_error(monkey_code, left_type, operator):
     program = Parser(Lexer(monkey_code)).parse_program()
     env = objs.Environment()
 
