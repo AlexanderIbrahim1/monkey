@@ -133,14 +133,29 @@ def _evaluate_expression(node: Expression, env: Environment) -> Object:
         return evaluate_if_expression(lambda n: evaluate(n, env), node)
     elif isinstance(node, exprs.Identifier):
         return env.get(node.value)
+    elif isinstance(node, exprs.FunctionLiteral):
+        return objs.FunctionObject(node.parameters, node.body, env)
     # TODO: continue this branch
     elif isinstance(node, exprs.CallExpression):
-        func_obj = evaluate(node.function, env)
-        if objs.is_error_object(func_obj):
-            return func_obj
-        arguments = _evaluate_sequence_of_expressions(node.arguments, env)  # TODO implement
+        func = evaluate(node.function, env)
+        if objs.is_error_object(func):
+            return func
+        arguments: list[Object] = _evaluate_sequence_of_expressions(node.arguments, env)
         if len(arguments) == 1 and objs.is_error_object(arguments[0]):
             return arguments[0]
     else:
         expr_type = type(node)
         assert False, f"unreachable; expression with no known evaluation: {expr_type}\nFound: {node}"
+
+
+def _evaluate_sequence_of_expressions(arguments: Sequence[Expression], env: Environment) -> list[Object]:
+    results: list[Object] = []
+
+    for arg in arguments:
+        evaluated = evaluate(arg, env)
+        if objs.is_error_object(evaluated):
+            return [evaluated]
+
+        results.append(evaluated)
+
+    return results
