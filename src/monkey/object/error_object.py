@@ -104,5 +104,26 @@ class UnknownIdentifierErrorObject(Object):
         return f"ERROR[unknown identifier]: {self.identifier}"
 
 
+@dataclass(frozen=True)
+class UnknownFunctionErrorObject(Object):
+    object_type: ObjectType
+
+    def data_type(self) -> ObjectType:
+        return ObjectType.ERROR
+
+    def inspect(self) -> str:
+        return self.__repr__()
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, UnknownFunctionErrorObject):
+            return NotImplemented
+
+        return self.object_type == other.object_type
+
+    def __repr__(self) -> str:
+        type_str = OBJECT_TYPE_DICT[self.object_type]
+        return f"ERROR[unknown function]: found {type_str}"
+
+
 def is_error_object(obj: Object):
     return obj.data_type() == ObjectType.ERROR

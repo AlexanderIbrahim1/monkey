@@ -5,6 +5,7 @@ from monkey.object.boolean_object import BooleanObject
 from monkey.object.error_object import TypeMismatchErrorObject
 from monkey.object.error_object import UnknownInfixOperatorErrorObject
 from monkey.object.error_object import UnknownIdentifierErrorObject
+from monkey.object.error_object import UnknownFunctionErrorObject
 from monkey.object.error_object import UnknownPrefixOperatorErrorObject
 from monkey.object.error_object import is_error_object
 from monkey.object.null_object import NullObject
