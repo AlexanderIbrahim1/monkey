@@ -280,3 +280,48 @@ def test_unknown_identifier_operator_error(monkey_code, identifier_name):
 
     err_output = evaluate(program, env)
     assert err_output == objs.UnknownIdentifierErrorObject(identifier_name)
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected_value",
+    [
+        ("let identity = fn(x) { x }; identity(5);", 5),
+        ("let identity = fn(x) { return x; }; identity(5);", 5),
+        ("let double = fn(x) { return 2 * x; }; double(5);", 10),
+        ("let add = fn(x, y) { x + y }; add(5, 3);", 8),
+        ("let add = fn(x, y) { x + y }; add(5, add(2, 1));", 8),
+        ("fn(x) { x }(5);", 5),
+    ],
+)
+def test_function_application_on_integers(monkey_code, expected_value):
+    program = Parser(Lexer(monkey_code)).parse_program()
+    env = objs.Environment()
+
+    assert evaluate(program, env) == objs.IntegerObject(expected_value)
+
+
+# NOTE:
+# - this is why we create a new environment for the function, that encloses the surrounding
+#   environment; it allows us to contain variables from the surroundings, and the current function
+# - this means we get closures for free!
+# - it also saves us the trouble of having to get rid of the function's local variables from the
+#   surrounding environment (if we had extended the surrounding environment instead)
+def test_closure():
+    monkey_code = """
+        let new_adder = fn(x) {
+            let new_func = fn(y) {
+                return x + y;
+            };
+
+            return new_func;
+        };
+
+        let add_two = new_adder(2);
+        add_two(2);
+    """
+    expected_value = 4
+
+    program = Parser(Lexer(monkey_code)).parse_program()
+    env = objs.Environment()
+
+    assert evaluate(program, env) == objs.IntegerObject(expected_value)
