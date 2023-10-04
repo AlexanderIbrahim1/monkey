@@ -16,6 +16,7 @@ from monkey.object import Object
 from monkey.object import Environment
 import monkey.object as objs
 
+from monkey.evaluator._apply_function import apply_function
 from monkey.evaluator._evaluate_prefix_expression import evaluate_prefix_expression
 from monkey.evaluator._evaluate_boolean_literal import evaluate_boolean_literal
 from monkey.evaluator._evaluate_integer_literal import evaluate_integer_literal
@@ -135,7 +136,6 @@ def _evaluate_expression(node: Expression, env: Environment) -> Object:
         return env.get(node.value)
     elif isinstance(node, exprs.FunctionLiteral):
         return objs.FunctionObject(node.parameters, node.body, env)
-    # TODO: continue this branch
     elif isinstance(node, exprs.CallExpression):
         func = evaluate(node.function, env)
         if objs.is_error_object(func):
@@ -143,6 +143,7 @@ def _evaluate_expression(node: Expression, env: Environment) -> Object:
         arguments: list[Object] = _evaluate_sequence_of_expressions(node.arguments, env)
         if len(arguments) == 1 and objs.is_error_object(arguments[0]):
             return arguments[0]
+        return apply_function(evaluate, func, arguments)
     else:
         expr_type = type(node)
         assert False, f"unreachable; expression with no known evaluation: {expr_type}\nFound: {node}"
