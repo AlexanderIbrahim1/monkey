@@ -14,7 +14,7 @@ from monkey.tokens import Literal
 @dataclasses.dataclass
 class Environment:
     store: dict[Literal, Object] = dataclasses.field(default_factory=dict)
-    outer: Optional['Environment'] = None
+    outer: Optional["Environment"] = None
 
     def get(self, name: Literal) -> Object:
         if (result := self.store.get(name, None)) is not None:
