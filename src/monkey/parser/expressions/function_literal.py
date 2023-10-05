@@ -39,4 +39,4 @@ class FunctionLiteral(Expression):
     def __repr__(self) -> str:
         parameters_list = ", ".join([str(param) for param in self.parameters])
 
-        return f"fn({parameters_list}) {self.body}"
+        return f"fn({parameters_list}) {{ {self.body} }}"

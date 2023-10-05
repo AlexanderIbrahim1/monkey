@@ -38,7 +38,7 @@ class IfExpression(Expression):
         )
 
     def __repr__(self) -> str:
-        if_part = f"if {self.condition} {self.consequence}"
-        else_part = f"else {self.alternative}" if self.alternative is not None else ""
+        if_part = f"if {self.condition} {{ {self.consequence} }}"
+        else_part = f"else {{ {self.alternative} }}" if self.alternative is not None else ""
 
         return f"{if_part} {else_part}"
