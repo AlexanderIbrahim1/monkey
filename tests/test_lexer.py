@@ -162,3 +162,46 @@ class TestLexer:
     def test_failed_lexer_no_semicolon_end(self, monkey_text):
         lexer = Lexer(monkey_text)
         assert lexer.has_errors()
+
+    @pytest.mark.parametrize(
+        "contents",
+        [
+            "hello",
+            "hello world",
+            "123super",
+            "super123",
+            "123",
+            "!!><?",
+            "",
+        ],
+    )
+    def test_string(self, contents):
+        monkey_text = f'"{contents}"'
+        lexer = Lexer(monkey_text)
+        assert lexer.next_token() == Token(token_types.STRING, contents)
+
+    @pytest.mark.parametrize(
+        "contents, other_thing, other_token",
+        [
+            ("hello", "123", Token(token_types.INT, "123")),
+            ("hello world", "true", Token(token_types.TRUE, "true")),
+        ],
+    )
+    def test_string_followed_by_something_else(self, contents, other_thing, other_token):
+        monkey_text = f'"{contents}" {other_thing}'
+        lexer = Lexer(monkey_text)
+        assert lexer.next_token() == Token(token_types.STRING, contents)
+        assert lexer.next_token() == other_token
+
+    @pytest.mark.parametrize(
+        "contents, other_thing, other_token",
+        [
+            ("hello", "123", Token(token_types.INT, "123")),
+            ("hello world", "true", Token(token_types.TRUE, "true")),
+        ],
+    )
+    def test_string_preceeded_by_something_else(self, contents, other_thing, other_token):
+        monkey_text = f'{other_thing} "{contents}"'
+        lexer = Lexer(monkey_text)
+        assert lexer.next_token() == other_token
+        assert lexer.next_token() == Token(token_types.STRING, contents)

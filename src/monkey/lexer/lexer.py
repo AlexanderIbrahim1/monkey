@@ -51,6 +51,10 @@ class Lexer:
         elif c == "!" and self._peek_char() == "=":
             self._read_char()
             token = token_constants.NOT_EQ_TOKEN
+        elif c == '"':
+            tok_type = token_types.STRING
+            string = self._read_string()
+            token = Token(tok_type, string)
         elif _is_identifier_character(c):
             identifier = self._read_identifier()
             tok_type = _lookup_identifier_token_type(identifier)
@@ -89,6 +93,10 @@ class Lexer:
     def _read_number(self) -> str:
         return self._read_token_between_positions(_is_digit_character)
 
+    def _read_string(self) -> str:
+        self._read_char()  # read past the current '"'
+        return self._read_token_between_positions(_is_not_end_of_string)
+
     def _read_token_between_positions(self, char_condition: Callable[[str], bool]) -> str:
         start_position = self._position
 
@@ -126,6 +134,10 @@ def _is_identifier_character(char: str) -> bool:
 
 def _is_digit_character(char: str) -> bool:
     return "0" <= char <= "9"
+
+
+def _is_not_end_of_string(char: str) -> bool:
+    return char != '"' and char != NULL_CHAR
 
 
 def _lookup_identifier_token_type(possible_keyword: str) -> TokenType:

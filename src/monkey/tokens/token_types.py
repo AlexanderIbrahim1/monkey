@@ -15,6 +15,7 @@ IDENTIFIER = "IDENTIFIER"
 
 # literals
 INT = "INT"
+STRING = "STRING"
 
 # operators
 ASSIGN = "="
