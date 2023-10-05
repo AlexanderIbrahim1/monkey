@@ -39,3 +39,21 @@ FALSE_TOKEN = Token(token_types.FALSE, "FALSE")
 IF_TOKEN = Token(token_types.IF, "IF")
 ELSE_TOKEN = Token(token_types.ELSE, "ELSE")
 RETURN_TOKEN = Token(token_types.RETURN, "RETURN")
+
+
+SINGLE_CHAR_TOKEN_DICT: dict[str, Token] = {
+    "=": ASSIGN_TOKEN,
+    "+": PLUS_TOKEN,
+    "-": MINUS_TOKEN,
+    "!": BANG_TOKEN,
+    "*": ASTERISK_TOKEN,
+    "/": SLASH_TOKEN,
+    "<": LT_TOKEN,
+    ">": GT_TOKEN,
+    ",": COMMA_TOKEN,
+    ";": SEMICOLON_TOKEN,
+    "(": LPAREN_TOKEN,
+    ")": RPAREN_TOKEN,
+    "{": LBRACE_TOKEN,
+    "}": RBRACE_TOKEN,
+}

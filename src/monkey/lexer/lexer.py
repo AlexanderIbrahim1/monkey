@@ -3,10 +3,14 @@ This module contains the Lexer, which takes the source code and turns it into
 Token instances for a later step in the interpreter.
 """
 
+from typing import Callable
+
 from monkey.tokens import Token
 from monkey.tokens import TokenType
 from monkey.tokens import token_maps
 from monkey.tokens import token_types
+
+import monkey.tokens.token_constants as token_constants
 
 # NULL_BYTE = b"\x00"
 NULL_CHAR = ""
@@ -41,46 +45,12 @@ class Lexer:
         flag__read_char = True
 
         c = self._char
-        if c == "=":
-            if self._peek_char() == "=":
-                char1 = c
-                self._read_char()
-                char2 = self._char
-                token = Token(token_types.EQ, f"{char1}{char2}")
-            else:
-                token = Token(token_types.ASSIGN, c)
-        elif c == ";":
-            token = Token(token_types.SEMICOLON, c)
-        elif c == "(":
-            token = Token(token_types.LPAREN, c)
-        elif c == ")":
-            token = Token(token_types.RPAREN, c)
-        elif c == "{":
-            token = Token(token_types.LBRACE, c)
-        elif c == "}":
-            token = Token(token_types.RBRACE, c)
-        elif c == ",":
-            token = Token(token_types.COMMA, c)
-        elif c == "+":
-            token = Token(token_types.PLUS, c)
-        elif c == "-":
-            token = Token(token_types.MINUS, c)
-        elif c == "!":
-            if self._peek_char() == "=":
-                char1 = c
-                self._read_char()
-                char2 = self._char
-                token = Token(token_types.NOT_EQ, f"{char1}{char2}")
-            else:
-                token = Token(token_types.BANG, c)
-        elif c == "*":
-            token = Token(token_types.ASTERISK, c)
-        elif c == "/":
-            token = Token(token_types.SLASH, c)
-        elif c == "<":
-            token = Token(token_types.LT, c)
-        elif c == ">":
-            token = Token(token_types.GT, c)
+        if c == "=" and self._peek_char() == "=":
+            self._read_char()
+            token = token_constants.EQ_TOKEN
+        elif c == "!" and self._peek_char() == "=":
+            self._read_char()
+            token = token_constants.NOT_EQ_TOKEN
         elif _is_identifier_character(c):
             identifier = self._read_identifier()
             tok_type = _lookup_identifier_token_type(identifier)
@@ -91,9 +61,9 @@ class Lexer:
             token = Token(token_types.INT, integer)
             flag__read_char = False  # had to read 1 past the number to identify it; don't read again
         elif c == NULL_CHAR:
-            token = Token(token_types.EOF, c)
+            token = token_constants.EOF_TOKEN
         else:
-            token = Token(token_types.ILLEGAL, c)
+            token = token_constants.SINGLE_CHAR_TOKEN_DICT.get(c, _make_illegal(c))
 
         if flag__read_char:
             self._read_char()
@@ -101,43 +71,35 @@ class Lexer:
         return token
 
     def _read_char(self) -> None:
-        if self._read_position >= self._max_size:
-            self._char = NULL_CHAR
-        else:
-            self._char = self._text_input[self._read_position]
-
+        self._char = self._peek_char()
         self._position = self._read_position
         self._read_position += 1
 
     def _peek_char(self) -> str:
         if self._read_position >= self._max_size:
-            return NULL_CHAR
+            char = NULL_CHAR
         else:
-            return self._text_input[self._read_position]
+            char = self._text_input[self._read_position]
+
+        return char
 
     def _read_identifier(self) -> str:
-        start_position = self._position
-
-        while _is_identifier_character(self._char):
-            self._read_char()
-
-        end_position = self._position
-
-        identifier = self._text_input[start_position:end_position]
-
-        return identifier
+        return self._read_token_between_positions(_is_identifier_character)
 
     def _read_number(self) -> str:
+        return self._read_token_between_positions(_is_digit_character)
+
+    def _read_token_between_positions(self, char_condition: Callable[[str], bool]) -> str:
         start_position = self._position
 
-        while _is_digit_character(self._char):
+        while char_condition(self._char):
             self._read_char()
 
         end_position = self._position
 
-        number = self._text_input[start_position:end_position]
+        token = self._text_input[start_position:end_position]
 
-        return number
+        return token
 
     def _skip_whitespace(self) -> None:
         while self._char.isspace():
@@ -172,3 +134,8 @@ def _lookup_identifier_token_type(possible_keyword: str) -> TokenType:
     is a user-defined identifier.
     """
     return token_maps.KEYWORD_TO_TOKEN.get(possible_keyword, token_types.IDENTIFIER)
+
+
+def _make_illegal(char: str) -> Token:
+    """Helper function to make an illegal token."""
+    return Token(token_types.ILLEGAL, char)
