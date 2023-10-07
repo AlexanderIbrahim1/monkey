@@ -18,6 +18,7 @@ class ObjectType(enum.Enum):
     ERROR = enum.auto()
     FUNCTION = enum.auto()
     STRING = enum.auto()
+    BUILTIN = enum.auto()
 
 
 OBJECT_TYPE_DICT: dict[ObjectType, str] = {
@@ -28,4 +29,5 @@ OBJECT_TYPE_DICT: dict[ObjectType, str] = {
     ObjectType.ERROR: "ERROR",
     ObjectType.FUNCTION: "FUNCTION",
     ObjectType.STRING: "STRING",
+    ObjectType.BUILTIN: "BUILTIN",
 }
