@@ -2,24 +2,24 @@ from typing import Callable
 from typing import Sequence
 
 from monkey.parser import ASTNode
-
 import monkey.object as objs
 
 
 def apply_function(
     eval_func: Callable[[ASTNode, objs.Environment], objs.Object],
-    fnobj: objs.Object,
+    func: objs.Object,
     args: Sequence[objs.Object],
 ) -> objs.Object:
     # NOTE: for whatever reason (maybe revealed later) a CallExpression can also take
     # an Identifier as well as a FunctionLiteral
-    if not isinstance(fnobj, objs.FunctionObject):
-        return objs.UnknownFunctionErrorObject(fnobj.data_type())
-
-    extended_env = _extend_function_environment(fnobj, args)
-    evaluated = eval_func(fnobj.body, extended_env)
-
-    return _unwrap_return_value(evaluated)
+    if isinstance(func, objs.FunctionObject):
+        extended_env = _extend_function_environment(func, args)
+        evaluated = eval_func(func.body, extended_env)
+        return _unwrap_return_value(evaluated)
+    elif isinstance(func, objs.BuiltinObject):
+        return func.func(*args)
+    else:
+        return objs.UnknownFunctionErrorObject(func.data_type())
 
 
 def _extend_function_environment(fnobj: objs.FunctionObject, args: Sequence[objs.Object]) -> objs.Environment:

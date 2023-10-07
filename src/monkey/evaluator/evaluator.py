@@ -18,6 +18,7 @@ import monkey.object as objs
 
 from monkey.evaluator._apply_function import apply_function
 from monkey.evaluator._evaluate_boolean_literal import evaluate_boolean_literal
+from monkey.evaluator._evaluate_identifier import evaluate_identifier
 from monkey.evaluator._evaluate_integer_literal import evaluate_integer_literal
 from monkey.evaluator._evaluate_infix_expression import evaluate_infix_expression
 from monkey.evaluator._evaluate_if_expression import evaluate_if_expression
@@ -136,7 +137,7 @@ def _evaluate_expression(node: Expression, env: Environment) -> Object:
     elif isinstance(node, exprs.IfExpression):
         return evaluate_if_expression(lambda n: evaluate(n, env), node)
     elif isinstance(node, exprs.Identifier):
-        return env.get(node.value)
+        return evaluate_identifier(node, env)
     elif isinstance(node, exprs.FunctionLiteral):
         return objs.FunctionObject(node.parameters, node.body, env)
     elif isinstance(node, exprs.CallExpression):
