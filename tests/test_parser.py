@@ -8,6 +8,7 @@ from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import IfExpression
 from monkey.parser.expressions import InfixExpression
 from monkey.parser.expressions import IntegerLiteral
+from monkey.parser.expressions import StringLiteral
 from monkey.parser.expressions import PrefixExpression
 from monkey.parser.parser import Parser
 from monkey.parser.parser import parse_program
@@ -381,6 +382,20 @@ def test_call_expression1():
     )
 
     expected_statement = ExpressionStatement(Token(token_types.IDENTIFIER, "add"), expected_call_expr)
+
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement
+    assert not parser.has_errors()
+
+
+def test_string_literal():
+    monkey_code = '"hello";'
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parse_program(parser)
+
+    expected_token = Token(token_types.STRING, "hello")
+    expected_statement = ExpressionStatement(expected_token, StringLiteral(expected_token, "hello"))
 
     assert program.number_of_statements() == 1
     assert program[0] == expected_statement
