@@ -4,6 +4,7 @@ This module contains our REPL for the Monkey language.
 
 from monkey import Lexer
 from monkey import Parser
+from monkey import parse_program
 from monkey import evaluate
 import monkey.object as objs
 
@@ -23,7 +24,7 @@ def main() -> None:
 
         lexer = Lexer(user_input)
         parser = Parser(lexer)
-        program = parser.parse_program()
+        program = parse_program(parser)
 
         if program.has_errors():
             print("PARSING ERROR")
