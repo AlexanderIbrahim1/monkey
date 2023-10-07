@@ -8,7 +8,7 @@ from monkey.parser.parser.parser import Parser
 
 def parse_string_literal(
     parser: Parser, _: ParsingFunction
-) -> exprs.BooleanLiteral | exprs.FailedExpression:
+) -> exprs.StringLiteral | exprs.FailedExpression:
     token = parser.current_token
     literal = parser.current_token.literal
 
