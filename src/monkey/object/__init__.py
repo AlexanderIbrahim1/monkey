@@ -13,6 +13,7 @@ from monkey.object.return_object import ReturnObject
 from monkey.object.environment import Environment
 from monkey.object.environment import new_enclosed_environment
 from monkey.object.function_object import FunctionObject
+from monkey.object.string_object import StringObject
 
 from monkey.object.constants import NULL_OBJ
 from monkey.object.constants import TRUE_BOOL_OBJ

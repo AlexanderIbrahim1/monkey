@@ -17,6 +17,7 @@ class ObjectType(enum.Enum):
     RETURN = enum.auto()
     ERROR = enum.auto()
     FUNCTION = enum.auto()
+    STRING = enum.auto()
 
 
 OBJECT_TYPE_DICT: dict[ObjectType, str] = {
@@ -26,4 +27,5 @@ OBJECT_TYPE_DICT: dict[ObjectType, str] = {
     ObjectType.RETURN: "RETURN",
     ObjectType.ERROR: "ERROR",
     ObjectType.FUNCTION: "FUNCTION",
+    ObjectType.STRING: "STRING",
 }
