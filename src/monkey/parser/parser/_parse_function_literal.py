@@ -1,8 +1,8 @@
 import monkey.tokens.token_types as token_types
 import monkey.parser.expressions as exprs
 
-from monkey.parser.parser.constants import FAIL_EXPR
-from monkey.parser.parser.constants import ParsingFunction
+from monkey.parser.parser._constants import FAIL_EXPR
+from monkey.parser.parser._constants import ParsingFunction
 from monkey.parser.parser.parser import Parser
 from monkey.parser.parser._parse_block_statement import parse_block_statement
 from monkey.parser.parser._parse_identifier import parse_identifier

@@ -12,7 +12,7 @@ from monkey.tokens import TokenType
 from monkey.tokens import token_types
 import monkey.parser.expressions as exprs
 
-from monkey.parser.parser.constants import ParsingFunction
+from monkey.parser.parser._constants import ParsingFunction
 from monkey.parser.parser.parser import Parser
 
 from monkey.parser.parser._parse_identifier import parse_identifier

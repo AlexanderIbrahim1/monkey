@@ -1,5 +1,5 @@
 """
-This module contains constants needed for other modules in this directory.
+This module contains _constants needed for other modules in this directory.
 """
 
 from typing import Callable

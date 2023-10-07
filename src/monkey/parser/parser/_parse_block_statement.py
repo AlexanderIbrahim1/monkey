@@ -2,8 +2,8 @@ import monkey.parser.statements as stmts
 
 from monkey.parser.parser.parser import Parser
 
-from monkey.parser.parser.constants import FAIL_STMT
-from monkey.parser.parser.constants import ParsingFunction
+from monkey.parser.parser._constants import FAIL_STMT
+from monkey.parser.parser._constants import ParsingFunction
 
 from monkey.parser.parser._parse_statement import parse_statement
 

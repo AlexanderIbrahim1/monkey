@@ -1,8 +1,8 @@
 from monkey.parser.precedences import Precedence
 import monkey.parser.expressions as exprs
 
-from monkey.parser.parser.constants import FAIL_EXPR
-from monkey.parser.parser.constants import ParsingFunction
+from monkey.parser.parser._constants import FAIL_EXPR
+from monkey.parser.parser._constants import ParsingFunction
 from monkey.parser.parser.parser import Parser
 
 

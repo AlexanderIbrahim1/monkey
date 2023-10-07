@@ -10,6 +10,7 @@ from monkey.parser.expressions import InfixExpression
 from monkey.parser.expressions import IntegerLiteral
 from monkey.parser.expressions import PrefixExpression
 from monkey.parser.parser import Parser
+from monkey.parser.parser import parse_program
 from monkey.parser.statements import ExpressionStatement
 from monkey.parser.statements import BlockStatement
 from monkey.parser.statements import LetStatement
@@ -22,7 +23,7 @@ from monkey.tokens import token_types
 def test_parse_let_statement(monkey_code):
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
-    program = parser.parse_program()
+    program = parse_program(parser)
 
     expected_statement = LetStatement(
         Token(token_types.LET, "let"),
@@ -39,7 +40,7 @@ def test_parse_let_statement(monkey_code):
 def test_failed_parse_let_statement(monkey_code):
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
-    parser.parse_program()
+    parse_program(parser)
 
     assert parser.has_errors()
 
@@ -48,7 +49,7 @@ def test_failed_parse_let_statement(monkey_code):
 def test_parse_return_statement(monkey_code):
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
-    program = parser.parse_program()
+    program = parse_program(parser)
 
     expected_statement = ReturnStatement(
         Token(token_types.RETURN, "return"),
@@ -65,7 +66,7 @@ def test_identifier_expression():
     monkey_code = "hello;"
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
-    program = parser.parse_program()
+    program = parse_program(parser)
 
     expected_token = Token(token_types.IDENTIFIER, "hello")
     expected_statement = ExpressionStatement(expected_token, Identifier(expected_token, "hello"))
@@ -79,7 +80,7 @@ def test_integer_literal_expression():
     monkey_code = "5;"
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
-    program = parser.parse_program()
+    program = parse_program(parser)
 
     expected_token = Token(token_types.INT, "5")
     expected_statement = ExpressionStatement(expected_token, IntegerLiteral(expected_token, "5"))
@@ -99,7 +100,7 @@ def test_integer_literal_expression():
 def test_prefix_expression_integer_literal(monkey_code, ttype, literal):
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
-    program = parser.parse_program()
+    program = parse_program(parser)
 
     expected_token = Token(ttype, literal)
     expected_integer_expression = IntegerLiteral(Token(token_types.INT, "5"), "5")
@@ -125,7 +126,7 @@ def test_prefix_expression_boolean_literal(
 ):
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
-    program = parser.parse_program()
+    program = parse_program(parser)
 
     expected_prefix_token = Token(prefix_ttype, prefix_literal)
 
@@ -156,7 +157,7 @@ def test_prefix_expression_boolean_literal(
 def test_parsing_infix_expressions(monkey_code, ttype, left, operator, right):
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
-    program = parser.parse_program()
+    program = parse_program(parser)
 
     expected_token = Token(token_types.INT, left)
     expected_expression = InfixExpression(
@@ -202,7 +203,7 @@ def test_parsing_infix_expressions(monkey_code, ttype, left, operator, right):
 def test_operator_precedence_parsing(monkey_code, expected):
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
-    program = parser.parse_program()
+    program = parse_program(parser)
 
     actual = str(program)
     assert actual == expected
@@ -218,7 +219,7 @@ def test_operator_precedence_parsing(monkey_code, expected):
 def test_boolean_literal_expression(monkey_code, ttype, literal):
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
-    program = parser.parse_program()
+    program = parse_program(parser)
 
     expected_token = Token(ttype, literal)
     expected_expression = BooleanLiteral(expected_token, literal)
@@ -233,7 +234,7 @@ def test_parse_if_expression():
     monkey_code = "if (3 < 5) { 10 } else { 20 };"
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
-    program = parser.parse_program()
+    program = parse_program(parser)
 
     token = Token(token_types.IF, "if")
     condition = InfixExpression(
@@ -283,7 +284,7 @@ def test_parse_if_expression():
 def test_function_literal_parameters(monkey_code, expected_parameter_literals):
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
-    program = parser.parse_program()
+    program = parse_program(parser)
 
     expected_token = Token(token_types.FUNCTION, "fn")
     expected_parameters = [
@@ -303,7 +304,7 @@ def test_function_literal():
     monkey_code = "fn(x, y) { return x + y; };"
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
-    program = parser.parse_program()
+    program = parse_program(parser)
 
     expected_token = Token(token_types.FUNCTION, "fn")
     expected_parameters = [
@@ -335,7 +336,7 @@ def test_call_expression0():
     monkey_code = "add(1, 2);"
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
-    program = parser.parse_program()
+    program = parse_program(parser)
 
     expected_call_token = Token(token_types.LPAREN, "(")
     expected_function_name = Identifier(Token(token_types.IDENTIFIER, "add"), "add")
@@ -360,7 +361,7 @@ def test_call_expression1():
     monkey_code = "add(1, 2 + 3);"
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
-    program = parser.parse_program()
+    program = parse_program(parser)
 
     expected_call_token = Token(token_types.LPAREN, "(")
     expected_function_name = Identifier(Token(token_types.IDENTIFIER, "add"), "add")

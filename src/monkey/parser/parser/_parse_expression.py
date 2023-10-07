@@ -2,20 +2,19 @@ from monkey.parser.precedences import Precedence
 from monkey.parser.parser.parser import Parser
 import monkey.parser.expressions as exprs
 
-from monkey.parser.parser.constants import FAIL_EXPR
-from monkey.parser.parser.constants import ParsingFunction
-from monkey.parser.parser.prefix_parsing_functions import PREFIX_PARSING_FUNCTIONS
-from monkey.parser.parser.infix_parsing_functions import INFIX_PARSING_FUNCTIONS
+from monkey.parser.parser._constants import FAIL_EXPR
+from monkey.parser.parser._prefix_parsing_functions import PREFIX_PARSING_FUNCTIONS
+from monkey.parser.parser._infix_parsing_functions import INFIX_PARSING_FUNCTIONS
 
 
-def parse_expression(parser: Parser, parsing_fn: ParsingFunction, precedence: Precedence) -> exprs.Expression:
+def parse_expression(parser: Parser, precedence: Precedence) -> exprs.Expression:
     ttype = parser.current_token.token_type
     prefix_parsing_fn = PREFIX_PARSING_FUNCTIONS.get(ttype, None)
 
     if prefix_parsing_fn is None:
         return FAIL_EXPR
 
-    expr = prefix_parsing_fn(parser, parsing_fn)
+    expr = prefix_parsing_fn(parser, parse_expression)
     if expr == FAIL_EXPR:
         return FAIL_EXPR
 
@@ -28,7 +27,7 @@ def parse_expression(parser: Parser, parsing_fn: ParsingFunction, precedence: Pr
 
         parser.parse_next_token()
 
-        expr = infix_parsing_fn(parser, parsing_fn, expr)
+        expr = infix_parsing_fn(parser, parse_expression, expr)
         if expr == FAIL_EXPR:
             return FAIL_EXPR
 
