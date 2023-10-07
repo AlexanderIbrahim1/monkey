@@ -326,3 +326,14 @@ def test_closure():
     env = objs.Environment()
 
     assert evaluate(program, env) == objs.IntegerObject(expected_value)
+
+
+def test_evaluate_string_literal():
+    monkey_code = '"hello world";'
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parse_program(parser)
+    env = objs.Environment()
+
+    assert not program.has_errors()
+    assert evaluate(program, env) == objs.StringObject("hello world")

@@ -17,11 +17,12 @@ from monkey.object import Environment
 import monkey.object as objs
 
 from monkey.evaluator._apply_function import apply_function
-from monkey.evaluator._evaluate_prefix_expression import evaluate_prefix_expression
 from monkey.evaluator._evaluate_boolean_literal import evaluate_boolean_literal
 from monkey.evaluator._evaluate_integer_literal import evaluate_integer_literal
 from monkey.evaluator._evaluate_infix_expression import evaluate_infix_expression
 from monkey.evaluator._evaluate_if_expression import evaluate_if_expression
+from monkey.evaluator._evaluate_prefix_expression import evaluate_prefix_expression
+from monkey.evaluator._evaluate_string_literal import evaluate_string_literal
 
 
 def evaluate(node: ASTNode, env: Environment) -> Object:
@@ -115,6 +116,8 @@ def _evaluate_expression(node: Expression, env: Environment) -> Object:
         return evaluate_integer_literal(node)
     elif isinstance(node, exprs.BooleanLiteral):
         return evaluate_boolean_literal(node)
+    elif isinstance(node, exprs.StringLiteral):
+        return evaluate_string_literal(node)
     elif isinstance(node, exprs.PrefixExpression):
         argument = evaluate(node.expr, env)
         if objs.is_error_object(argument):
