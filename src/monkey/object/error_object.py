@@ -125,5 +125,25 @@ class UnknownFunctionErrorObject(Object):
         return f"ERROR[unknown function]: found {type_str}"
 
 
+@dataclass(frozen=True)
+class BuiltinErrorObject(Object):
+    message: str
+
+    def data_type(self) -> ObjectType:
+        return ObjectType.ERROR
+
+    def inspect(self) -> str:
+        return self.__repr__()
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, BuiltinErrorObject):
+            return NotImplemented
+
+        return self.message == other.message
+
+    def __repr__(self) -> str:
+        return f"{self.message}"
+
+
 def is_error_object(obj: Object):
     return obj.data_type() == ObjectType.ERROR
