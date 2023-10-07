@@ -28,12 +28,18 @@ BOOLEAN_OPERATION_DICT = {
     token_types.NOT_EQ: operator_lib.ne,
 }
 
+STRING_OPERATION_DICT = {
+    token_types.PLUS: operator_lib.add,
+}
+
 
 def evaluate_infix_expression(operator: Literal, left: objs.Object, right: objs.Object) -> objs.Object:
     if isinstance(left, objs.IntegerObject) and isinstance(right, objs.IntegerObject):
         return _evaluate_integer_infix_expression(operator, left, right)
     if isinstance(left, objs.BooleanObject) and isinstance(right, objs.BooleanObject):
         return _evaluate_boolean_infix_expression(operator, left, right)
+    if isinstance(left, objs.StringObject) and isinstance(right, objs.StringObject):
+        return _evaluate_string_infix_expression(operator, left, right)
     else:
         return objs.TypeMismatchErrorObject(left.data_type(), right.data_type(), operator)
 
@@ -74,3 +80,14 @@ def _evaluate_integer_logical_infix_expression(
     operation = INTEGER_LOGICAL_OPERATION_DICT[operator]
     value = operation(left.value, right.value)
     return objs.BooleanObject(value)
+
+
+def _evaluate_string_infix_expression(
+    operator: Literal, left: objs.StringObject, right: objs.StringObject
+) -> objs.Object:
+    if operator in STRING_OPERATION_DICT.keys():
+        operation = STRING_OPERATION_DICT[operator]
+        value = operation(left.value, right.value)
+        return objs.StringObject(value)
+    else:
+        return objs.UnknownInfixOperatorErrorObject(left.data_type(), right.data_type(), operator)

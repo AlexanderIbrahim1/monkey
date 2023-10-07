@@ -232,6 +232,8 @@ def test_return_in_nested_if_statement():
         ("10 + false;", objs.ObjectType.INTEGER, objs.ObjectType.BOOLEAN, token_types.PLUS),
         ("true - 10;", objs.ObjectType.BOOLEAN, objs.ObjectType.INTEGER, token_types.MINUS),
         ("10 - false;", objs.ObjectType.INTEGER, objs.ObjectType.BOOLEAN, token_types.MINUS),
+        ('"hello" + 10;', objs.ObjectType.STRING, objs.ObjectType.INTEGER, token_types.PLUS),
+        ('"hello" + true;', objs.ObjectType.STRING, objs.ObjectType.BOOLEAN, token_types.PLUS),
     ],
 )
 def test_type_mismatch_error(monkey_code, left_type, right_type, operator):
@@ -250,6 +252,9 @@ def test_type_mismatch_error(monkey_code, left_type, right_type, operator):
         ("true + true;", objs.ObjectType.BOOLEAN, objs.ObjectType.BOOLEAN, token_types.PLUS),
         ("true - false;", objs.ObjectType.BOOLEAN, objs.ObjectType.BOOLEAN, token_types.MINUS),
         ("false * false;", objs.ObjectType.BOOLEAN, objs.ObjectType.BOOLEAN, token_types.ASTERISK),
+        ('"hello" * "world";', objs.ObjectType.STRING, objs.ObjectType.STRING, token_types.ASTERISK),
+        ('"hello" - "world";', objs.ObjectType.STRING, objs.ObjectType.STRING, token_types.MINUS),
+        ('"hello" / "world";', objs.ObjectType.STRING, objs.ObjectType.STRING, token_types.SLASH),
     ],
 )
 def test_unknown_infix_operator_error(monkey_code, left_type, right_type, operator):
@@ -330,6 +335,22 @@ def test_closure():
 
 def test_evaluate_string_literal():
     monkey_code = '"hello world";'
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parse_program(parser)
+    env = objs.Environment()
+
+    assert not program.has_errors()
+    assert evaluate(program, env) == objs.StringObject("hello world")
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected_value",
+    [
+        ('"hello" + " world";', "hello world"),
+    ],
+)
+def test_string_concatenation(monkey_code, expected_value):
     lexer = Lexer(monkey_code)
     parser = Parser(lexer)
     program = parse_program(parser)
