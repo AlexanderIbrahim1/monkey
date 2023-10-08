@@ -1,3 +1,5 @@
+from monkey.parser.expressions import ArrayLiteral
+from monkey.parser.expressions import BooleanLiteral
 from monkey.parser.expressions import FunctionLiteral
 from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import IfExpression
@@ -77,3 +79,23 @@ def test_function_literal():
     expr = FunctionLiteral(token, parameters, body)
 
     assert str(expr) == "fn(x, y) { return (x + y); }"
+
+
+def test_array_literal():
+    token = Token(token_types.LBRACKET, "[")
+
+    elements = [
+        Identifier(Token(token_types.IDENTIFIER, "x"), "x"),
+        Identifier(Token(token_types.IDENTIFIER, "y"), "y"),
+        IntegerLiteral(Token(token_types.INT, "20"), "20"),
+        BooleanLiteral(Token(token_types.TRUE, "true"), "true"),
+    ]
+
+    expr = ArrayLiteral(token, elements)
+    assert str(expr) == "[x, y, 20, true]"
+
+
+def test_array_literal_empty():
+    token = Token(token_types.LBRACKET, "[")
+    expr = ArrayLiteral(token, [])
+    assert str(expr) == "[]"
