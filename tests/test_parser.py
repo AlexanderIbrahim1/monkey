@@ -1,6 +1,7 @@
 import pytest
 
 from monkey.lexer import Lexer
+from monkey.parser.expressions import ArrayLiteral
 from monkey.parser.expressions import BooleanLiteral
 from monkey.parser.expressions import CallExpression
 from monkey.parser.expressions import FunctionLiteral
@@ -396,6 +397,33 @@ def test_string_literal():
 
     expected_token = Token(token_types.STRING, "hello")
     expected_statement = ExpressionStatement(expected_token, StringLiteral(expected_token, "hello"))
+
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement
+    assert not parser.has_errors()
+
+
+def test_array_literal():
+    monkey_code = "[1, 2, true, 3 * 4];"
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parse_program(parser)
+
+    expected_token = Token(token_types.LBRACKET, "[")
+    expected_elements = [
+        IntegerLiteral(Token(token_types.INT, "1"), "1"),
+        IntegerLiteral(Token(token_types.INT, "2"), "2"),
+        BooleanLiteral(Token(token_types.TRUE, "true"), "true"),
+        InfixExpression(
+            Token(token_types.ASTERISK, "*"),
+            IntegerLiteral(Token(token_types.INT, "3"), "3"),
+            token_types.ASTERISK,
+            IntegerLiteral(Token(token_types.INT, "4"), "4"),
+        ),
+    ]
+    expected_array = ArrayLiteral(expected_token, expected_elements)
+
+    expected_statement = ExpressionStatement(expected_token, expected_array)
 
     assert program.number_of_statements() == 1
     assert program[0] == expected_statement
