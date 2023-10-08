@@ -3,6 +3,7 @@ from monkey.parser.expressions import BooleanLiteral
 from monkey.parser.expressions import FunctionLiteral
 from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import IfExpression
+from monkey.parser.expressions import IndexExpression
 from monkey.parser.expressions import InfixExpression
 from monkey.parser.expressions import IntegerLiteral
 from monkey.parser.statements import BlockStatement
@@ -99,3 +100,12 @@ def test_array_literal_empty():
     token = Token(token_types.LBRACKET, "[")
     expr = ArrayLiteral(token, [])
     assert str(expr) == "[]"
+
+
+def test_index_expression():
+    token = Token(token_types.LBRACKET, "[")
+    container = Identifier(Token(token_types.IDENTIFIER, "my_array"), "my_array")
+    inside = IntegerLiteral(Token(token_types.INT, "3"), "3")
+
+    expr = IndexExpression(token, container, inside)
+    assert str(expr) == "(my_array[3])"
