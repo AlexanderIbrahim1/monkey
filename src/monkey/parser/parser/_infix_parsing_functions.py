@@ -15,6 +15,7 @@ import monkey.parser.expressions as exprs
 from monkey.parser.parser._constants import ParsingFunction
 from monkey.parser.parser.parser import Parser
 
+from monkey.parser.parser._parse_index_expression import parse_index_expression
 from monkey.parser.parser._parse_infix_expression import parse_infix_expression
 from monkey.parser.parser._parse_call_expression import parse_call_expression
 
@@ -30,4 +31,5 @@ INFIX_PARSING_FUNCTIONS: dict[TokenType, InfixParsingFunction] = {
     token_types.EQ: parse_infix_expression,
     token_types.NOT_EQ: parse_infix_expression,
     token_types.LPAREN: parse_call_expression,
+    token_types.LBRACKET: parse_index_expression,
 }

@@ -200,6 +200,7 @@ def test_parsing_infix_expressions(monkey_code, ttype, left, operator, right):
         ("2 / (5 + 5);", "(2 / (5 + 5))"),
         ("-(5 + 5);", "(-(5 + 5))"),
         ("!(true == true);", "(!(true == true))"),
+        ("add(a * b[2], b[1], 2 * [1, 2][1]);", "add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))"),
     ],
 )
 def test_operator_precedence_parsing(monkey_code, expected):
