@@ -17,4 +17,5 @@ PRECEDENCE_MAP: dict[TokenType, Precedence] = {
     token_types.SLASH: Precedence.PRODUCT,
     token_types.ASTERISK: Precedence.PRODUCT,
     token_types.LPAREN: Precedence.CALL,
+    token_types.LBRACKET: Precedence.INDEX,
 }

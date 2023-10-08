@@ -20,6 +20,7 @@ class Precedence(enum.Enum):
     PRODUCT = 4
     PREFIX = 5
     CALL = 6
+    INDEX = 7
 
     def __lt__(self, other: Any) -> bool:
         if not isinstance(other, Precedence):
