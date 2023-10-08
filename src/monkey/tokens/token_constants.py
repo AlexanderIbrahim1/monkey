@@ -30,6 +30,8 @@ LPAREN_TOKEN = Token(token_types.LPAREN, "(")
 RPAREN_TOKEN = Token(token_types.RPAREN, ")")
 LBRACE_TOKEN = Token(token_types.LBRACE, "{")
 RBRACE_TOKEN = Token(token_types.RBRACE, "}")
+LBRACKET_TOKEN = Token(token_types.LBRACKET, "[")
+RBRACKET_TOKEN = Token(token_types.RBRACKET, "]")
 
 # reserved keywords
 FUNCTION_TOKEN = Token(token_types.FUNCTION, "FUNCTION")
@@ -56,4 +58,6 @@ SINGLE_CHAR_TOKEN_DICT: dict[str, Token] = {
     ")": RPAREN_TOKEN,
     "{": LBRACE_TOKEN,
     "}": RBRACE_TOKEN,
+    "[": LBRACKET_TOKEN,
+    "]": RBRACKET_TOKEN,
 }
