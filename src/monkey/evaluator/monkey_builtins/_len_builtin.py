@@ -13,8 +13,9 @@ def len_builtin_impl(*args: objs.Object) -> objs.Object:
 
     arg = args[0]
     if isinstance(arg, objs.StringObject):
-        inner_string = arg.value
-        return objs.IntegerObject(len(inner_string))
+        return objs.IntegerObject(len(arg.value))
+    elif isinstance(arg, objs.ArrayObject):
+        return objs.IntegerObject(len(arg.elements))
     else:
         message = f"Cannot find length of object of type '{arg.data_type()}'"
         return objs.BuiltinErrorObject(message)

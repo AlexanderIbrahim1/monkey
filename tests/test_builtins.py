@@ -16,6 +16,9 @@ import monkey.object as objs
         ('len("hello");', 5),
         ('len("hello world");', 11),
         ('len("");', 0),
+        ("len([1, 2, 3]);", 3),
+        ("len([]);", 0),
+        ("let x = [1, 2]; len(x);", 2),
     ],
 )
 def test_len(monkey_code, expected_length):
