@@ -145,5 +145,34 @@ class BuiltinErrorObject(Object):
         return f"{self.message}"
 
 
+@dataclass(frozen=True)
+class IndexErrorObject(Object):
+    container_name: str
+    container_type: ObjectType
+    index: int
+    max_allowed_index: int
+
+    def data_type(self) -> ObjectType:
+        return ObjectType.ERROR
+
+    def inspect(self) -> str:
+        return self.__repr__()
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, IndexErrorObject):
+            return NotImplemented
+
+        return astuple(self) == astuple(other)
+
+    def __repr__(self) -> str:
+        type_str = OBJECT_TYPE_DICT[self.container_type]
+        message_lines = [
+            f"ERROR[index error]: invalid index access of '{type_str}' of name '{self.container_name}'",
+            f"                  : index: '{self.index}'                                               ",
+            f"                  : size of container: '{self.max_allowed_index}'                       ",
+        ]
+        return "\n".join(message_lines)
+
+
 def is_error_object(obj: Object):
     return obj.data_type() == ObjectType.ERROR

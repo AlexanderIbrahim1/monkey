@@ -3,6 +3,7 @@ from monkey.object.object import Object
 from monkey.object.integer_object import IntegerObject
 from monkey.object.boolean_object import BooleanObject
 from monkey.object.error_object import BuiltinErrorObject
+from monkey.object.error_object import IndexErrorObject
 from monkey.object.error_object import TypeMismatchErrorObject
 from monkey.object.error_object import UnknownInfixOperatorErrorObject
 from monkey.object.error_object import UnknownIdentifierErrorObject
