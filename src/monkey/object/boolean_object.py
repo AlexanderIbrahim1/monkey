@@ -27,4 +27,4 @@ class BooleanObject(Object):
         return self.value == other.value
 
     def __repr__(self) -> str:
-        return f"{self.value}"
+        return f"{self.value}".lower()
