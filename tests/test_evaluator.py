@@ -424,3 +424,38 @@ def test_out_of_bounds_array_index_expression(monkey_code, index, size):
 
     assert not program.has_errors()
     assert evaluate(program, env) == expected_error
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected_value",
+    [
+        ('"hello"[0];', "h"),
+        ('"hello"[1];', "e"),
+        ('"hello"[4];', "o"),
+        ('"hello world"[5];', " "),
+        ('"hello world"[6];', "w"),
+    ],
+)
+def test_string_index_expression(monkey_code, expected_value):
+    program, env = program_and_env(monkey_code)
+
+    assert not program.has_errors()
+    assert evaluate(program, env) == objs.StringObject(expected_value)
+
+
+# @pytest.mark.parametrize(
+#     "monkey_code, index, size",
+#     [
+#         ("[][3];", 3, 0),
+#         ("[1, 2, 3][3];", 3, 3),
+#         ("[1, 2, 3][5];", 5, 3),
+#         ("[1, 2, 3][-1];", -1, 3),
+#     ],
+# )
+# def test_out_of_bounds_array_index_expression(monkey_code, index, size):
+#     program, env = program_and_env(monkey_code)
+#
+#     expected_error = objs.OutOfBoundsErrorObject(objs.ObjectType.ARRAY, index, size)
+#
+#     assert not program.has_errors()
+#     assert evaluate(program, env) == expected_error
