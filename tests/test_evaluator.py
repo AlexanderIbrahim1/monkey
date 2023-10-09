@@ -358,3 +358,24 @@ def test_string_concatenation(monkey_code, expected_value):
 
     assert not program.has_errors()
     assert evaluate(program, env) == objs.StringObject("hello world")
+
+
+def test_evaluate_array_literal():
+    monkey_code = '[1, 2 * 2, 3 - 4, true, "hello" + " world"];'
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parse_program(parser)
+    env = objs.Environment()
+
+    expected_object = objs.ArrayObject(
+        [
+            objs.IntegerObject(1),
+            objs.IntegerObject(4),
+            objs.IntegerObject(-1),
+            objs.BooleanObject(True),
+            objs.StringObject("hello world"),
+        ]
+    )
+
+    assert not program.has_errors()
+    assert evaluate(program, env) == expected_object

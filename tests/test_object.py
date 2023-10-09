@@ -93,11 +93,13 @@ def test_function_object():
 
 
 def test_array_object():
-    array_obj = ArrayObject([
-        IntegerObject(-3),
-        BooleanObject(True),
-        IntegerObject(10),
-    ])
+    array_obj = ArrayObject(
+        [
+            IntegerObject(-3),
+            BooleanObject(True),
+            IntegerObject(10),
+        ]
+    )
 
     assert array_obj.data_type() == ObjectType.ARRAY
     assert array_obj.inspect() == "[-3, true, 10]"
