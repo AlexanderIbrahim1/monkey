@@ -2,20 +2,12 @@ import pytest
 
 from monkey import Lexer
 from monkey import Parser
-from monkey.parser.program import Program
 from monkey.parser.parser import parse_program
 from monkey.evaluator.evaluator import evaluate
 from monkey.tokens import token_types
 import monkey.object as objs
 
-
-def program_and_env(monkey_code: str) -> tuple[Program, objs.Environment]:
-    lexer = Lexer(monkey_code)
-    parser = Parser(lexer)
-    program = parse_program(parser)
-    env = objs.Environment()
-
-    return program, env
+from utils_for_tests import program_and_env
 
 
 def test_evaluate_integer_literal():
