@@ -149,7 +149,7 @@ class BuiltinErrorObject(Object):
 class OutOfBoundsErrorObject(Object):
     container_type: ObjectType
     index: int
-    max_allowed_index: int
+    size: int
 
     def data_type(self) -> ObjectType:
         return ObjectType.ERROR
@@ -168,7 +168,7 @@ class OutOfBoundsErrorObject(Object):
         message_lines = [
             f"ERROR[index error]: invalid index access of instance of type '{type_str}'",
             f"                  : index: '{self.index}'                                ",
-            f"                  : size of container: '{self.max_allowed_index}'        ",
+            f"                  : size: '{self.size }'                                 ",
         ]
         return "\n".join(message_lines)
 
