@@ -9,6 +9,7 @@ from monkey.object import BooleanObject
 from monkey.object import NullObject
 from monkey.object import ReturnObject
 from monkey.object import FunctionObject
+from monkey.object import ArrayObject
 
 from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import InfixExpression
@@ -32,8 +33,8 @@ def test_boolean_object(bool_value):
     bool_obj = BooleanObject(bool_value)
 
     assert bool_obj.data_type() == ObjectType.BOOLEAN
-    assert bool_obj.inspect() == str(bool_value)
-    assert bool_obj.inspect() == str(bool_obj)
+    assert bool_obj.inspect() == str(bool_value).lower()
+    assert bool_obj.inspect() == str(bool_obj).lower()
     assert bool_obj == BooleanObject(bool_value)
     assert bool_obj != bool_value
 
@@ -89,3 +90,14 @@ def test_function_object():
 
     assert func_obj.data_type() == ObjectType.FUNCTION
     assert func_obj.inspect() == "fn(x, y) {\nreturn (x + y);\n}"
+
+
+def test_array_object():
+    array_obj = ArrayObject([
+        IntegerObject(-3),
+        BooleanObject(True),
+        IntegerObject(10),
+    ])
+
+    assert array_obj.data_type() == ObjectType.ARRAY
+    assert array_obj.inspect() == "[-3, true, 10]"

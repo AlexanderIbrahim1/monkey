@@ -19,6 +19,7 @@ class ObjectType(enum.Enum):
     FUNCTION = enum.auto()
     STRING = enum.auto()
     BUILTIN = enum.auto()
+    ARRAY = enum.auto()
 
 
 OBJECT_TYPE_DICT: dict[ObjectType, str] = {
@@ -30,4 +31,5 @@ OBJECT_TYPE_DICT: dict[ObjectType, str] = {
     ObjectType.FUNCTION: "FUNCTION",
     ObjectType.STRING: "STRING",
     ObjectType.BUILTIN: "BUILTIN",
+    ObjectType.ARRAY: "ARRAY",
 }
