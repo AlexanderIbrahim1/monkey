@@ -2,10 +2,20 @@ import pytest
 
 from monkey import Lexer
 from monkey import Parser
+from monkey.parser.program import Program
 from monkey.parser.parser import parse_program
 from monkey.evaluator.evaluator import evaluate
 from monkey.tokens import token_types
 import monkey.object as objs
+
+
+def program_and_env(monkey_code: str) -> tuple[Program, objs.Environment]:
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parse_program(parser)
+    env = objs.Environment()
+
+    return program, env
 
 
 def test_evaluate_integer_literal():
@@ -362,10 +372,7 @@ def test_string_concatenation(monkey_code, expected_value):
 
 def test_evaluate_array_literal():
     monkey_code = '[1, 2 * 2, 3 - 4, true, "hello" + " world"];'
-    lexer = Lexer(monkey_code)
-    parser = Parser(lexer)
-    program = parse_program(parser)
-    env = objs.Environment()
+    program, env = program_and_env(monkey_code)
 
     expected_object = objs.ArrayObject(
         [
@@ -379,3 +386,41 @@ def test_evaluate_array_literal():
 
     assert not program.has_errors()
     assert evaluate(program, env) == expected_object
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected_value",
+    [
+        ("[1, 2, 3][0];", 1),
+        ("[1, 2, 3][1];", 2),
+        ("[1, 2, 3][2];", 3),
+        ("let i = 0; [1][i];", 1),
+        ("[1, 2, 3][1 + 1];", 3),
+        ("let my_array = [1, 2, 3]; my_array[0];", 1),
+        ("let my_array = [1, 2, 3]; my_array[0] + my_array[1];", 3),
+        ("let my_array = [1, 2, 3]; let i = my_array[0]; my_array[i];", 2),
+    ],
+)
+def test_array_index_expression_with_integers(monkey_code, expected_value):
+    program, env = program_and_env(monkey_code)
+
+    assert not program.has_errors()
+    assert evaluate(program, env) == objs.IntegerObject(expected_value)
+
+
+@pytest.mark.parametrize(
+    "monkey_code, index, size",
+    [
+        ("[][3];", 3, 0),
+        ("[1, 2, 3][3];", 3, 3),
+        ("[1, 2, 3][5];", 5, 3),
+        ("[1, 2, 3][-1];", -1, 3),
+    ],
+)
+def test_out_of_bounds_array_index_expression(monkey_code, index, size):
+    program, env = program_and_env(monkey_code)
+
+    expected_error = objs.OutOfBoundsErrorObject(objs.ObjectType.ARRAY, index, size)
+
+    assert not program.has_errors()
+    assert evaluate(program, env) == expected_error

@@ -20,6 +20,7 @@ from monkey.evaluator._apply_function import apply_function
 from monkey.evaluator._evaluate_array_literal import evaluate_array_literal
 from monkey.evaluator._evaluate_boolean_literal import evaluate_boolean_literal
 from monkey.evaluator._evaluate_identifier import evaluate_identifier
+from monkey.evaluator._evaluate_index_expression import evaluate_index_expression
 from monkey.evaluator._evaluate_integer_literal import evaluate_integer_literal
 from monkey.evaluator._evaluate_infix_expression import evaluate_infix_expression
 from monkey.evaluator._evaluate_if_expression import evaluate_if_expression
@@ -151,6 +152,14 @@ def _evaluate_expression(node: Expression, env: Environment) -> Object:
         return apply_function(evaluate, func, arguments)
     elif isinstance(node, exprs.ArrayLiteral):
         return evaluate_array_literal(node, _evaluate_sequence_of_expressions, env)
+    elif isinstance(node, exprs.IndexExpression):
+        container = evaluate(node.container, env)
+        if objs.is_error_object(container):
+            return container
+        inside = evaluate(node.inside, env)
+        if objs.is_error_object(inside):
+            return inside
+        return evaluate_index_expression(container, inside)
     else:
         expr_type = type(node)
         assert False, f"unreachable; expression with no known evaluation: {expr_type}\nFound: {node}"
