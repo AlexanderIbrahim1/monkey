@@ -146,7 +146,7 @@ class BuiltinErrorObject(Object):
 
 
 @dataclass(frozen=True)
-class IndexErrorObject(Object):
+class OutOfBoundsErrorObject(Object):
     container_type: ObjectType
     index: int
     max_allowed_index: int
@@ -158,7 +158,7 @@ class IndexErrorObject(Object):
         return self.__repr__()
 
     def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, IndexErrorObject):
+        if not isinstance(other, OutOfBoundsErrorObject):
             return NotImplemented
 
         return astuple(self) == astuple(other)
@@ -171,6 +171,29 @@ class IndexErrorObject(Object):
             f"                  : size of container: '{self.max_allowed_index}'        ",
         ]
         return "\n".join(message_lines)
+
+
+@dataclass(frozen=True)
+class InvalidIndexingErrorObject(Object):
+    container_type: ObjectType
+    inside_type: ObjectType
+
+    def data_type(self) -> ObjectType:
+        return ObjectType.ERROR
+
+    def inspect(self) -> str:
+        return self.__repr__()
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, InvalidIndexingErrorObject):
+            return NotImplemented
+
+        return astuple(self) == astuple(other)
+
+    def __repr__(self) -> str:
+        container_str = OBJECT_TYPE_DICT[self.container_type]
+        inside_str = OBJECT_TYPE_DICT[self.inside_type]
+        return f"Cannot access object of type '{container_str}' with object of type '{inside_str}'"
 
 
 def is_error_object(obj: Object):
