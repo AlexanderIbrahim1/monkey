@@ -1,13 +1,9 @@
 import pytest
 
-
 from monkey import evaluate
-from monkey import Lexer
-from monkey import Parser
-from monkey import parse_program
-from monkey import Environment
-
 import monkey.object as objs
+
+from utils_for_tests import program_and_env
 
 
 @pytest.mark.parametrize(
@@ -22,10 +18,37 @@ import monkey.object as objs
     ],
 )
 def test_len(monkey_code, expected_length):
-    lexer = Lexer(monkey_code)
-    parser = Parser(lexer)
-    program = parse_program(parser)
-    env = Environment()
+    program, env = program_and_env(monkey_code)
 
     assert not program.has_errors()
     assert evaluate(program, env) == objs.IntegerObject(expected_length)
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected_object",
+    [
+        ('first("hello");', objs.StringObject("h")),
+        ('first("hello world");', objs.StringObject("h")),
+        ("first([1, 2, 3]);", objs.IntegerObject(1)),
+        ("let x = [1, 2]; first(x);", objs.IntegerObject(1)),
+    ],
+)
+def test_first(monkey_code, expected_object):
+    program, env = program_and_env(monkey_code)
+
+    assert not program.has_errors()
+    assert evaluate(program, env) == expected_object
+
+
+@pytest.mark.parametrize("monkey_code", ["len();", "len([1, 2], [3, 4]);"])
+def test_first_invalid_number_of_elements(monkey_code):
+    program, env = program_and_env(monkey_code)
+    assert not program.has_errors()
+    assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
+
+
+@pytest.mark.parametrize("monkey_code", ["len(1);", "len(true);"])
+def test_first_invalid_argument(monkey_code):
+    program, env = program_and_env(monkey_code)
+    assert not program.has_errors()
+    assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)

@@ -1,0 +1,37 @@
+"""
+This module contains implementation for the BuiltinObject for the `len` function,
+which calculates the length of an object in the monkey language.
+"""
+
+from typing import Sequence
+
+import monkey.object as objs
+
+
+def first_builtin_impl(*args: objs.Object) -> objs.Object:
+    if len(args) != 1:
+        message = f"Wrong number of arguments in `first`: Got {len(args)}, want 1."
+        return objs.BuiltinErrorObject(message)
+
+    arg = args[0]
+    if isinstance(arg, objs.StringObject):
+        return _first_of_string(arg.value)
+    elif isinstance(arg, objs.ArrayObject):
+        return _first_of_array(arg.elements)
+    else:
+        message = f"Cannot return first element of object of type '{arg.data_type()}'"
+        return objs.BuiltinErrorObject(message)
+
+
+def _first_of_string(inner_string: str) -> objs.Object:
+    if len(inner_string) >= 1:
+        return objs.StringObject(inner_string[0])
+    else:
+        return objs.OutOfBoundsErrorObject(objs.ObjectType.STRING, 0, len(inner_string))
+
+
+def _first_of_array(elements: Sequence[objs.Object]) -> objs.Object:
+    if len(elements) >= 1:
+        return elements[0]
+    else:
+        return objs.OutOfBoundsErrorObject(objs.ObjectType.ARRAY, 0, len(elements))
