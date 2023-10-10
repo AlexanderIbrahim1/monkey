@@ -1,6 +1,6 @@
 """
-This module contains implementation for the BuiltinObject for the `len` function,
-which calculates the length of an object in the monkey language.
+This module contains implementation for the BuiltinObject for the `first` function,
+which returns the first element of a container in the monkey language.
 """
 
 from typing import Sequence
