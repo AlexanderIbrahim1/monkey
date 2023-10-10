@@ -24,6 +24,20 @@ def test_len(monkey_code, expected_length):
     assert evaluate(program, env) == objs.IntegerObject(expected_length)
 
 
+@pytest.mark.parametrize("monkey_code", ["len();", "len([1, 2], [3, 4]);"])
+def test_len_invalid_number_of_elements(monkey_code):
+    program, env = program_and_env(monkey_code)
+    assert not program.has_errors()
+    assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
+
+
+@pytest.mark.parametrize("monkey_code", ["len(1);", "len(true);"])
+def test_len_invalid_argument(monkey_code):
+    program, env = program_and_env(monkey_code)
+    assert not program.has_errors()
+    assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
+
+
 @pytest.mark.parametrize(
     "monkey_code, expected_object",
     [
@@ -40,15 +54,45 @@ def test_first(monkey_code, expected_object):
     assert evaluate(program, env) == expected_object
 
 
-@pytest.mark.parametrize("monkey_code", ["len();", "len([1, 2], [3, 4]);"])
+@pytest.mark.parametrize("monkey_code", ["first();", "first([1, 2], [3, 4]);"])
 def test_first_invalid_number_of_elements(monkey_code):
     program, env = program_and_env(monkey_code)
     assert not program.has_errors()
     assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
 
 
-@pytest.mark.parametrize("monkey_code", ["len(1);", "len(true);"])
+@pytest.mark.parametrize("monkey_code", ["first(1);", "first(true);"])
 def test_first_invalid_argument(monkey_code):
+    program, env = program_and_env(monkey_code)
+    assert not program.has_errors()
+    assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected_object",
+    [
+        ('last("hello");', objs.StringObject("o")),
+        ('last("hello world");', objs.StringObject("d")),
+        ("last([1, 2, 3]);", objs.IntegerObject(3)),
+        ("let x = [1, 2]; last(x);", objs.IntegerObject(2)),
+    ],
+)
+def test_last(monkey_code, expected_object):
+    program, env = program_and_env(monkey_code)
+
+    assert not program.has_errors()
+    assert evaluate(program, env) == expected_object
+
+
+@pytest.mark.parametrize("monkey_code", ["last();", "last([1, 2], [3, 4]);"])
+def test_last_invalid_number_of_elements(monkey_code):
+    program, env = program_and_env(monkey_code)
+    assert not program.has_errors()
+    assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
+
+
+@pytest.mark.parametrize("monkey_code", ["last(1);", "last(true);"])
+def test_last_invalid_argument(monkey_code):
     program, env = program_and_env(monkey_code)
     assert not program.has_errors()
     assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
