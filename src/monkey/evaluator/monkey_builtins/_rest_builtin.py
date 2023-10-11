@@ -17,7 +17,8 @@ def rest_builtin_impl(*args: objs.Object) -> objs.Object:
     elif isinstance(arg, objs.ArrayObject):
         return _rest_of_array(arg.elements)
     else:
-        message = f"Cannot return rest element of object of type '{arg.data_type()}'"
+        type_str = objs.object_type.OBJECT_TYPE_DICT[arg.data_type()]
+        message = f"Cannot return rest of elements of object of type '{type_str}'"
         return objs.BuiltinErrorObject(message)
 
 

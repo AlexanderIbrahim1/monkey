@@ -17,7 +17,8 @@ def first_builtin_impl(*args: objs.Object) -> objs.Object:
     elif isinstance(arg, objs.ArrayObject):
         return _first_of_array(arg.elements)
     else:
-        message = f"Cannot return first element of object of type '{arg.data_type()}'"
+        type_str = objs.object_type.OBJECT_TYPE_DICT[arg.data_type()]
+        message = f"Cannot return first element of object of type '{type_str}'"
         return objs.BuiltinErrorObject(message)
 
 
