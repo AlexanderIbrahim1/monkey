@@ -3,8 +3,6 @@ This module contains implementation for the BuiltinObject for the `first` functi
 which returns the first element of a container in the monkey language.
 """
 
-from typing import Sequence
-
 import monkey.object as objs
 
 
@@ -30,7 +28,7 @@ def _first_of_string(inner_string: str) -> objs.Object:
         return objs.OutOfBoundsErrorObject(objs.ObjectType.STRING, 0, len(inner_string))
 
 
-def _first_of_array(elements: Sequence[objs.Object]) -> objs.Object:
+def _first_of_array(elements: list[objs.Object]) -> objs.Object:
     if len(elements) >= 1:
         return elements[0]
     else:
