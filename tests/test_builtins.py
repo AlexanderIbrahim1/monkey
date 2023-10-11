@@ -96,3 +96,34 @@ def test_last_invalid_argument(monkey_code):
     program, env = program_and_env(monkey_code)
     assert not program.has_errors()
     assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected_object",
+    [
+        ('rest("hello");', objs.StringObject("ello")),
+        ('rest("hello world");', objs.StringObject("ello world")),
+        ("rest([1, 2, 3]);", objs.ArrayObject([objs.IntegerObject(2), objs.IntegerObject(3)])),
+        ("let x = [1, 2]; rest(x);", objs.ArrayObject([objs.IntegerObject(2)])),
+        ("let x = [10]; rest(x);", objs.ArrayObject([])),
+    ],
+)
+def test_rest(monkey_code, expected_object):
+    program, env = program_and_env(monkey_code)
+
+    assert not program.has_errors()
+    assert evaluate(program, env) == expected_object
+
+
+@pytest.mark.parametrize("monkey_code", ["rest();", "rest([1, 2], [3, 4]);"])
+def test_rest_invalid_number_of_elements(monkey_code):
+    program, env = program_and_env(monkey_code)
+    assert not program.has_errors()
+    assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
+
+
+@pytest.mark.parametrize("monkey_code", ["rest(1);", "rest(true);"])
+def test_rest_invalid_argument(monkey_code):
+    program, env = program_and_env(monkey_code)
+    assert not program.has_errors()
+    assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
