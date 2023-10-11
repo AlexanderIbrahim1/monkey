@@ -159,3 +159,45 @@ class TestBuiltin_push:
         program, env = program_and_env(monkey_code)
         assert not program.has_errors()
         assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
+
+    def test_push_invalid_string(self):
+        monkey_code = 'push("hello", "wow");'
+        program, env = program_and_env(monkey_code)
+        assert not program.has_errors()
+        assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
+
+
+class TestBuiltin_pop:
+    @pytest.mark.parametrize(
+        "monkey_code, expected_object",
+        [
+            ('pop("hello");', objs.StringObject("hell")),
+            ('pop("hello world");', objs.StringObject("hello worl")),
+            ("pop([1, 2]);", make_integer_array([1])),
+            ("let x = [1, 2]; pop(x);", make_integer_array([1])),
+            ("let x = [1]; pop(x);", make_integer_array([])),
+        ],
+    )
+    def test_pop(self, monkey_code, expected_object):
+        program, env = program_and_env(monkey_code)
+
+        assert not program.has_errors()
+        assert evaluate(program, env) == expected_object
+
+    @pytest.mark.parametrize("monkey_code", ["pop();", "pop([1], [2]);"])
+    def test_pop_invalid_number_of_elements(self, monkey_code):
+        program, env = program_and_env(monkey_code)
+        assert not program.has_errors()
+        assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
+
+    @pytest.mark.parametrize("monkey_code", ["pop(1);", "pop(true);"])
+    def test_pop_invalid_argument(self, monkey_code):
+        program, env = program_and_env(monkey_code)
+        assert not program.has_errors()
+        assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
+
+    @pytest.mark.parametrize("monkey_code", ["pop([]);", "pop(" ");"])
+    def test_pop_empty_container(self, monkey_code):
+        program, env = program_and_env(monkey_code)
+        assert not program.has_errors()
+        assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
