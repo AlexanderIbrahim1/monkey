@@ -127,3 +127,38 @@ def test_rest_invalid_argument(monkey_code):
     program, env = program_and_env(monkey_code)
     assert not program.has_errors()
     assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
+
+
+def array_of_123() -> objs.ArrayObject:
+    return objs.ArrayObject([objs.IntegerObject(1), objs.IntegerObject(2), objs.IntegerObject(3)])
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected_object",
+    [
+        ('push("hello", "x");', objs.StringObject("hellox")),
+        ('push("hello world", "!");', objs.StringObject("hello world!")),
+        ("push([1, 2], 3);", array_of_123()),
+        ("let x = [1, 2]; push(x, 3);", array_of_123()),
+        ("let x = []; push(x, 1);", objs.ArrayObject([objs.IntegerObject(1)])),
+    ],
+)
+def test_push(monkey_code, expected_object):
+    program, env = program_and_env(monkey_code)
+
+    assert not program.has_errors()
+    assert evaluate(program, env) == expected_object
+
+
+@pytest.mark.parametrize("monkey_code", ["push();", "push([1, 2]);", "push([1], 2, 3);"])
+def test_push_invalid_number_of_elements(monkey_code):
+    program, env = program_and_env(monkey_code)
+    assert not program.has_errors()
+    assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
+
+
+@pytest.mark.parametrize("monkey_code", ["push(1, 1);", "push(true, false);"])
+def test_push_invalid_argument(monkey_code):
+    program, env = program_and_env(monkey_code)
+    assert not program.has_errors()
+    assert isinstance(evaluate(program, env), objs.BuiltinErrorObject)
