@@ -1,11 +1,13 @@
 from monkey.parser.expressions import ArrayLiteral
 from monkey.parser.expressions import BooleanLiteral
 from monkey.parser.expressions import FunctionLiteral
+from monkey.parser.expressions import HashLiteral
 from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import IfExpression
 from monkey.parser.expressions import IndexExpression
 from monkey.parser.expressions import InfixExpression
 from monkey.parser.expressions import IntegerLiteral
+from monkey.parser.expressions import StringLiteral
 from monkey.parser.statements import BlockStatement
 from monkey.parser.statements import ExpressionStatement
 from monkey.parser.statements import ReturnStatement
@@ -109,3 +111,12 @@ def test_index_expression():
 
     expr = IndexExpression(token, container, inside)
     assert str(expr) == "(my_array[3])"
+
+
+def test_hash_literal():
+    token = Token(token_types.LBRACE, "{")
+    left0 = StringLiteral(Token(token_types.STRING, "x"), "x")
+    right0 = IntegerLiteral(Token(token_types.INT, "3"), "3")
+
+    expr = HashLiteral(token, {left0: right0})
+    assert str(expr) == '{"x": 3}'
