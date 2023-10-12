@@ -8,7 +8,7 @@ from monkey import token_types
 
 class TestLexer:
     def test_basic(self):
-        input_text = r"=;(){},+-!*/<>[]"
+        input_text = r"=;(){},+-!*/<>[]:"
         lexer = Lexer(input_text)
 
         assert lexer.next_token() == Token(token_types.ASSIGN, "=")
@@ -27,6 +27,7 @@ class TestLexer:
         assert lexer.next_token() == Token(token_types.GT, ">")
         assert lexer.next_token() == Token(token_types.LBRACKET, "[")
         assert lexer.next_token() == Token(token_types.RBRACKET, "]")
+        assert lexer.next_token() == Token(token_types.COLON, ":")
         assert lexer.next_token() == Token(token_types.EOF, "")
 
     def test_sample_monkey_code(self):

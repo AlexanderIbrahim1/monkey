@@ -23,6 +23,7 @@ EQ_TOKEN = Token(token_types.EQ, "==")
 NOT_EQ_TOKEN = Token(token_types.NOT_EQ, "!=")
 
 # punctuation
+COLON_TOKEN = Token(token_types.COLON, ":")
 COMMA_TOKEN = Token(token_types.COMMA, ",")
 SEMICOLON_TOKEN = Token(token_types.SEMICOLON, ";")
 
@@ -52,6 +53,7 @@ SINGLE_CHAR_TOKEN_DICT: dict[str, Token] = {
     "/": SLASH_TOKEN,
     "<": LT_TOKEN,
     ">": GT_TOKEN,
+    ":": COLON_TOKEN,
     ",": COMMA_TOKEN,
     ";": SEMICOLON_TOKEN,
     "(": LPAREN_TOKEN,

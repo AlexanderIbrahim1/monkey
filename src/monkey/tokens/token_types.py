@@ -30,6 +30,7 @@ EQ = "=="
 NOT_EQ = "!="
 
 # punctuation
+COLON = ":"
 COMMA = ","
 SEMICOLON = ";"
 
