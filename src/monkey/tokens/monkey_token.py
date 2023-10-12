@@ -10,7 +10,7 @@ from monkey.tokens.token_types import Literal
 from monkey.tokens.token_types import TokenType
 
 
-@dataclass
+@dataclass(frozen=True)
 class Token:
     token_type: TokenType
     literal: Literal
