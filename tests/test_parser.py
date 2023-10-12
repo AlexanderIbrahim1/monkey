@@ -1,10 +1,12 @@
 import pytest
 
 from monkey.lexer import Lexer
+from monkey.parser.expressions import Expression
 from monkey.parser.expressions import ArrayLiteral
 from monkey.parser.expressions import BooleanLiteral
 from monkey.parser.expressions import CallExpression
 from monkey.parser.expressions import FunctionLiteral
+from monkey.parser.expressions import HashLiteral
 from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import IfExpression
 from monkey.parser.expressions import InfixExpression
@@ -429,3 +431,88 @@ def test_array_literal():
     assert program.number_of_statements() == 1
     assert program[0] == expected_statement
     assert not parser.has_errors()
+
+
+def test_hash_literal():
+    monkey_code = '{"one": 1, "two": 2, "three": 3};'
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parse_program(parser)
+
+    expected_token = Token(token_types.LBRACE, "{")
+
+    string0 = StringLiteral(Token(token_types.STRING, "one"), "one")
+    integer0 = IntegerLiteral(Token(token_types.INT, "1"), "1")
+    string1 = StringLiteral(Token(token_types.STRING, "two"), "two")
+    integer1 = IntegerLiteral(Token(token_types.INT, "2"), "2")
+    string2 = StringLiteral(Token(token_types.STRING, "three"), "three")
+    integer2 = IntegerLiteral(Token(token_types.INT, "3"), "3")
+    expected_dict: dict[Expression, Expression] = {string0: integer0, string1: integer1, string2: integer2}
+
+    expected_hash_literal = HashLiteral(expected_token, expected_dict)
+
+    expected_statement = ExpressionStatement(expected_token, expected_hash_literal)
+
+    assert not parser.has_errors()
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement
+
+
+def test_hash_literal_with_expressions():
+    monkey_code = '{"one": 0 + 1, "two": 10 - 8, "three": 15 / 5};'
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parse_program(parser)
+
+    expected_token = Token(token_types.LBRACE, "{")
+
+    string0 = StringLiteral(Token(token_types.STRING, "one"), "one")
+    integer0 = InfixExpression(
+        Token(token_types.PLUS, "+"),
+        IntegerLiteral(Token(token_types.INT, "0"), "0"),
+        token_types.PLUS,
+        IntegerLiteral(Token(token_types.INT, "1"), "1"),
+    )
+
+    string1 = StringLiteral(Token(token_types.STRING, "two"), "two")
+    integer1 = InfixExpression(
+        Token(token_types.MINUS, "-"),
+        IntegerLiteral(Token(token_types.INT, "10"), "10"),
+        token_types.MINUS,
+        IntegerLiteral(Token(token_types.INT, "8"), "8"),
+    )
+
+    string2 = StringLiteral(Token(token_types.STRING, "three"), "three")
+    integer2 = InfixExpression(
+        Token(token_types.SLASH, "/"),
+        IntegerLiteral(Token(token_types.INT, "15"), "15"),
+        token_types.SLASH,
+        IntegerLiteral(Token(token_types.INT, "5"), "5"),
+    )
+
+    expected_dict: dict[Expression, Expression] = {string0: integer0, string1: integer1, string2: integer2}
+
+    expected_hash_literal = HashLiteral(expected_token, expected_dict)
+
+    expected_statement = ExpressionStatement(expected_token, expected_hash_literal)
+
+    assert not parser.has_errors()
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement
+
+
+def test_empty_hash_literal():
+    monkey_code = "{};"
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parse_program(parser)
+
+    expected_token = Token(token_types.LBRACE, "{")
+    expected_dict: dict[Expression, Expression] = {}
+    expected_hash_literal = HashLiteral(expected_token, expected_dict)
+
+    expected_statement = ExpressionStatement(expected_token, expected_hash_literal)
+
+    assert not parser.has_errors()
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement

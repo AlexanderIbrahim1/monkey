@@ -23,6 +23,7 @@ from monkey.parser.parser._parse_prefix_expression import parse_prefix_expressio
 from monkey.parser.parser._parse_grouped_expression import parse_grouped_expression
 from monkey.parser.parser._parse_if_expression import parse_if_expression
 from monkey.parser.parser._parse_function_literal import parse_function_literal
+from monkey.parser.parser._parse_hash_literal import parse_hash_literal
 from monkey.parser.parser._parse_string_literal import parse_string_literal
 
 PrefixParsingFunction = Callable[[Parser, ParsingFunction], exprs.Expression]
@@ -39,4 +40,5 @@ PREFIX_PARSING_FUNCTIONS: dict[TokenType, PrefixParsingFunction] = {
     token_types.MINUS: parse_prefix_expression,
     token_types.STRING: parse_string_literal,
     token_types.TRUE: parse_boolean_literal,
+    token_types.LBRACE: parse_hash_literal,
 }
