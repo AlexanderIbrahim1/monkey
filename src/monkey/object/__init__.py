@@ -20,6 +20,9 @@ from monkey.object.string_object import StringObject
 from monkey.object.builtin_object import BuiltinObject
 from monkey.object.array_object import ArrayObject
 
+from monkey.object.object_hasher import HashKey
+from monkey.object.object_hasher import create_hash_key
+
 from monkey.object.constants import NULL_OBJ
 from monkey.object.constants import TRUE_BOOL_OBJ
 from monkey.object.constants import FALSE_BOOL_OBJ
