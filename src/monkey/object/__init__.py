@@ -3,6 +3,7 @@ from monkey.object.object import Object
 from monkey.object.integer_object import IntegerObject
 from monkey.object.boolean_object import BooleanObject
 from monkey.object.error_object import BuiltinErrorObject
+from monkey.object.error_object import HashErrorObject
 from monkey.object.error_object import InvalidIndexingErrorObject
 from monkey.object.error_object import OutOfBoundsErrorObject
 from monkey.object.error_object import TypeMismatchErrorObject
@@ -21,8 +22,8 @@ from monkey.object.builtin_object import BuiltinObject
 from monkey.object.array_object import ArrayObject
 from monkey.object.hash_object import HashObject
 
-from monkey.object.object_hasher import create_hash_key
-from monkey.object.object_hasher import HashKeyValuePair
+from monkey.object.hash_object import HashKeyValuePair
+from monkey.object.object_hasher import create_object_hash
 from monkey.object.object_hasher import ObjectHash
 
 from monkey.object.constants import NULL_OBJ

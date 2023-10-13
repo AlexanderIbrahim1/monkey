@@ -196,5 +196,26 @@ class InvalidIndexingErrorObject(Object):
         return f"Cannot access object of type '{container_str}' with object of type '{inside_str}'"
 
 
+@dataclass(frozen=True)
+class HashErrorObject(Object):
+    attempted_type: ObjectType
+
+    def data_type(self) -> ObjectType:
+        return ObjectType.ERROR
+
+    def inspect(self) -> str:
+        return self.__repr__()
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, HashErrorObject):
+            return NotImplemented
+
+        return astuple(self) == astuple(other)
+
+    def __repr__(self) -> str:
+        attempted_str = OBJECT_TYPE_DICT[self.attempted_type]
+        return f"Cannot hash object of type '{attempted_str}'"
+
+
 def is_error_object(obj: Object):
     return obj.data_type() == ObjectType.ERROR
