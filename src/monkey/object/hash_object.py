@@ -9,7 +9,7 @@ from typing import Any
 
 from monkey.object.object_type import ObjectType
 from monkey.object.object import Object
-from monkey.object.object_hasher import HashKey
+from monkey.object.object_hasher import ObjectHash
 
 
 @dataclass(frozen=True)
@@ -20,7 +20,7 @@ class HashKeyValuePair:
 
 @dataclass(frozen=True)
 class HashObject(Object):
-    pairs: dict[HashKey, HashKeyValuePair]
+    pairs: dict[ObjectHash, HashKeyValuePair]
 
     def data_type(self) -> ObjectType:
         return ObjectType.HASH

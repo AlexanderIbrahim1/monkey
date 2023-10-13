@@ -25,12 +25,12 @@ from monkey.object.string_object import StringObject
 
 
 @dataclass(frozen=True)
-class HashKey:
+class ObjectHash:
     data_type: ObjectType
     value: int
 
 
-def create_hash_key(obj: Object) -> HashKey:
+def create_hash_key(obj: Object) -> ObjectHash:
     if isinstance(obj, BooleanObject):
         return _boolean_object_hash_key(obj)
     elif isinstance(obj, IntegerObject):
@@ -38,16 +38,16 @@ def create_hash_key(obj: Object) -> HashKey:
     elif isinstance(obj, StringObject):
         return _string_object_hash_key(obj)
     else:
-        return HashKey(ObjectType.ERROR, -1)
+        return ObjectHash(ObjectType.ERROR, -1)
 
 
-def _boolean_object_hash_key(obj: BooleanObject) -> HashKey:
-    return HashKey(ObjectType.BOOLEAN, hash(obj.value))
+def _boolean_object_hash_key(obj: BooleanObject) -> ObjectHash:
+    return ObjectHash(ObjectType.BOOLEAN, hash(obj.value))
 
 
-def _integer_object_hash_key(obj: IntegerObject) -> HashKey:
-    return HashKey(ObjectType.INTEGER, obj.value)
+def _integer_object_hash_key(obj: IntegerObject) -> ObjectHash:
+    return ObjectHash(ObjectType.INTEGER, obj.value)
 
 
-def _string_object_hash_key(obj: StringObject) -> HashKey:
-    return HashKey(ObjectType.STRING, hash(obj.value))
+def _string_object_hash_key(obj: StringObject) -> ObjectHash:
+    return ObjectHash(ObjectType.STRING, hash(obj.value))
