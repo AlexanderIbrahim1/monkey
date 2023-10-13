@@ -19,6 +19,7 @@ from monkey.object.function_object import FunctionObject
 from monkey.object.string_object import StringObject
 from monkey.object.builtin_object import BuiltinObject
 from monkey.object.array_object import ArrayObject
+from monkey.object.hash_object import HashObject
 
 from monkey.object.object_hasher import HashKey
 from monkey.object.object_hasher import create_hash_key
