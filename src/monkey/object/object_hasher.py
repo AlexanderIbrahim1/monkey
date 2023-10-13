@@ -30,7 +30,7 @@ class ObjectHash:
     value: int
 
 
-def create_hash_key(obj: Object) -> ObjectHash:
+def create_object_hash(obj: Object) -> ObjectHash:
     if isinstance(obj, BooleanObject):
         return _boolean_object_hash_key(obj)
     elif isinstance(obj, IntegerObject):
