@@ -11,7 +11,7 @@ from monkey.object.object_type import ObjectType
 from monkey.object.object import Object
 
 
-@dataclass
+@dataclass(frozen=True)
 class ArrayObject(Object):
     elements: list[Object]
 
