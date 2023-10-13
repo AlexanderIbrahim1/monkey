@@ -447,7 +447,7 @@ def test_hash_literal():
     integer1 = IntegerLiteral(Token(token_types.INT, "2"), "2")
     string2 = StringLiteral(Token(token_types.STRING, "three"), "three")
     integer2 = IntegerLiteral(Token(token_types.INT, "3"), "3")
-    expected_dict: dict[Expression, Expression] = {string0: integer0, string1: integer1, string2: integer2}
+    expected_dict: dict[Expression, Expression] = {string0: integer0, string1: integer1, string2: integer2}  # type: ignore
 
     expected_hash_literal = HashLiteral(expected_token, expected_dict)
 
@@ -490,7 +490,7 @@ def test_hash_literal_with_expressions():
         IntegerLiteral(Token(token_types.INT, "5"), "5"),
     )
 
-    expected_dict: dict[Expression, Expression] = {string0: integer0, string1: integer1, string2: integer2}
+    expected_dict: dict[Expression, Expression] = {string0: integer0, string1: integer1, string2: integer2}  # type: ignore
 
     expected_hash_literal = HashLiteral(expected_token, expected_dict)
 
@@ -508,7 +508,7 @@ def test_empty_hash_literal():
     program = parse_program(parser)
 
     expected_token = Token(token_types.LBRACE, "{")
-    expected_dict: dict[Expression, Expression] = {}
+    expected_dict: dict[Expression, Expression] = {}  # type: ignore
     expected_hash_literal = HashLiteral(expected_token, expected_dict)
 
     expected_statement = ExpressionStatement(expected_token, expected_hash_literal)
