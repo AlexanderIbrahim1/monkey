@@ -19,7 +19,7 @@ from monkey.parser.expressions.expression import Expression
 @dataclass(frozen=True)
 class HashLiteral(Expression):
     token: Token  # the '{' token
-    key_value_pairs: dict[Expression, Expression]
+    key_value_pairs: list[tuple[Expression, Expression]]
 
     def token_literal(self) -> Literal:
         return self.token.literal
@@ -34,7 +34,7 @@ class HashLiteral(Expression):
         return astuple(self) == astuple(other)
 
     def __repr__(self) -> str:
-        pairs = (f"{key}: {value}" for (key, value) in self.key_value_pairs.items())
+        pairs = (f"{key}: {value}" for (key, value) in self.key_value_pairs)
         pairs_list = ", ".join([p for p in pairs])
 
         return f"{{{pairs_list}}}"

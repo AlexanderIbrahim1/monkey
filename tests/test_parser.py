@@ -447,9 +447,13 @@ def test_hash_literal():
     integer1 = IntegerLiteral(Token(token_types.INT, "2"), "2")
     string2 = StringLiteral(Token(token_types.STRING, "three"), "three")
     integer2 = IntegerLiteral(Token(token_types.INT, "3"), "3")
-    expected_dict: dict[Expression, Expression] = {string0: integer0, string1: integer1, string2: integer2}  # type: ignore
+    expected_pairs: list[tuple[Expression, Expression]] = [  # type: ignore
+        (string0, integer0),
+        (string1, integer1),
+        (string2, integer2),
+    ]
 
-    expected_hash_literal = HashLiteral(expected_token, expected_dict)
+    expected_hash_literal = HashLiteral(expected_token, expected_pairs)
 
     expected_statement = ExpressionStatement(expected_token, expected_hash_literal)
 
@@ -489,10 +493,13 @@ def test_hash_literal_with_expressions():
         token_types.SLASH,
         IntegerLiteral(Token(token_types.INT, "5"), "5"),
     )
+    expected_pairs: list[tuple[Expression, Expression]] = [  # type: ignore
+        (string0, integer0),
+        (string1, integer1),
+        (string2, integer2),
+    ]
 
-    expected_dict: dict[Expression, Expression] = {string0: integer0, string1: integer1, string2: integer2}  # type: ignore
-
-    expected_hash_literal = HashLiteral(expected_token, expected_dict)
+    expected_hash_literal = HashLiteral(expected_token, expected_pairs)
 
     expected_statement = ExpressionStatement(expected_token, expected_hash_literal)
 
@@ -508,8 +515,8 @@ def test_empty_hash_literal():
     program = parse_program(parser)
 
     expected_token = Token(token_types.LBRACE, "{")
-    expected_dict: dict[Expression, Expression] = {}  # type: ignore
-    expected_hash_literal = HashLiteral(expected_token, expected_dict)
+    expected_pairs: list[tuple[Expression, Expression]] = []  # type: ignore
+    expected_hash_literal = HashLiteral(expected_token, expected_pairs)
 
     expected_statement = ExpressionStatement(expected_token, expected_hash_literal)
 

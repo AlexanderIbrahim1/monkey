@@ -118,5 +118,5 @@ def test_hash_literal():
     left0 = StringLiteral(Token(token_types.STRING, "x"), "x")
     right0 = IntegerLiteral(Token(token_types.INT, "3"), "3")
 
-    expr = HashLiteral(token, {left0: right0})
+    expr = HashLiteral(token, [(left0, right0)])
     assert str(expr) == '{"x": 3}'

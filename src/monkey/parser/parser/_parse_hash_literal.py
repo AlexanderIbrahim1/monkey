@@ -9,7 +9,7 @@ from monkey.parser.parser.parser import Parser
 
 def parse_hash_literal(parser: Parser, parsing_fn: ParsingFunction) -> exprs.Expression | exprs.HashLiteral:
     token = parser.current_token
-    kv_pairs: dict[exprs.Expression, exprs.Expression] = {}
+    kv_pairs: list[tuple[exprs.Expression, exprs.Expression]] = []
 
     while not parser.peek_token_type_is(token_types.RBRACE):  # while not the closing brace
         parser.parse_next_token()
@@ -32,7 +32,7 @@ def parse_hash_literal(parser: Parser, parsing_fn: ParsingFunction) -> exprs.Exp
         if not _is_end_of_hash_literal(parser):
             return FAIL_EXPR
 
-        kv_pairs[key] = value
+        kv_pairs.append((key, value))
 
     if not parser.expect_peek_and_next(token_types.RBRACE):
         parser.append_error("Hash literal does not end with '}'")
