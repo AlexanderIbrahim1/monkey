@@ -19,6 +19,7 @@ import monkey.object as objs
 from monkey.evaluator._apply_function import apply_function
 from monkey.evaluator._evaluate_array_literal import evaluate_array_literal
 from monkey.evaluator._evaluate_boolean_literal import evaluate_boolean_literal
+from monkey.evaluator._evaluate_hash_literal import evaluate_hash_literal
 from monkey.evaluator._evaluate_identifier import evaluate_identifier
 from monkey.evaluator._evaluate_index_expression import evaluate_index_expression
 from monkey.evaluator._evaluate_integer_literal import evaluate_integer_literal
@@ -138,6 +139,8 @@ def _evaluate_expression(node: Expression, env: Environment) -> Object:
         return evaluate_infix_expression(operator, left, right)
     elif isinstance(node, exprs.IfExpression):
         return evaluate_if_expression(lambda n: evaluate(n, env), node)
+    elif isinstance(node, exprs.HashLiteral):
+        return evaluate_hash_literal(lambda n: evaluate(n, env), node)
     elif isinstance(node, exprs.Identifier):
         return evaluate_identifier(node, env)
     elif isinstance(node, exprs.FunctionLiteral):

@@ -435,19 +435,76 @@ def test_string_index_expression(monkey_code, expected_value):
     assert evaluate(program, env) == objs.StringObject(expected_value)
 
 
-# @pytest.mark.parametrize(
-#     "monkey_code, index, size",
-#     [
-#         ("[][3];", 3, 0),
-#         ("[1, 2, 3][3];", 3, 3),
-#         ("[1, 2, 3][5];", 5, 3),
-#         ("[1, 2, 3][-1];", -1, 3),
-#     ],
-# )
-# def test_out_of_bounds_array_index_expression(monkey_code, index, size):
-#     program, env = program_and_env(monkey_code)
-#
-#     expected_error = objs.OutOfBoundsErrorObject(objs.ObjectType.ARRAY, index, size)
-#
-#     assert not program.has_errors()
-#     assert evaluate(program, env) == expected_error
+def test_evaluate_hash_literal_1():
+    monkey_code = '{"one": 1};'
+    program, env = program_and_env(monkey_code)
+
+    key0 = objs.StringObject("one")
+    value0 = objs.IntegerObject(1)
+    object_hash0 = objs.create_object_hash(key0)
+    kv_pair0 = objs.HashKeyValuePair(key0, value0)
+
+    pairs = {object_hash0: kv_pair0}
+    expected_hash_object = objs.HashObject(pairs)
+
+    assert not program.has_errors()
+    assert evaluate(program, env) == expected_hash_object
+
+
+def test_evaluate_hash_literal_2():
+    # fmt: off
+    monkey_code = """{
+        "zero": 0,
+        "one": 1,
+        "two": 1 + 1,
+        "thr" + "ee": 6 / 2,
+        4: 4,
+        true: 5,
+        false: 6
+    };"""
+    # fmt: on
+    program, env = program_and_env(monkey_code)
+
+    key0 = objs.StringObject("zero")
+    object_hash0 = objs.create_object_hash(key0)
+    kv_pair0 = objs.HashKeyValuePair(key0, objs.IntegerObject(0))
+
+    key1 = objs.StringObject("one")
+    object_hash1 = objs.create_object_hash(key1)
+    kv_pair1 = objs.HashKeyValuePair(key1, objs.IntegerObject(1))
+
+    key2 = objs.StringObject("two")
+    object_hash2 = objs.create_object_hash(key2)
+    kv_pair2 = objs.HashKeyValuePair(key2, objs.IntegerObject(2))
+
+    key3 = objs.StringObject("three")
+    object_hash3 = objs.create_object_hash(key3)
+    kv_pair3 = objs.HashKeyValuePair(key3, objs.IntegerObject(3))
+
+    key4 = objs.IntegerObject(4)
+    object_hash4 = objs.create_object_hash(key4)
+    kv_pair4 = objs.HashKeyValuePair(key4, objs.IntegerObject(4))
+
+    key5 = objs.BooleanObject(True)
+    object_hash5 = objs.create_object_hash(key5)
+    kv_pair5 = objs.HashKeyValuePair(key5, objs.IntegerObject(5))
+
+    key6 = objs.BooleanObject(False)
+    object_hash6 = objs.create_object_hash(key6)
+    kv_pair6 = objs.HashKeyValuePair(key6, objs.IntegerObject(6))
+
+    pairs = dict(
+        [
+            (object_hash0, kv_pair0),
+            (object_hash1, kv_pair1),
+            (object_hash2, kv_pair2),
+            (object_hash3, kv_pair3),
+            (object_hash4, kv_pair4),
+            (object_hash5, kv_pair5),
+            (object_hash6, kv_pair6),
+        ]
+    )
+    expected_hash_object = objs.HashObject(pairs)
+
+    assert not program.has_errors()
+    assert evaluate(program, env) == expected_hash_object
