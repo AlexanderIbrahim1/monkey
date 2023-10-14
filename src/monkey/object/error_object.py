@@ -142,7 +142,7 @@ class BuiltinErrorObject(Object):
         return self.message == other.message
 
     def __repr__(self) -> str:
-        return f"{self.message}"
+        return f"ERROR[builtin function]: {self.message}"
 
 
 @dataclass(frozen=True)
@@ -193,11 +193,16 @@ class InvalidIndexingErrorObject(Object):
     def __repr__(self) -> str:
         container_str = OBJECT_TYPE_DICT[self.container_type]
         inside_str = OBJECT_TYPE_DICT[self.inside_type]
-        return f"Cannot access object of type '{container_str}' with object of type '{inside_str}'"
+        message_lines = [
+            "ERROR[invalid index type]: invalid combination of container and index types",
+            f"                         : container type: {container_str}                 ",
+            f"                         : index type: {inside_str}                        ",
+        ]
+        return "\n".join(message_lines)
 
 
 @dataclass(frozen=True)
-class HashErrorObject(Object):
+class UnhashableTypeErrorObject(Object):
     attempted_type: ObjectType
 
     def data_type(self) -> ObjectType:
@@ -207,14 +212,34 @@ class HashErrorObject(Object):
         return self.__repr__()
 
     def __eq__(self, other: Any) -> bool:
-        if not isinstance(other, HashErrorObject):
+        if not isinstance(other, UnhashableTypeErrorObject):
             return NotImplemented
 
         return astuple(self) == astuple(other)
 
     def __repr__(self) -> str:
         attempted_str = OBJECT_TYPE_DICT[self.attempted_type]
-        return f"Cannot hash object of type '{attempted_str}'"
+        return f"ERROR[unhashable type]: cannot hash object of type '{attempted_str}'"
+
+
+@dataclass(frozen=True)
+class KeyNotFoundErrorObject(Object):
+    key: Object
+
+    def data_type(self) -> ObjectType:
+        return ObjectType.ERROR
+
+    def inspect(self) -> str:
+        return self.__repr__()
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, KeyNotFoundErrorObject):
+            return NotImplemented
+
+        return astuple(self) == astuple(other)
+
+    def __repr__(self) -> str:
+        return f"ERROR[key not found]: '{self.key}' not present in map"
 
 
 def is_error_object(obj: Object):
