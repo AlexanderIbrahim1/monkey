@@ -10,6 +10,8 @@ def evaluate_index_expression(container: objs.Object, inside: objs.Object) -> ob
         return _evaluate_array_index_expression(container, inside)
     if isinstance(container, objs.StringObject) and isinstance(inside, objs.IntegerObject):
         return _evaluate_string_index_expression(container, inside)
+    if isinstance(container, objs.HashObject):
+        return _evaluate_hash_index_expression(container, inside)
     else:
         return objs.InvalidIndexingErrorObject(container.data_type(), inside.data_type())
 
@@ -32,3 +34,15 @@ def _evaluate_string_index_expression(string: objs.StringObject, index: objs.Int
         return objs.OutOfBoundsErrorObject(string.data_type(), str_index, len(string.value))
 
     return objs.StringObject(string.value[str_index])
+
+
+def _evaluate_hash_index_expression(hashmap: objs.HashObject, key: objs.Object) -> objs.Object:
+    hashed_key = objs.create_object_hash(key)
+    if hashed_key.data_type == objs.ObjectType.ERROR:
+        return objs.UnhashableTypeErrorObject(key.data_type())
+
+    pair = hashmap.pairs.get(hashed_key, None)
+    if pair is None:
+        return objs.KeyNotFoundErrorObject(key)
+
+    return pair.value

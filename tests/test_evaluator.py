@@ -508,3 +508,39 @@ def test_evaluate_hash_literal_2():
 
     assert not program.has_errors()
     assert evaluate(program, env) == expected_hash_object
+
+
+@pytest.mark.parametrize(
+    "monkey_code, expected_value",
+    [
+        ('{"one": 1}["one"];', 1),
+        ('{"one": 1, "two": 2}["one"];', 1),
+        ('{"two": 2, "one": 1}["one"];', 1),
+        ('let x = {"one": 1}; x["one"];', 1),
+        ('let x = {"three": 2 + 1}; x["three"];', 3),
+        ("let x = {2 + 1: 3}; x[3];", 3),
+        ("{true: 1}[true];", 1),
+        ("{false: 1}[false];", 1),
+    ],
+)
+def test_hash_index_expression(monkey_code, expected_value):
+    program, env = program_and_env(monkey_code)
+
+    assert not program.has_errors()
+    assert evaluate(program, env) == objs.IntegerObject(expected_value)
+
+
+@pytest.mark.parametrize(
+    "monkey_code, key",
+    [
+        ('{"one": 1}["two"];', objs.StringObject("two")),
+        ('{}["two"];', objs.StringObject("two")),
+    ],
+)
+def test_key_not_found_hash_index_expression(monkey_code, key):
+    program, env = program_and_env(monkey_code)
+
+    expected_error = objs.KeyNotFoundErrorObject(key)
+
+    assert not program.has_errors()
+    assert evaluate(program, env) == expected_error

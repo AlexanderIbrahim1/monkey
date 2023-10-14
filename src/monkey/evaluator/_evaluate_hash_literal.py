@@ -21,7 +21,7 @@ def evaluate_hash_literal(
 
         object_hash = objs.create_object_hash(key)
         if object_hash.data_type == objs.ObjectType.ERROR:
-            return objs.HashErrorObject(key.data_type())
+            return objs.UnhashableTypeErrorObject(key.data_type())
 
         value = eval_func(value_expr)
         if objs.is_error_object(value):
