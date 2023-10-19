@@ -24,14 +24,54 @@ def make_instruction(op: Opcode, *operands: int) -> Instructions:
     offset = 1
     for i, operand in enumerate(operands):
         width = opcode_def.operand_widths[i]
-        if width == 2:
-            _set_as_u16(mutable_instruction, offset, operand)
-        else:
-            assert False, "not implemented"
+        instr_end = offset + width
+        mutable_instruction[offset:instr_end] = operand.to_bytes(width, byteorder="big", signed=False)
 
         offset += width
 
     return Instructions(mutable_instruction)
+
+
+def instructions_to_string(instructions: Instructions) -> str:
+    formatted_instructions: list[str] = []
+
+    # NOTE to dev: can't use enumerate; index `i` might jump forward by more than 1 each loop
+    i = 0
+    while i < len(instructions):
+        i_instr_start = i + 1
+
+        opcode = instructions[i:i_instr_start]
+        opcode_def = lookup_opcode_definition(opcode)
+        if is_undefined(opcode_def):
+            raise ValueError(f"Cannot look up the opcode definition of '{opcode[0]}'")
+
+        operands, bytes_read = _read_operands(opcode_def, instructions[i_instr_start:])
+
+        # append the instructions to the string buffer
+        formatted_instruction = _format_instruction(opcode_def, operands)
+        formatted_instructions.append(formatted_instruction)
+
+        next_opcode_steps = 1 + bytes_read
+        i += next_opcode_steps
+
+    return "\n".join(formatted_instructions)
+
+
+def _read_operands(
+    definition: OpcodeDefinition, remaining_instructions: Instructions
+) -> tuple[list[int], int]:
+    n_operands = len(definition.operand_widths)
+    operands: list[int] = [0 for _ in range(n_operands)]
+
+    offset = 0
+    for i, width in enumerate(definition.operand_widths):
+        instr_end = offset + width
+        instruction = remaining_instructions[offset:instr_end]
+        operands[i] = int.from_bytes(instruction, byteorder="big", signed=False)
+
+        offset += width
+
+    return operands, offset
 
 
 def _instruction_length(definition: OpcodeDefinition) -> int:
@@ -40,13 +80,17 @@ def _instruction_length(definition: OpcodeDefinition) -> int:
     return bytes_taken_by_opcode + bytes_taken_by_operands
 
 
-def _set_as_u16(instruction: bytearray, offset: int, operand: int) -> None:
-    """
-    Take the operand, interpret it as a 16-bit integer, and assign it to the
-    instruction at `offset` and `offset + 1`.
-    """
-    first_8_bits = (operand >> 8) & 0xFF
-    second_8_bits = operand & 0xFF
+def _format_instruction(definition: OpcodeDefinition, operands: list[int]) -> str:
+    n_expected_operands = len(definition.operand_widths)
 
-    instruction[offset] = first_8_bits
-    instruction[offset + 1] = second_8_bits
+    if len(operands) != n_expected_operands:
+        raise ValueError(
+            "The number of operands read does not match the number expected for the opcode.\n"
+            f"Expected operand widths: {n_expected_operands}\n"
+            f"Found: {len(operands)}"
+        )
+
+    if n_expected_operands == 1:
+        return f"{definition.name:<16s}   {operands[0]}"
+
+    raise ValueError(f"Can only format instructions for a single operand. Found: {n_expected_operands}")
