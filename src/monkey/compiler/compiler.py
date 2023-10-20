@@ -1,14 +1,60 @@
 import dataclasses
+from typing import Optional
 
 from monkey.code import Instructions
 from monkey.object import Object
 from monkey.parser import ASTNode
+from monkey.parser import Program
+
+import monkey.object as objs
+import monkey.parser.expressions as exprs
+import monkey.parser.statements as stmts
+
+from monkey.code import Opcode
+from monkey.code import make_instruction
+import monkey.code.opcodes as opcodes
+
+from monkey.compiler.custom_exceptions import CompilationError
 
 
-@dataclasses.dataclass
 class Compiler:
-    instructions: Instructions = Instructions()
-    constants: list[Object] = dataclasses.field(defaultfactory=list)
+    def __init__(
+        self,
+        instructions: Instructions = Instructions(),
+        constants: Optional[list[Object]] = None,
+    ) -> None:
+        self._instructions = instructions
+
+        if constants is None:
+            self._constants = []
+        else:
+            self._constants = constants
+
+    @property
+    def instructions(self) -> Instructions:
+        return self._instructions
+
+    @property
+    def constants(self) -> list[Object]:
+        return self._constants
+
+    def add_constant_and_get_position(self, const: Object) -> int:
+        position = len(self._constants)
+        self._constants.append(const)
+
+        return position
+
+    def add_instruction_and_get_position(self, instr: Instructions) -> int:
+        position = len(self._instructions)
+        self._instructions += instr
+
+        return position
+
+    def emit(self, opcode: Opcode, *operands: int) -> int:
+        instruction = make_instruction(opcode, *operands)
+        pos = self.add_instruction_and_get_position(instruction)
+
+        return pos
 
 
 @dataclasses.dataclass
@@ -17,6 +63,7 @@ class Bytecode:
     Container to hold the instructions that the compiler generated, and the constants
     that the compiler evaluated. Gets passed to the virtual machine.
     """
+
     instructions: Instructions
     constants: list[Object]
 
@@ -26,4 +73,15 @@ def bytecode_from_compiler(compiler: Compiler) -> Bytecode:
 
 
 def compile(compiler: Compiler, node: ASTNode) -> None:
-    pass
+    if isinstance(node, Program):
+        for stmt in node.statements:
+            compile(compiler, stmt)
+    elif isinstance(node, stmts.ExpressionStatement):
+        compile(compiler, node.value)
+    elif isinstance(node, exprs.InfixExpression):
+        compile(compiler, node.left)
+        compile(compiler, node.right)
+    elif isinstance(node, exprs.IntegerLiteral):
+        integer = objs.IntegerObject(int(node.value))
+        constant_position = compiler.add_constant_and_get_position(integer)
+        compiler.emit(opcodes.OPCONSTANT, constant_position)
