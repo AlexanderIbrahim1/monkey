@@ -1,4 +1,10 @@
+import functools
+from typing import Sequence
+
+import pytest
+
 from monkey.code import Instructions
+from monkey.code import Opcode
 from monkey.code import lookup_opcode_definition
 from monkey.code import make_instruction
 from monkey.code import instructions_to_string
@@ -16,15 +22,40 @@ def test_make_instruction():
     assert expected_instruction == actual_instruction
 
 
-def test_instruction_to_string():
-    opcode = opcodes.OPCONSTANT
-    operands = (2**16 - 2,)
-    instruction = make_instruction(opcode, *operands)
+@pytest.mark.parametrize(
+    "instruction_pairs",
+    [
+        ([(opcodes.OPCONSTANT, (2**16 - 2,))]),
+        ([(opcodes.OPCONSTANT, (1,)), (opcodes.OPCONSTANT, (2,))]),
+    ],
+)
+def test_instruction_to_string(instruction_pairs):
+    instructions = concatenate_instructions(instruction_pairs)
+    formatted_instructions = instructions_to_string(instructions)
+    token_pairs = formatted_instructions.split("\n")
 
-    formatted_instruction = instructions_to_string(instruction)
+    for instruction_pair, token_pair in zip(instruction_pairs, token_pairs):
+        actual_opcode_name, actual_operands = extract_name_and_operands(token_pair)
+        expected_opcode_name = lookup_opcode_definition(instruction_pair[0]).name
+        expected_operands = instruction_pair[1]
+
+        assert actual_opcode_name == expected_opcode_name
+        assert actual_operands == expected_operands
+
+
+# --- HELPER FUNCTIONS ---
+
+
+def concatenate_instructions(instruction_pairs: Sequence[tuple[Opcode, tuple[int, ...]]]) -> Instructions:
+    instructions = (make_instruction(opcode, *operands) for (opcode, operands) in instruction_pairs)
+    concat_instructions = functools.reduce(lambda x, y: x + y, instructions)
+
+    return concat_instructions
+
+
+def extract_name_and_operands(formatted_instruction: str) -> tuple[str, tuple[int, ...]]:
     tokens = formatted_instruction.split()
-    actual_opcode = tokens[0]
-    actual_operand = int(tokens[1])
+    opcode_name = tokens[0]
+    operands = tuple([int(t) for t in tokens[1:]])
 
-    assert actual_opcode == lookup_opcode_definition(opcode).name
-    assert actual_operand == operands[0]
+    return opcode_name, operands
