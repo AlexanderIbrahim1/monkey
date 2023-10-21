@@ -8,6 +8,7 @@ the effects of having a maximum stack size.
 """
 
 from typing import Generic
+from typing import Optional
 from typing import TypeVar
 
 T = TypeVar("T")
@@ -41,15 +42,36 @@ class FixedStack(Generic[T]):
 
         return element
 
+    def maybe_pop(self) -> Optional[T]:
+        if self._stack_pointer == 0:
+            return None
+
+        element = self._data[self._stack_pointer - 1]
+        self._stack_pointer -= 1
+
+        return element
+
     def peek(self) -> T:
         if self._stack_pointer == 0:
             raise FixedStackError("Attempted to peek at the top of an empty stack.")
 
         return self._data[self._stack_pointer - 1]
 
+    def maybe_peek(self) -> Optional[T]:
+        if self._stack_pointer == 0:
+            return None
+
+        return self._data[self._stack_pointer - 1]
+
     def __getitem__(self, index: int) -> T:
         if not (0 <= index < self._stack_pointer):
             raise FixedStackError("Attempted to access element out of bounds of the stack.")
+
+        return self._data[index]
+
+    def maybe_get(self, index: int) -> Optional[T]:
+        if not (0 <= index < self._stack_pointer):
+            return None
 
         return self._data[index]
 

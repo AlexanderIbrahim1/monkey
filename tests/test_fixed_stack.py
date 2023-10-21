@@ -158,3 +158,51 @@ class TestFixedStack:
         stack = FixedStack[int](10)
         with pytest.raises(FixedStackError):
             stack[index]
+
+    def test_values_from_maybe_pop(self):
+        stack = FixedStack[int](10)
+
+        stack.push(1)
+        stack.push(2)
+        stack.push(3)
+        assert stack.maybe_pop() == 3
+        assert stack.maybe_pop() == 2
+        assert stack.maybe_pop() == 1
+
+    def test_maybe_pop_empty_stack(self):
+        stack = FixedStack[int](10)
+
+        stack.push(1)
+        stack.pop()
+        assert stack.maybe_pop() is None
+
+    @pytest.mark.parametrize("values", [(1, 2, 3), (1, 2), (1,)])
+    def test_maybe_peek_value(self, values):
+        stack = FixedStack[int](10)
+
+        for v in values:
+            stack.push(v)
+
+        assert stack.maybe_peek() == values[-1]
+
+    def test_maybe_peek_empty_stack(self):
+        stack = FixedStack[int](10)
+
+        stack.push(1)
+        stack.pop()
+        assert stack.maybe_peek() is None
+
+    def test_maybe_get(self):
+        stack = FixedStack[int](3)
+        stack.push(1)
+        stack.push(2)
+        stack.push(3)
+
+        assert stack.maybe_get(0) == 1
+        assert stack.maybe_get(1) == 2
+        assert stack.maybe_get(2) == 3
+
+    def test_maybe_get_out_of_bounds(self):
+        stack = FixedStack[int](3)
+        stack.push(1)
+        assert stack.maybe_get(2) is None
