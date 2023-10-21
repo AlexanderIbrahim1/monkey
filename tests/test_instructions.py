@@ -11,6 +11,8 @@ from monkey.code import instructions_to_string
 
 import monkey.code.opcodes as opcodes
 
+from compiler_utils import concatenate_instructions
+
 
 def test_make_instruction():
     opcode = opcodes.OPCONSTANT
@@ -44,13 +46,6 @@ def test_instruction_to_string(instruction_pairs):
 
 
 # --- HELPER FUNCTIONS ---
-
-
-def concatenate_instructions(instruction_pairs: Sequence[tuple[Opcode, tuple[int, ...]]]) -> Instructions:
-    instructions = (make_instruction(opcode, *operands) for (opcode, operands) in instruction_pairs)
-    concat_instructions = functools.reduce(lambda x, y: x + y, instructions)
-
-    return concat_instructions
 
 
 def extract_name_and_operands(formatted_instruction: str) -> tuple[str, tuple[int, ...]]:
