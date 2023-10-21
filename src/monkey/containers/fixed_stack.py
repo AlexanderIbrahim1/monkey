@@ -47,6 +47,12 @@ class FixedStack(Generic[T]):
 
         return self._data[self._stack_pointer - 1]
 
+    def __getitem__(self, index: int) -> T:
+        if not (0 <= index < self._stack_pointer):
+            raise FixedStackError("Attempted to access element out of bounds of the stack.")
+
+        return self._data[index]
+
     def size(self) -> int:
         return self._stack_pointer
 

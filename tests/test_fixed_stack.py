@@ -136,3 +136,25 @@ class TestFixedStack:
             stack.push(1)
 
         assert stack.size() == n_elements
+
+    def test_getitem(self):
+        stack = FixedStack[int](3)
+        stack.push(1)
+        stack.push(2)
+        stack.push(3)
+
+        assert stack[0] == 1
+        assert stack[1] == 2
+        assert stack[2] == 3
+
+    def test_raises_getitem_out_of_bounds(self):
+        stack = FixedStack[int](3)
+        stack.push(1)
+        with pytest.raises(FixedStackError):
+            stack[2]
+
+    @pytest.mark.parametrize("index", [-1, 0, 1, 2])
+    def test_raises_getitem_on_empty_stack(self, index: int):
+        stack = FixedStack[int](10)
+        with pytest.raises(FixedStackError):
+            stack[index]
