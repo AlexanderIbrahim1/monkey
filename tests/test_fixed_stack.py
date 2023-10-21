@@ -1,7 +1,7 @@
 import pytest
 
-from monkey.virtual_machine._fixed_stack import FixedStack
-from monkey.virtual_machine._fixed_stack import FixedStackError
+from monkey.containers import FixedStack
+from monkey.containers import FixedStackError
 
 
 class TestFixedStack:
