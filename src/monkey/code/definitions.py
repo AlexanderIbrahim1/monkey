@@ -14,7 +14,7 @@ UNDEFINED_OPCODE = OpcodeDefinition("UNDEFINED", ())
 
 
 OPCODE_DEFINITIONS: dict[Opcode, OpcodeDefinition] = {
-    opcodes.OPCONSTANT: OpcodeDefinition("OPCONSTANT", (2,))
+    opcodes.OPCONSTANT: OpcodeDefinition("OPCONSTANT", (opcodes.OPCONSTANT_WIDTH,))
 }
 
 
