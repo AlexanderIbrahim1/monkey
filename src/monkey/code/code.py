@@ -12,3 +12,5 @@ from typing import Annotated
 
 Instructions = bytes
 Opcode = Annotated[bytes, "length of 1"]
+
+OPCODE_SIZE = 1

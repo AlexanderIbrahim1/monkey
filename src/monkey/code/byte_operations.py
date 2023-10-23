@@ -5,10 +5,18 @@ compiler.
 
 from monkey.code.code import Instructions
 from monkey.code.code import Opcode
+from monkey.code.code import OPCODE_SIZE
 
 from monkey.code.definitions import OpcodeDefinition
 from monkey.code.definitions import is_undefined
 from monkey.code.definitions import lookup_opcode_definition
+
+
+def extract_opcode(instructions: Instructions, position: int) -> Opcode:
+    i_begin = position
+    i_end = i_begin + OPCODE_SIZE
+
+    return Opcode(instructions[i_begin:i_end])
 
 
 def make_instruction(op: Opcode, *operands: int) -> Instructions:
