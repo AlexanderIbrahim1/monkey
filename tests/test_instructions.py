@@ -1,10 +1,6 @@
-import functools
-from typing import Sequence
-
 import pytest
 
 from monkey.code import Instructions
-from monkey.code import Opcode
 from monkey.code import lookup_opcode_definition
 from monkey.code import make_instruction
 from monkey.code import instructions_to_string
