@@ -46,14 +46,12 @@ def instructions_to_string(instructions: Instructions) -> str:
     # NOTE to dev: can't use enumerate; index `i` might jump forward by more than 1 each loop
     i = 0
     while i < len(instructions):
-        i_instr_start = i + 1
-
-        opcode = instructions[i:i_instr_start]
+        opcode = extract_opcode(instructions, i)
         opcode_def = lookup_opcode_definition(opcode)
         if is_undefined(opcode_def):
             raise ValueError(f"Cannot look up the opcode definition of '{opcode[0]}'")
 
-        operands, bytes_read = _read_operands(opcode_def, instructions[i_instr_start:])
+        operands, bytes_read = _read_operands(opcode_def, instructions[i + 1 :])
 
         # append the instructions to the string buffer
         formatted_instruction = _format_instruction(opcode_def, operands)
@@ -98,7 +96,9 @@ def _format_instruction(definition: OpcodeDefinition, operands: list[int]) -> st
             f"Found: {len(operands)}"
         )
 
-    if n_expected_operands == 1:
+    if n_expected_operands == 0:
+        return f"{definition.name:<16s}"
+    elif n_expected_operands == 1:
         return f"{definition.name:<16s}   {operands[0]}"
-
-    raise ValueError(f"Can only format instructions for a single operand. Found: {n_expected_operands}")
+    else:
+        raise ValueError(f"Unable to format an instruction with '{n_expected_operands}' operands.")

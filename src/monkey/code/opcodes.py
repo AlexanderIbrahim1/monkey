@@ -10,5 +10,6 @@ from monkey.code.code import Opcode
 
 
 OPCONSTANT: Opcode = b"0"
+OPADD: Opcode = b"1"
 
 OPCONSTANT_WIDTH: int = 2

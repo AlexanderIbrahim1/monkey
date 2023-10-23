@@ -25,6 +25,9 @@ def test_make_instruction():
     [
         ([(opcodes.OPCONSTANT, (2**16 - 2,))]),
         ([(opcodes.OPCONSTANT, (1,)), (opcodes.OPCONSTANT, (2,))]),
+        ([(opcodes.OPADD, ())]),
+        ([(opcodes.OPADD, ()), (opcodes.OPCONSTANT, (2**16 - 2,))]),
+        ([(opcodes.OPCONSTANT, (2**16 - 2,)), (opcodes.OPADD, ())]),
     ],
 )
 def test_instruction_to_string(instruction_pairs):
