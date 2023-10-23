@@ -85,3 +85,5 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
         integer = objs.IntegerObject(int(node.value))
         constant_position = compiler.add_constant_and_get_position(integer)
         compiler.emit(opcodes.OPCONSTANT, constant_position)
+    else:
+        raise CompilationError(f"Invalid node encountered: {node}")
