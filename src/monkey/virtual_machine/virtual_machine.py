@@ -10,8 +10,9 @@ import monkey.code.opcodes as opcodes
 import monkey.compiler as comp
 import monkey.object as objs
 
-from monkey.virtual_machine.constants import MAX_STACK_SIZE
 from monkey.containers import FixedStack
+from monkey.virtual_machine.constants import MAX_STACK_SIZE
+from monkey.virtual_machine.custom_exceptions import VirtualMachineError
 
 
 class VirtualMachine:
@@ -36,11 +37,16 @@ def run(vm: VirtualMachine) -> None:
 
     instr_ptr = 0
     while instr_ptr < len(instructions):
-        opcode = code.Opcode(instructions[instr_ptr])
+        opcode = code.extract_opcode(instructions, instr_ptr)
 
         match opcode:
             case opcodes.OPCONSTANT:
-                instr_ptr += _push_opconstant(vm, instr_ptr)
+                offset = _push_opconstant(vm, instr_ptr)
+            case _:
+                raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
+
+        instr_ptr += offset
+        instr_ptr += 1
 
 
 def _push_opconstant(vm: VirtualMachine, instr_ptr: int) -> int:
