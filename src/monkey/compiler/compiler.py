@@ -5,6 +5,7 @@ from monkey.code import Instructions
 from monkey.object import Object
 from monkey.parser import ASTNode
 from monkey.parser import Program
+from monkey.tokens import token_types
 
 import monkey.object as objs
 import monkey.parser.expressions as exprs
@@ -79,12 +80,18 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
                 compile(compiler, stmt)
         case stmts.ExpressionStatement():
             compile(compiler, node.value)
-        case exprs.InfixExpression():
-            compile(compiler, node.left)
-            compile(compiler, node.right)
         case exprs.IntegerLiteral():
             integer = objs.IntegerObject(int(node.value))
             constant_position = compiler.add_constant_and_get_position(integer)
             compiler.emit(opcodes.OPCONSTANT, constant_position)
+        case exprs.InfixExpression():
+            # TODO: split this to separate functions for handling integers, booleans, strings, etc.
+            compile(compiler, node.left)
+            compile(compiler, node.right)
+            match node.operator:
+                case token_types.PLUS:
+                    compiler.emit(opcodes.OPADD)
+                case _:
+                    raise CompilationError(f"Unknown operator for infix expression: {node.operator}")
         case _:
             raise CompilationError(f"Invalid node encountered: {node}")

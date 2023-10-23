@@ -3,7 +3,7 @@ This module contains the VirtualMachine class, which runs the Bytecode instance 
 emitted by the compiler.
 """
 
-from typing import Optional
+import dataclasses
 
 import monkey.code as code
 import monkey.code.opcodes as opcodes
@@ -15,21 +15,10 @@ from monkey.virtual_machine.constants import MAX_STACK_SIZE
 from monkey.virtual_machine.custom_exceptions import VirtualMachineError
 
 
+@dataclasses.dataclass
 class VirtualMachine:
-    def __init__(self, bytecode: comp.Bytecode) -> None:
-        self._bytecode = bytecode
-        self._stack = FixedStack[objs.Object](MAX_STACK_SIZE)
-        pass
-
-    @property
-    def bytecode(self) -> comp.Bytecode:
-        return self._bytecode
-
-    def stack_top(self) -> Optional[objs.Object]:
-        return self._stack.maybe_peek()
-
-    def push(self, obj: objs.Object) -> None:
-        self._stack.push(obj)
+    bytecode: comp.Bytecode
+    stack: FixedStack[objs.Object] = FixedStack[objs.Object](MAX_STACK_SIZE)
 
 
 def run(vm: VirtualMachine) -> None:
@@ -41,18 +30,39 @@ def run(vm: VirtualMachine) -> None:
 
         match opcode:
             case opcodes.OPCONSTANT:
-                offset = _push_opconstant(vm, instr_ptr)
+                instr_ptr += _push_opconstant(vm, instr_ptr)
+            case opcodes.OPADD:
+                _push_opadd(vm)
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
 
-        instr_ptr += offset
         instr_ptr += 1
+
+
+def _pop_integer(vm: VirtualMachine) -> int:
+    integer = vm.stack.pop()
+    match integer:
+        case objs.IntegerObject(value):
+            return value
+        case _:
+            raise VirtualMachineError(
+                "Expected to pop an 'int'\n" f"Found instance of {type(integer)}, with value {integer}"
+            )
+
+
+def _push_opadd(vm: VirtualMachine) -> None:
+    right_value = _pop_integer(vm)
+    left_value = _pop_integer(vm)
+    result = right_value + left_value
+
+    integer = objs.IntegerObject(result)
+    vm.stack.push(integer)
 
 
 def _push_opconstant(vm: VirtualMachine, instr_ptr: int) -> int:
     position = _read_position(vm, instr_ptr, opcodes.OPCONSTANT_WIDTH)
     constant = vm.bytecode.constants[position]
-    vm.push(constant)
+    vm.stack.push(constant)
 
     return opcodes.OPCONSTANT_WIDTH
 
