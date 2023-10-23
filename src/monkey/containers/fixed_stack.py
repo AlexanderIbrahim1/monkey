@@ -79,6 +79,12 @@ class FixedStack(Generic[T]):
 
         return self._data[index]
 
+    def maybe_get_last_popped(self) -> Optional[T]:
+        if len(self._data) <= self._stack_pointer:
+            return None
+
+        return self._data[self._stack_pointer]
+
     def size(self) -> int:
         return self._stack_pointer
 

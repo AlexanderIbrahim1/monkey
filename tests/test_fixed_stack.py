@@ -206,3 +206,18 @@ class TestFixedStack:
         stack = FixedStack[int](3)
         stack.push(1)
         assert stack.maybe_get(2) is None
+
+    @pytest.mark.parametrize("elements", [(1,), (1, 2), (1, 2, 3)])
+    def test_maybe_get_last_popped(self, elements):
+        stack = FixedStack[int](3)
+
+        for elem in elements:
+            stack.push(elem)
+
+        stack.pop()
+
+        assert stack.maybe_get_last_popped() == elements[-1]
+
+    def test_empty_maybe_get_last_popped(self):
+        stack = FixedStack[int](3)
+        assert stack.maybe_get_last_popped() is None
