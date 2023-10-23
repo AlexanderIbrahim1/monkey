@@ -34,4 +34,5 @@ class TestVirtualMachine:
         vm.run(machine)
 
         top_object = machine.stack_top()
+        assert top_object is not None
         assert object_utils.is_expected_object(top_object, test_case.expected)
