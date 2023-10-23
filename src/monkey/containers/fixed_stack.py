@@ -30,7 +30,11 @@ class FixedStack(Generic[T]):
                 f"Attempted to push an element beyond the stack's size limit of {self._max_size}"
             )
 
-        self._data.append(element)
+        if len(self._data) <= self._stack_pointer:
+            self._data.append(element)
+        else:
+            self._data[self._stack_pointer] = element
+
         self._stack_pointer += 1
 
     def pop(self) -> T:
