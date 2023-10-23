@@ -73,17 +73,18 @@ def bytecode_from_compiler(compiler: Compiler) -> Bytecode:
 
 
 def compile(compiler: Compiler, node: ASTNode) -> None:
-    if isinstance(node, Program):
-        for stmt in node.statements:
-            compile(compiler, stmt)
-    elif isinstance(node, stmts.ExpressionStatement):
-        compile(compiler, node.value)
-    elif isinstance(node, exprs.InfixExpression):
-        compile(compiler, node.left)
-        compile(compiler, node.right)
-    elif isinstance(node, exprs.IntegerLiteral):
-        integer = objs.IntegerObject(int(node.value))
-        constant_position = compiler.add_constant_and_get_position(integer)
-        compiler.emit(opcodes.OPCONSTANT, constant_position)
-    else:
-        raise CompilationError(f"Invalid node encountered: {node}")
+    match node:
+        case Program():
+            for stmt in node.statements:
+                compile(compiler, stmt)
+        case stmts.ExpressionStatement():
+            compile(compiler, node.value)
+        case exprs.InfixExpression():
+            compile(compiler, node.left)
+            compile(compiler, node.right)
+        case exprs.IntegerLiteral():
+            integer = objs.IntegerObject(int(node.value))
+            constant_position = compiler.add_constant_and_get_position(integer)
+            compiler.emit(opcodes.OPCONSTANT, constant_position)
+        case _:
+            raise CompilationError(f"Invalid node encountered: {node}")
