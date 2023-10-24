@@ -33,6 +33,8 @@ def run(vm: VirtualMachine) -> None:
                 instr_ptr += _push_opconstant(vm, instr_ptr)
             case opcodes.OPADD:
                 _push_opadd(vm)
+            case opcodes.OPPOP:
+                vm.stack.pop()
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
 

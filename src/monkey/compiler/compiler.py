@@ -80,6 +80,7 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
                 compile(compiler, stmt)
         case stmts.ExpressionStatement():
             compile(compiler, node.value)
+            compiler.emit(opcodes.OPPOP)  # don't want to keep the (unusable) result on the stack
         case exprs.IntegerLiteral():
             integer = objs.IntegerObject(int(node.value))
             constant_position = compiler.add_constant_and_get_position(integer)
