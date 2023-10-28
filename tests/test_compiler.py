@@ -3,18 +3,23 @@ import pytest
 from monkey.compiler import Compiler
 from monkey.compiler import compile
 from monkey.compiler import bytecode_from_compiler
-from monkey.code import instructions_to_string
 
 import monkey.code.opcodes as op
 
 from compiler_utils import parse
 from compiler_utils import CompilerArithmeticTestCase
+from compiler_utils import CompilerBooleanTestCase
 
 
 class TestCompiler:
     @pytest.mark.parametrize(
         "case",
         [
+            CompilerArithmeticTestCase(
+                "1;",
+                (1,),
+                [(op.OPCONSTANT, (0,)), (op.OPPOP, ())],
+            ),
             CompilerArithmeticTestCase(
                 "1 + 2;",
                 (1, 2),
@@ -44,8 +49,30 @@ class TestCompiler:
         compile(compiler, program)
         bytecode = bytecode_from_compiler(compiler)
 
-        print(instructions_to_string(bytecode.instructions))
-        print(instructions_to_string(case.instructions))
-
         assert bytecode.instructions == case.instructions
         assert bytecode.constants == case.constants
+
+    @pytest.mark.parametrize(
+        "case",
+        [
+            CompilerBooleanTestCase(
+                "true;",
+                True,
+                [(op.OPCONSTANT, (0,)), (op.OPPOP, ())],
+            ),
+            CompilerBooleanTestCase(
+                "false;",
+                False,
+                [(op.OPCONSTANT, (0,)), (op.OPPOP, ())],
+            ),
+        ],
+    )
+    def test_boolean_literal(self, case: CompilerBooleanTestCase):
+        program = parse(case.input_text)
+        compiler = Compiler()
+
+        compile(compiler, program)
+        bytecode = bytecode_from_compiler(compiler)
+
+        assert bytecode.instructions == case.instructions
+        assert bytecode.constants == [case.boolean]

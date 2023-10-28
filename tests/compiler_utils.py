@@ -14,14 +14,6 @@ import monkey.code as code
 import monkey.object as objs
 
 
-def parse(monkey_code: str) -> Program:
-    lexer = Lexer(monkey_code)
-    parser = Parser(lexer)
-    program = parse_program(parser)
-
-    return program
-
-
 class CompilerArithmeticTestCase:
     def __init__(
         self,
@@ -32,6 +24,26 @@ class CompilerArithmeticTestCase:
         self.input_text = input_text
         self.instructions = concatenate_instructions(instruction_pairs)
         self.constants = [objs.IntegerObject(value) for value in expected_constants]
+
+
+class CompilerBooleanTestCase:
+    def __init__(
+        self,
+        input_text: str,
+        boolean_value: bool,
+        instruction_pairs: Sequence[tuple[code.Opcode, tuple[int, ...]]],
+    ) -> None:
+        self.input_text = input_text
+        self.boolean = objs.BooleanObject(boolean_value)
+        self.instructions = concatenate_instructions(instruction_pairs)
+
+
+def parse(monkey_code: str) -> Program:
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parse_program(parser)
+
+    return program
 
 
 def concatenate_instructions(

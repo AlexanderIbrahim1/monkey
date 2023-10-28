@@ -85,6 +85,11 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             integer = objs.IntegerObject(int(node.value))
             constant_position = compiler.add_constant_and_get_position(integer)
             compiler.emit(opcodes.OPCONSTANT, constant_position)
+        case exprs.BooleanLiteral():
+            value = True if node.value == "true" else False
+            boolean = objs.BooleanObject(value)
+            constant_position = compiler.add_constant_and_get_position(boolean)
+            compiler.emit(opcodes.OPCONSTANT, constant_position)
         case exprs.InfixExpression():
             # TODO: split this to separate functions for handling integers, booleans, strings, etc.
             compile(compiler, node.left)
