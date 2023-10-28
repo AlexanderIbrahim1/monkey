@@ -10,7 +10,10 @@ from monkey.code.code import Opcode
 
 
 OPCONSTANT: Opcode = b"0"
-OPADD: Opcode = b"1"
-OPPOP: Opcode = b"2"
+OPPOP: Opcode = b"1"
+OPADD: Opcode = b"2"
+OPSUB: Opcode = b"3"
+OPMUL: Opcode = b"4"
+OPDIV: Opcode = b"5"
 
 OPCONSTANT_WIDTH: int = 2

@@ -92,6 +92,12 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             match node.operator:
                 case token_types.PLUS:
                     compiler.emit(opcodes.OPADD)
+                case token_types.MINUS:
+                    compiler.emit(opcodes.OPSUB)
+                case token_types.ASTERISK:
+                    compiler.emit(opcodes.OPMUL)
+                case token_types.SLASH:
+                    compiler.emit(opcodes.OPDIV)
                 case _:
                     raise CompilationError(f"Unknown operator for infix expression: {node.operator}")
         case _:
