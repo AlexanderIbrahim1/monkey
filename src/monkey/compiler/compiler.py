@@ -6,6 +6,7 @@ from monkey.object import Object
 from monkey.parser import ASTNode
 from monkey.parser import Program
 from monkey.tokens import token_types
+from monkey.tokens.reserved_identifiers import TRUE_IDENTIFIER
 
 import monkey.object as objs
 import monkey.parser.expressions as exprs
@@ -86,7 +87,7 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             constant_position = compiler.add_constant_and_get_position(integer)
             compiler.emit(opcodes.OPCONSTANT, constant_position)
         case exprs.BooleanLiteral():
-            value = True if node.value == "true" else False
+            value = True if node.value == TRUE_IDENTIFIER else False
             boolean = objs.BooleanObject(value)
             constant_position = compiler.add_constant_and_get_position(boolean)
             compiler.emit(opcodes.OPCONSTANT, constant_position)
