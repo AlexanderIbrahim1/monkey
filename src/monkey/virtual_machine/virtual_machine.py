@@ -4,6 +4,8 @@ emitted by the compiler.
 """
 
 import dataclasses
+import operator
+from typing import Callable
 
 import monkey.code as code
 import monkey.code.opcodes as opcodes
@@ -32,13 +34,28 @@ def run(vm: VirtualMachine) -> None:
             case opcodes.OPCONSTANT:
                 instr_ptr += _push_opconstant(vm, instr_ptr)
             case opcodes.OPADD:
-                _push_opadd(vm)
+                _push_op_infix(vm, operator.add)
+            case opcodes.OPSUB:
+                _push_op_infix(vm, operator.sub)
+            case opcodes.OPMUL:
+                _push_op_infix(vm, operator.mul)
+            case opcodes.OPDIV:
+                _push_op_infix(vm, operator.floordiv)
             case opcodes.OPPOP:
                 vm.stack.pop()
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
 
         instr_ptr += 1
+
+
+def _push_op_infix(vm: VirtualMachine, binary_operation: Callable[[int, int], int]) -> None:
+    right_value = _pop_integer(vm)
+    left_value = _pop_integer(vm)
+    result = binary_operation(left_value, right_value)
+
+    integer = objs.IntegerObject(result)
+    vm.stack.push(integer)
 
 
 def _pop_integer(vm: VirtualMachine) -> int:
@@ -50,15 +67,6 @@ def _pop_integer(vm: VirtualMachine) -> int:
             raise VirtualMachineError(
                 "Expected to pop an 'int'\n" f"Found instance of {type(integer)}, with value {integer}"
             )
-
-
-def _push_opadd(vm: VirtualMachine) -> None:
-    right_value = _pop_integer(vm)
-    left_value = _pop_integer(vm)
-    result = right_value + left_value
-
-    integer = objs.IntegerObject(result)
-    vm.stack.push(integer)
 
 
 def _push_opconstant(vm: VirtualMachine, instr_ptr: int) -> int:

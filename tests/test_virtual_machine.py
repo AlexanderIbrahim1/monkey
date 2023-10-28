@@ -23,6 +23,10 @@ class TestVirtualMachine:
             VirtualMachineTestCase("0;", 0),
             VirtualMachineTestCase("1;", 1),
             VirtualMachineTestCase("1 + 2;", 3),
+            VirtualMachineTestCase("1 - 2;", -1),
+            VirtualMachineTestCase("2 * 3;", 6),
+            VirtualMachineTestCase("6 / 3;", 2),
+            VirtualMachineTestCase("6 / 4;", 1),
         ],
     )
     def test_basic(self, test_case: VirtualMachineTestCase):
@@ -34,6 +38,6 @@ class TestVirtualMachine:
         machine = vm.VirtualMachine(bytecode)
         vm.run(machine)
 
-        top_object = machine.stack.maybe_peek()
+        top_object = machine.stack.maybe_get_last_popped()
         assert top_object is not None
         assert object_utils.is_expected_object(top_object, test_case.expected)
