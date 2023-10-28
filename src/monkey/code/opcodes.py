@@ -15,5 +15,7 @@ OPADD: Opcode = b"2"
 OPSUB: Opcode = b"3"
 OPMUL: Opcode = b"4"
 OPDIV: Opcode = b"5"
+OPTRUE: Opcode = b"6"
+OPFALSE: Opcode = b"7"
 
 OPCONSTANT_WIDTH: int = 2
