@@ -30,11 +30,9 @@ class CompilerBooleanTestCase:
     def __init__(
         self,
         input_text: str,
-        boolean_value: bool,
         instruction_pairs: Sequence[tuple[code.Opcode, tuple[int, ...]]],
     ) -> None:
         self.input_text = input_text
-        self.boolean = objs.BooleanObject(boolean_value)
         self.instructions = concatenate_instructions(instruction_pairs)
 
 

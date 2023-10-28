@@ -88,8 +88,6 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             compiler.emit(opcodes.OPCONSTANT, constant_position)
         case exprs.BooleanLiteral():
             value = True if node.value == TRUE_IDENTIFIER else False
-            boolean = objs.BooleanObject(value)
-            constant_position = compiler.add_constant_and_get_position(boolean)
             if value:
                 compiler.emit(opcodes.OPTRUE)
             else:

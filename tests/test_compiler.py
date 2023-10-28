@@ -57,12 +57,10 @@ class TestCompiler:
         [
             CompilerBooleanTestCase(
                 "true;",
-                True,
                 [(op.OPTRUE, ()), (op.OPPOP, ())],
             ),
             CompilerBooleanTestCase(
                 "false;",
-                False,
                 [(op.OPFALSE, ()), (op.OPPOP, ())],
             ),
         ],
@@ -75,4 +73,4 @@ class TestCompiler:
         bytecode = bytecode_from_compiler(compiler)
 
         assert bytecode.instructions == case.instructions
-        assert bytecode.constants == [case.boolean]
+        assert len(bytecode.constants) == 0
