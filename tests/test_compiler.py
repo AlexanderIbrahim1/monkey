@@ -58,12 +58,12 @@ class TestCompiler:
             CompilerBooleanTestCase(
                 "true;",
                 True,
-                [(op.OPCONSTANT, (0,)), (op.OPPOP, ())],
+                [(op.OPTRUE, ()), (op.OPPOP, ())],
             ),
             CompilerBooleanTestCase(
                 "false;",
                 False,
-                [(op.OPCONSTANT, (0,)), (op.OPPOP, ())],
+                [(op.OPFALSE, ()), (op.OPPOP, ())],
             ),
         ],
     )
