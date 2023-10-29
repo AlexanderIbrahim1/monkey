@@ -27,6 +27,8 @@ class TestVirtualMachine:
             VirtualMachineTestCase("2 * 3;", 6),
             VirtualMachineTestCase("6 / 3;", 2),
             VirtualMachineTestCase("6 / 4;", 1),
+            VirtualMachineTestCase("true;", True),
+            VirtualMachineTestCase("false;", False),
         ],
     )
     def test_basic(self, test_case: VirtualMachineTestCase):

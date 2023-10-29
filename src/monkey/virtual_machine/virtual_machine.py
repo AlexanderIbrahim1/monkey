@@ -43,6 +43,10 @@ def run(vm: VirtualMachine) -> None:
                 _push_op_infix(vm, operator.floordiv)
             case opcodes.OPPOP:
                 vm.stack.pop()
+            case opcodes.OPTRUE:
+                vm.stack.push(objs.TRUE_BOOL_OBJ)
+            case opcodes.OPFALSE:
+                vm.stack.push(objs.FALSE_BOOL_OBJ)
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
 
