@@ -84,6 +84,16 @@ class TestCompiler:
                 (),
                 [(op.OPTRUE, ()), (op.OPFALSE, ()), (op.OPNOTEQUAL, ()), (op.OPPOP, ())],
             ),
+            CompilerTestCase(
+                "-1;",
+                (1,),
+                [(op.OPCONSTANT, (0,)), (op.OPMINUS, ()), (op.OPPOP, ())],
+            ),
+            CompilerTestCase(
+                "!true;",
+                (),
+                [(op.OPTRUE, ()), (op.OPBANG, ()), (op.OPPOP, ())],
+            ),
         ],
     )
     def test_case(self, case: CompilerTestCase):

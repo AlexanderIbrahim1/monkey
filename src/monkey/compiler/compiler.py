@@ -92,6 +92,15 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
                 compiler.emit(opcodes.OPTRUE)
             else:
                 compiler.emit(opcodes.OPFALSE)
+        case exprs.PrefixExpression():
+            compile(compiler, node.expr)
+            match node.operator:
+                case token_types.MINUS:
+                    compiler.emit(opcodes.OPMINUS)
+                case token_types.BANG:
+                    compiler.emit(opcodes.OPBANG)
+                case _:
+                    raise CompilationError(f"Unknown operator for prefix expression: {node.operator}")
         case exprs.InfixExpression():
             # NOTE: if I wanted a simpler solution, I would have just implemented an opcode for the less
             #       than operator; however, for pedagogical purposes the book wants to emphasize the ability
