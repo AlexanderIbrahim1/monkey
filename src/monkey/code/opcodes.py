@@ -9,13 +9,16 @@ to break when run in this directory.
 from monkey.code.code import Opcode
 
 
-OPCONSTANT: Opcode = b"0"
-OPPOP: Opcode = b"1"
-OPADD: Opcode = b"2"
-OPSUB: Opcode = b"3"
-OPMUL: Opcode = b"4"
-OPDIV: Opcode = b"5"
-OPTRUE: Opcode = b"6"
-OPFALSE: Opcode = b"7"
+OPCONSTANT: Opcode = b"\x00"
+OPPOP: Opcode = b"\x01"
+OPADD: Opcode = b"\x02"
+OPSUB: Opcode = b"\x03"
+OPMUL: Opcode = b"\x04"
+OPDIV: Opcode = b"\x05"
+OPTRUE: Opcode = b"\x06"
+OPFALSE: Opcode = b"\x07"
+OPEQUAL: Opcode = b"\x08"
+OPNOTEQUAL: Opcode = b"\x09"
+OPGREATERTHAN: Opcode = b"\x10"
 
 OPCONSTANT_WIDTH: int = 2
