@@ -86,8 +86,6 @@ def test_function_object():
 
     func_obj = FunctionObject(parameters, body, env)
 
-    print(func_obj)
-
     assert func_obj.data_type() == ObjectType.FUNCTION
     assert func_obj.inspect() == "fn(x, y) {\nreturn (x + y);\n}"
 
