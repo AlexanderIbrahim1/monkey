@@ -4,6 +4,7 @@ which returns the last element of a container in the monkey language.
 """
 
 import monkey.object as objs
+import monkey.object.object_type as object_type
 
 
 def last_builtin_impl(*args: objs.Object) -> objs.Object:
@@ -17,7 +18,7 @@ def last_builtin_impl(*args: objs.Object) -> objs.Object:
     elif isinstance(arg, objs.ArrayObject):
         return _last_of_array(arg.elements)
     else:
-        type_str = objs.object_type.OBJECT_TYPE_DICT[arg.data_type()]
+        type_str = object_type.OBJECT_TYPE_DICT[arg.data_type()]
         message = f"Cannot return last element of object of type '{type_str}'"
         return objs.BuiltinErrorObject(message)
 

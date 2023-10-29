@@ -7,6 +7,7 @@ element at the end.
 import copy
 
 import monkey.object as objs
+import monkey.object.object_type as object_type
 
 
 def push_builtin_impl(*args: objs.Object) -> objs.Object:
@@ -21,8 +22,8 @@ def push_builtin_impl(*args: objs.Object) -> objs.Object:
     elif isinstance(container, objs.ArrayObject):
         return _push_to_array(container.elements, element)
     else:
-        container_str = objs.object_type.OBJECT_TYPE_DICT[container.data_type()]
-        element_str = objs.object_type.OBJECT_TYPE_DICT[element.data_type()]
+        container_str = object_type.OBJECT_TYPE_DICT[container.data_type()]
+        element_str = object_type.OBJECT_TYPE_DICT[element.data_type()]
         return objs.BuiltinErrorObject(
             f"Cannot push element of object of type '{element_str}' onto object of type '{container_str}'"
         )

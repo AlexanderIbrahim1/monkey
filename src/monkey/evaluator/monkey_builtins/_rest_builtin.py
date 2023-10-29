@@ -4,6 +4,7 @@ which returns all elements after the first element in a container in the monkey 
 """
 
 import monkey.object as objs
+import monkey.object.object_type as object_type
 
 
 def rest_builtin_impl(*args: objs.Object) -> objs.Object:
@@ -17,7 +18,7 @@ def rest_builtin_impl(*args: objs.Object) -> objs.Object:
     elif isinstance(arg, objs.ArrayObject):
         return _rest_of_array(arg.elements)
     else:
-        type_str = objs.object_type.OBJECT_TYPE_DICT[arg.data_type()]
+        type_str = object_type.OBJECT_TYPE_DICT[arg.data_type()]
         message = f"Cannot return rest of elements of object of type '{type_str}'"
         return objs.BuiltinErrorObject(message)
 

@@ -7,6 +7,7 @@ This was not implemented in the book.
 """
 
 import monkey.object as objs
+import monkey.object.object_type as object_type
 
 
 def pop_builtin_impl(*args: objs.Object) -> objs.Object:
@@ -20,7 +21,7 @@ def pop_builtin_impl(*args: objs.Object) -> objs.Object:
     elif isinstance(container, objs.ArrayObject):
         return _pop_from_array(container.elements)
     else:
-        container_str = objs.object_type.OBJECT_TYPE_DICT[container.data_type()]
+        container_str = object_type.OBJECT_TYPE_DICT[container.data_type()]
         return objs.BuiltinErrorObject(f"Cannot pop from object of type '{container_str}'")
 
 

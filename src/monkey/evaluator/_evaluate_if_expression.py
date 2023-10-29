@@ -10,7 +10,7 @@ import monkey.parser.expressions as exprs
 import monkey.object as objs
 
 
-TRUTHY_DICT = {
+TRUTHY_DICT: dict[objs.Object, bool] = {
     objs.TRUE_BOOL_OBJ: True,
     objs.FALSE_BOOL_OBJ: False,
     objs.NULL_OBJ: False,
