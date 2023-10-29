@@ -93,7 +93,15 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             else:
                 compiler.emit(opcodes.OPFALSE)
         case exprs.InfixExpression():
-            # TODO: split this to separate functions for handling integers, booleans, strings, etc.
+            # NOTE: if I wanted a simpler solution, I would have just implemented an opcode for the less
+            #       than operator; however, for pedagogical purposes the book wants to emphasize the ability
+            #       for the compiler to reorder expressions, so I'll do that here, even if it is messier
+            if node.operator == token_types.LT:
+                compile(compiler, node.right)
+                compile(compiler, node.left)
+                compiler.emit(opcodes.OPGREATERTHAN)
+                return
+
             compile(compiler, node.left)
             compile(compiler, node.right)
             match node.operator:
@@ -105,6 +113,12 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
                     compiler.emit(opcodes.OPMUL)
                 case token_types.SLASH:
                     compiler.emit(opcodes.OPDIV)
+                case token_types.EQ:
+                    compiler.emit(opcodes.OPEQUAL)
+                case token_types.NOT_EQ:
+                    compiler.emit(opcodes.OPNOTEQUAL)
+                case token_types.GT:
+                    compiler.emit(opcodes.OPGREATERTHAN)
                 case _:
                     raise CompilationError(f"Unknown operator for infix expression: {node.operator}")
         case _:

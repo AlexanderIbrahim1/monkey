@@ -7,7 +7,7 @@ from monkey.compiler import bytecode_from_compiler
 import monkey.code.opcodes as op
 
 from compiler_utils import parse
-from compiler_utils import CompilerArithmeticTestCase
+from compiler_utils import CompilerInfixTestCase
 from compiler_utils import CompilerBooleanTestCase
 
 
@@ -15,34 +15,69 @@ class TestCompiler:
     @pytest.mark.parametrize(
         "case",
         [
-            CompilerArithmeticTestCase(
+            CompilerInfixTestCase(
                 "1;",
                 (1,),
                 [(op.OPCONSTANT, (0,)), (op.OPPOP, ())],
             ),
-            CompilerArithmeticTestCase(
+            CompilerInfixTestCase(
                 "1 + 2;",
                 (1, 2),
                 [(op.OPCONSTANT, (0,)), (op.OPCONSTANT, (1,)), (op.OPADD, ()), (op.OPPOP, ())],
             ),
-            CompilerArithmeticTestCase(
+            CompilerInfixTestCase(
                 "1 - 2;",
                 (1, 2),
                 [(op.OPCONSTANT, (0,)), (op.OPCONSTANT, (1,)), (op.OPSUB, ()), (op.OPPOP, ())],
             ),
-            CompilerArithmeticTestCase(
+            CompilerInfixTestCase(
                 "1 * 2;",
                 (1, 2),
                 [(op.OPCONSTANT, (0,)), (op.OPCONSTANT, (1,)), (op.OPMUL, ()), (op.OPPOP, ())],
             ),
-            CompilerArithmeticTestCase(
+            CompilerInfixTestCase(
                 "2 / 1;",
                 (2, 1),
                 [(op.OPCONSTANT, (0,)), (op.OPCONSTANT, (1,)), (op.OPDIV, ()), (op.OPPOP, ())],
             ),
+            CompilerInfixTestCase(
+                "1 > 2;",
+                (1, 2),
+                [(op.OPCONSTANT, (0,)), (op.OPCONSTANT, (1,)), (op.OPGREATERTHAN, ()), (op.OPPOP, ())],
+            ),
+            CompilerInfixTestCase(
+                "1 != 2;",
+                (1, 2),
+                [(op.OPCONSTANT, (0,)), (op.OPCONSTANT, (1,)), (op.OPNOTEQUAL, ()), (op.OPPOP, ())],
+            ),
+            CompilerInfixTestCase(
+                "1 == 2;",
+                (1, 2),
+                [(op.OPCONSTANT, (0,)), (op.OPCONSTANT, (1,)), (op.OPEQUAL, ()), (op.OPPOP, ())],
+            ),
+            CompilerInfixTestCase(
+                "1 < 2;",
+                (2, 1),
+                [(op.OPCONSTANT, (0,)), (op.OPCONSTANT, (1,)), (op.OPGREATERTHAN, ()), (op.OPPOP, ())],
+            ),
+            CompilerInfixTestCase(
+                "true == false;",
+                (),
+                [(op.OPTRUE, ()), (op.OPFALSE, ()), (op.OPEQUAL, ()), (op.OPPOP, ())],
+            ),
+            CompilerInfixTestCase(
+                "false == true;",
+                (),
+                [(op.OPFALSE, ()), (op.OPTRUE, ()), (op.OPEQUAL, ()), (op.OPPOP, ())],
+            ),
+            CompilerInfixTestCase(
+                "true != false;",
+                (),
+                [(op.OPTRUE, ()), (op.OPFALSE, ()), (op.OPNOTEQUAL, ()), (op.OPPOP, ())],
+            ),
         ],
     )
-    def test_integer_arithmetic(self, case: CompilerArithmeticTestCase):
+    def test_infix_case(self, case: CompilerInfixTestCase):
         program = parse(case.input_text)
         compiler = Compiler()
 

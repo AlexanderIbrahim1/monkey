@@ -3,6 +3,7 @@ This module contains functions needed to help run the `test_compiler.py` file.
 """
 
 import functools
+from typing import Any
 from typing import Sequence
 
 from monkey import Lexer
@@ -14,16 +15,16 @@ import monkey.code as code
 import monkey.object as objs
 
 
-class CompilerArithmeticTestCase:
+class CompilerInfixTestCase:
     def __init__(
         self,
         input_text: str,
-        expected_constants: tuple[int, ...],
+        expected_constants: tuple[Any, ...],
         instruction_pairs: Sequence[tuple[code.Opcode, tuple[int, ...]]],
     ) -> None:
         self.input_text = input_text
         self.instructions = concatenate_instructions(instruction_pairs)
-        self.constants = [objs.IntegerObject(value) for value in expected_constants]
+        self.constants = [make_object(value) for value in expected_constants]
 
 
 class CompilerBooleanTestCase:
@@ -51,3 +52,13 @@ def concatenate_instructions(
     concat_instructions = functools.reduce(lambda x, y: x + y, instructions)
 
     return concat_instructions
+
+
+def make_object(value: Any) -> objs.Object:
+    match value:
+        case bool():
+            return objs.BooleanObject(value)
+        case int():
+            return objs.IntegerObject(value)
+        case _:
+            raise RuntimeError(f"Got a value for which there is no corresponding objs.Object type: '{value}'")
