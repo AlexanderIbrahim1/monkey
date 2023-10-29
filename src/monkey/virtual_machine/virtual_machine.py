@@ -54,6 +54,10 @@ def run(vm: VirtualMachine) -> None:
                 _push_op_notequal(vm)
             case opcodes.OPGREATERTHAN:
                 _push_op_greaterthan(vm)
+            case opcodes.OPMINUS:
+                _push_op_minus(vm)
+            case opcodes.OPBANG:
+                _push_op_bang(vm)
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
 
@@ -183,6 +187,35 @@ def _push_opconstant(vm: VirtualMachine, instr_ptr: int) -> int:
     return opcodes.OPCONSTANT_WIDTH
 
 
+def _push_op_minus(vm: VirtualMachine) -> None:
+    argument = vm.stack.pop()
+
+    match argument:
+        case objs.IntegerObject():
+            value = argument.value
+            integer = objs.IntegerObject(-value)
+            vm.stack.push(integer)
+        case _:
+            err_msg = _invalid_prefix_operation_error(token_types.MINUS, argument)
+            raise VirtualMachineError(err_msg)
+
+
+def _push_op_bang(vm: VirtualMachine) -> None:
+    argument = vm.stack.pop()
+
+    match argument:
+        case objs.BooleanObject():
+            value = argument.value
+            if value:
+                vm.stack.push(objs.FALSE_BOOL_OBJ)
+            else:
+                vm.stack.push(objs.TRUE_BOOL_OBJ)
+        case objs.NULL_OBJ:
+            vm.stack.push(objs.TRUE_BOOL_OBJ)
+        case _:
+            vm.stack.push(objs.FALSE_BOOL_OBJ)
+
+
 def _read_position(vm: VirtualMachine, instr_ptr: int, size: int) -> int:
     begin_ptr = instr_ptr + 1
     end_ptr = begin_ptr + size
@@ -193,6 +226,13 @@ def _read_position(vm: VirtualMachine, instr_ptr: int, size: int) -> int:
 def _invalid_infix_operation_error(operation: str, left_obj: objs.Object, right_obj: objs.Object) -> str:
     left_str = OBJECT_TYPE_DICT[left_obj.data_type()]
     right_str = OBJECT_TYPE_DICT[right_obj.data_type()]
-    message = f"Unable to perform '{operation}' on objects of type '{left_str}' and '{right_str}'"
+    message = f"Unable to perform infix '{operation}' on objects of type '{left_str}' and '{right_str}'"
+
+    return message
+
+
+def _invalid_prefix_operation_error(operation: str, argument: objs.Object) -> str:
+    argument_str = OBJECT_TYPE_DICT[argument.data_type()]
+    message = f"Unable to perform prefix operation '{operation}' on object of type '{argument_str}'"
 
     return message
