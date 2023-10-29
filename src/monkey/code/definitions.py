@@ -22,6 +22,9 @@ OPCODE_DEFINITIONS: dict[Opcode, OpcodeDefinition] = {
     opcodes.OPDIV: OpcodeDefinition("OPDIV", ()),
     opcodes.OPTRUE: OpcodeDefinition("OPTRUE", ()),
     opcodes.OPFALSE: OpcodeDefinition("OPFALSE", ()),
+    opcodes.OPEQUAL: OpcodeDefinition("OPEQUAL", ()),
+    opcodes.OPNOTEQUAL: OpcodeDefinition("OPNOTEQUAL", ()),
+    opcodes.OPGREATERTHAN: OpcodeDefinition("OPGREATERTHAN", ()),
 }
 
 
