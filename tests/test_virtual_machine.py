@@ -17,6 +17,10 @@ class VirtualMachineTestCase:
 
 
 class TestVirtualMachine:
+    # NOTE: we don't have to implement anything to do with priorities to get the parentheses
+    #       to work properly; this is because the parser has already taken care of that, and
+    #       turned the stuff inside the parentheses into objects to be compared! The VM only
+    #       works with the Object instance that the parser has already created!
     @pytest.mark.parametrize(
         "test_case",
         [
@@ -29,6 +33,24 @@ class TestVirtualMachine:
             VirtualMachineTestCase("6 / 4;", 1),
             VirtualMachineTestCase("true;", True),
             VirtualMachineTestCase("false;", False),
+            VirtualMachineTestCase("1 > 2;", False),
+            VirtualMachineTestCase("2 < 1;", False),
+            VirtualMachineTestCase("1 < 2;", True),
+            VirtualMachineTestCase("2 > 1;", True),
+            VirtualMachineTestCase("1 == 1;", True),
+            VirtualMachineTestCase("1 != 1;", False),
+            VirtualMachineTestCase("2 == 1;", False),
+            VirtualMachineTestCase("2 != 1;", True),
+            VirtualMachineTestCase("true == true;", True),
+            VirtualMachineTestCase("false == false;", True),
+            VirtualMachineTestCase("true == false;", False),
+            VirtualMachineTestCase("true != true;", False),
+            VirtualMachineTestCase("false != false;", False),
+            VirtualMachineTestCase("true != false;", True),
+            VirtualMachineTestCase("(1 < 2) == true;", True),
+            VirtualMachineTestCase("(1 < 2) == false;", False),
+            VirtualMachineTestCase("(1 > 2) == true;", False),
+            VirtualMachineTestCase("(1 > 2) == false;", True),
         ],
     )
     def test_basic(self, test_case: VirtualMachineTestCase):
