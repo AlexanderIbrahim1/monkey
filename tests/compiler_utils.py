@@ -15,7 +15,7 @@ import monkey.code as code
 import monkey.object as objs
 
 
-class CompilerInfixTestCase:
+class CompilerTestCase:
     def __init__(
         self,
         input_text: str,
@@ -25,16 +25,6 @@ class CompilerInfixTestCase:
         self.input_text = input_text
         self.instructions = concatenate_instructions(instruction_pairs)
         self.constants = [make_object(value) for value in expected_constants]
-
-
-class CompilerBooleanTestCase:
-    def __init__(
-        self,
-        input_text: str,
-        instruction_pairs: Sequence[tuple[code.Opcode, tuple[int, ...]]],
-    ) -> None:
-        self.input_text = input_text
-        self.instructions = concatenate_instructions(instruction_pairs)
 
 
 def parse(monkey_code: str) -> Program:
