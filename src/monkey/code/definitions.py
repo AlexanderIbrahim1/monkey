@@ -25,6 +25,8 @@ OPCODE_DEFINITIONS: dict[Opcode, OpcodeDefinition] = {
     opcodes.OPEQUAL: OpcodeDefinition("OPEQUAL", ()),
     opcodes.OPNOTEQUAL: OpcodeDefinition("OPNOTEQUAL", ()),
     opcodes.OPGREATERTHAN: OpcodeDefinition("OPGREATERTHAN", ()),
+    opcodes.OPMINUS: OpcodeDefinition("OPMINUS", ()),
+    opcodes.OPBANG: OpcodeDefinition("OPBANG", ()),
 }
 
 

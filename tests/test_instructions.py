@@ -35,6 +35,8 @@ def test_make_instruction():
         ([(opcodes.OPEQUAL, ())]),
         ([(opcodes.OPNOTEQUAL, ())]),
         ([(opcodes.OPGREATERTHAN, ())]),
+        ([(opcodes.OPMINUS, ())]),
+        ([(opcodes.OPBANG, ())]),
     ],
 )
 def test_instruction_to_string(instruction_pairs):

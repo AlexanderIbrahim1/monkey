@@ -20,5 +20,7 @@ OPFALSE: Opcode = b"\x07"
 OPEQUAL: Opcode = b"\x08"
 OPNOTEQUAL: Opcode = b"\x09"
 OPGREATERTHAN: Opcode = b"\x10"
+OPMINUS: Opcode = b"\x11"
+OPBANG: Opcode = b"\x12"
 
 OPCONSTANT_WIDTH: int = 2
