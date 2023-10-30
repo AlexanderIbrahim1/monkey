@@ -27,6 +27,8 @@ OPCODE_DEFINITIONS: dict[Opcode, OpcodeDefinition] = {
     opcodes.OPGREATERTHAN: OpcodeDefinition("OPGREATERTHAN", ()),
     opcodes.OPMINUS: OpcodeDefinition("OPMINUS", ()),
     opcodes.OPBANG: OpcodeDefinition("OPBANG", ()),
+    opcodes.OPJUMP: OpcodeDefinition("OPJUMP", (opcodes.OPJUMP_WIDTH,)),
+    opcodes.OPJUMPWHENFALSE: OpcodeDefinition("OPJUMPWHENFALSE", (opcodes.OPJUMPWHENFALSE_WIDTH,)),
 }
 
 

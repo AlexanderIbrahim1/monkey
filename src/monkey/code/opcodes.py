@@ -7,6 +7,7 @@ to break when run in this directory.
 """
 
 from monkey.code.code import Opcode
+from monkey.code.constants import ADDRESS_POSITION_SIZE
 
 
 OPCONSTANT: Opcode = b"\x00"
@@ -22,5 +23,9 @@ OPNOTEQUAL: Opcode = b"\x09"
 OPGREATERTHAN: Opcode = b"\x10"
 OPMINUS: Opcode = b"\x11"
 OPBANG: Opcode = b"\x12"
+OPJUMP: Opcode = b"\x13"
+OPJUMPWHENFALSE: Opcode = b"\x14"
 
-OPCONSTANT_WIDTH: int = 2
+OPCONSTANT_WIDTH: int = ADDRESS_POSITION_SIZE
+OPJUMP_WIDTH: int = ADDRESS_POSITION_SIZE
+OPJUMPWHENFALSE_WIDTH: int = ADDRESS_POSITION_SIZE
