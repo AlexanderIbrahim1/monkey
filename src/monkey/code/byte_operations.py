@@ -11,6 +11,8 @@ from monkey.code.definitions import OpcodeDefinition
 from monkey.code.definitions import is_undefined
 from monkey.code.definitions import lookup_opcode_definition
 
+from monkey.code.constants import MAXIMUM_ADDRESS_DIGITS
+
 
 def extract_opcode(instructions: Instructions, position: int) -> Opcode:
     i_begin = position
@@ -97,8 +99,8 @@ def _format_instruction(definition: OpcodeDefinition, operands: list[int]) -> st
         )
 
     if n_expected_operands == 0:
-        return f"{definition.name:<16s}"
+        return f"{definition.name:<16s}   " + " " * MAXIMUM_ADDRESS_DIGITS
     elif n_expected_operands == 1:
-        return f"{definition.name:<16s}   {operands[0]}"
+        return f"{definition.name:<16s}   {operands[0]:0>{MAXIMUM_ADDRESS_DIGITS}d}"
     else:
         raise ValueError(f"Unable to format an instruction with '{n_expected_operands}' operands.")
