@@ -1,5 +1,6 @@
 import pytest
 
+import monkey.code as code
 from monkey.compiler import Compiler
 from monkey.compiler import compile
 from monkey.compiler import bytecode_from_compiler
@@ -7,6 +8,7 @@ from monkey.compiler import bytecode_from_compiler
 import monkey.code.opcodes as op
 
 from compiler_utils import parse
+from compiler_utils import interleave_formatted_instructions
 from compiler_utils import CompilerTestCase
 
 
@@ -94,6 +96,24 @@ class TestCompiler:
                 (),
                 [(op.OPTRUE, ()), (op.OPBANG, ()), (op.OPPOP, ())],
             ),
+            CompilerTestCase(
+                "if (true) { 10 }; 3333;",
+                (10, 3333),
+                [
+                    # 0000 [the condition]
+                    (op.OPTRUE, ()),
+                    # 0001 [skip to after the popping of the 10 if false]
+                    (op.OPJUMPWHENFALSE, (7,)),
+                    # 0004 [holds the 10]
+                    (op.OPCONSTANT, (0,)),
+                    # 0007 [pop the 10]
+                    (op.OPPOP, ()),
+                    # 0008 [holds the 3333]
+                    (op.OPCONSTANT, (1,)),
+                    # 0011 [pop the 3333]
+                    (op.OPPOP, ()),
+                ],
+            ),
         ],
     )
     def test_case(self, case: CompilerTestCase):
@@ -103,5 +123,9 @@ class TestCompiler:
         compile(compiler, program)
         bytecode = bytecode_from_compiler(compiler)
 
-        assert bytecode.instructions == case.instructions
+        try:
+            assert bytecode.instructions == case.instructions
+        except AssertionError:
+            output = interleave_formatted_instructions(bytecode.instructions, case.instructions)
+            pytest.fail(output)
         assert bytecode.constants == case.constants

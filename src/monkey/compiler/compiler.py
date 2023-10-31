@@ -1,7 +1,6 @@
 import dataclasses
 from typing import Optional
 
-from monkey.code import Instructions
 from monkey.object import Object
 from monkey.parser import ASTNode
 from monkey.parser import Program
@@ -12,8 +11,10 @@ import monkey.object as objs
 import monkey.parser.expressions as exprs
 import monkey.parser.statements as stmts
 
+from monkey.code import Instructions
 from monkey.code import Opcode
 from monkey.code import make_instruction
+from monkey.code import DUMMY_ADDRESS
 import monkey.code.opcodes as opcodes
 
 from monkey.compiler.custom_exceptions import CompilationError
@@ -82,6 +83,9 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
         case stmts.ExpressionStatement():
             compile(compiler, node.value)
             compiler.emit(opcodes.OPPOP)  # don't want to keep the (unusable) result on the stack
+        case stmts.BlockStatement():
+            for statement in node.statements:
+                compile(compiler, statement)
         case exprs.IntegerLiteral():
             integer = objs.IntegerObject(int(node.value))
             constant_position = compiler.add_constant_and_get_position(integer)
@@ -101,6 +105,10 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
                     compiler.emit(opcodes.OPBANG)
                 case _:
                     raise CompilationError(f"Unknown operator for prefix expression: {node.operator}")
+        case exprs.IfExpression():
+            compile(compiler, node.condition)
+            compiler.emit(opcodes.OPJUMPWHENFALSE, DUMMY_ADDRESS)
+            compile(compiler, node.consequence)
         case exprs.InfixExpression():
             # NOTE: if I wanted a simpler solution, I would have just implemented an opcode for the less
             #       than operator; however, for pedagogical purposes the book wants to emphasize the ability
