@@ -26,6 +26,9 @@ OPBANG: Opcode = b"\x12"
 OPJUMP: Opcode = b"\x13"
 OPJUMPWHENFALSE: Opcode = b"\x14"
 
+# a dummy opcode used in situations where an opcode instance needs to exist
+OPDUMMY: Opcode = b"\xFF"
+
 OPCONSTANT_WIDTH: int = ADDRESS_POSITION_SIZE
 OPJUMP_WIDTH: int = ADDRESS_POSITION_SIZE
 OPJUMPWHENFALSE_WIDTH: int = ADDRESS_POSITION_SIZE
