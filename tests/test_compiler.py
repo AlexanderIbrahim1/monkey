@@ -123,6 +123,8 @@ class TestCompiler:
         compile(compiler, program)
         bytecode = bytecode_from_compiler(compiler)
 
+        print(compiler._instructions)
+
         try:
             assert bytecode.instructions == case.instructions
         except AssertionError:

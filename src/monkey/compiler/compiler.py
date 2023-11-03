@@ -25,10 +25,13 @@ import monkey.compiler.emitted_instruction as emitted
 class Compiler:
     def __init__(
         self,
-        instructions: Instructions = Instructions(),
+        instructions: Optional[Instructions] = None,
         constants: Optional[list[Object]] = None,
     ) -> None:
-        self._instructions = instructions
+        if instructions is None:
+            self._instructions = Instructions()
+        else:
+            self._instructions = instructions
 
         if constants is None:
             self._constants = []
