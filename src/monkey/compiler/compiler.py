@@ -19,6 +19,7 @@ import monkey.code.opcodes as opcodes
 
 from monkey.compiler.custom_exceptions import CompilationError
 from monkey.compiler.emitted_instruction import EmittedInstruction
+import monkey.compiler.emitted_instruction as emitted
 
 
 class Compiler:
@@ -72,6 +73,17 @@ class Compiler:
         self._update_last_instructions(opcode, pos)
 
         return pos
+
+    def remove_last_instruction(self) -> None:
+        if not emitted.is_valid_emitted_instruction(self._last_instruction):
+            raise CompilationError(
+                "Cannot remove the last instruction; it isn't a valid one.\n"
+                f"last instruction: {self._last_instruction}"
+            )
+
+        new_end_pos = self._last_instruction.position
+        self._instructions = self._instructions[:new_end_pos]
+        self._last_instruction = self._second_last_instruction
 
     def _update_last_instructions(self, opcode: Opcode, position: int) -> None:
         self._second_last_instruction = self._last_instruction
@@ -127,6 +139,10 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             compile(compiler, node.condition)
             compiler.emit(opcodes.OPJUMPWHENFALSE, DUMMY_ADDRESS)
             compile(compiler, node.consequence)
+
+            # depending on the expression in the consequence, it might leave an extra OPPOP on the stack
+            if emitted.is_pop(compiler.last_instruction):
+                compiler.remove_last_instruction()
         case exprs.InfixExpression():
             # NOTE: if I wanted a simpler solution, I would have just implemented an opcode for the less
             #       than operator; however, for pedagogical purposes the book wants to emphasize the ability
