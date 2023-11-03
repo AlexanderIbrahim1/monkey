@@ -13,6 +13,7 @@ import monkey.parser.statements as stmts
 
 from monkey.code import Instructions
 from monkey.code import Opcode
+from monkey.code import extract_opcode
 from monkey.code import make_instruction
 from monkey.code import DUMMY_ADDRESS
 import monkey.code.opcodes as opcodes
@@ -88,9 +89,31 @@ class Compiler:
         self._instructions = self._instructions[:new_end_pos]
         self._last_instruction = self._second_last_instruction
 
+    def replace_instructions(self, new_instructions: Instructions, start_position: int) -> None:
+        self._check_last_instruction_position(new_instructions, start_position)
+
+        end_position = start_position + len(new_instructions)
+        self._instructions[start_position:end_position] = new_instructions
+
+    def replace_operand(self, position: int, *operands: int) -> None:
+        new_opcode = extract_opcode(self._instructions, position)
+        new_instructions = make_instruction(new_opcode, *operands)
+
+        self.replace_instructions(new_instructions, position)
+
     def _update_last_instructions(self, opcode: Opcode, position: int) -> None:
         self._second_last_instruction = self._last_instruction
         self._last_instruction = EmittedInstruction(opcode, position)
+
+    def _check_last_instruction_position(self, new_instructions: Instructions, start_position: int) -> None:
+        last_replaced_position = start_position + len(new_instructions) - 1
+        if last_replaced_position >= len(self._instructions):
+            raise CompilationError(
+                "Attempted to replace instructions beyond the last existing instruction.\n"
+                f"len(instructions) = {len(self._instructions)}\n"
+                f"start_position = {start_position}\n"
+                f"len(new_instructions) = {len(new_instructions)}"
+            )
 
 
 @dataclasses.dataclass
@@ -140,12 +163,15 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
                     raise CompilationError(f"Unknown operator for prefix expression: {node.operator}")
         case exprs.IfExpression():
             compile(compiler, node.condition)
-            compiler.emit(opcodes.OPJUMPWHENFALSE, DUMMY_ADDRESS)
+            consequence_jump_instruction_position = compiler.emit(opcodes.OPJUMPWHENFALSE, DUMMY_ADDRESS)
             compile(compiler, node.consequence)
 
             # depending on the expression in the consequence, it might leave an extra OPPOP on the stack
             if emitted.is_pop(compiler.last_instruction):
                 compiler.remove_last_instruction()
+
+            position_after_consequence = len(compiler.instructions)
+            compiler.replace_operand(consequence_jump_instruction_position, position_after_consequence)
         case exprs.InfixExpression():
             # NOTE: if I wanted a simpler solution, I would have just implemented an opcode for the less
             #       than operator; however, for pedagogical purposes the book wants to emphasize the ability
