@@ -18,6 +18,7 @@ from monkey.code import DUMMY_ADDRESS
 import monkey.code.opcodes as opcodes
 
 from monkey.compiler.custom_exceptions import CompilationError
+from monkey.compiler.emitted_instruction import EmittedInstruction
 
 
 class Compiler:
@@ -32,6 +33,17 @@ class Compiler:
             self._constants = []
         else:
             self._constants = constants
+
+        self._last_instruction = EmittedInstruction()
+        self._second_last_instruction = EmittedInstruction()
+
+    @property
+    def last_instruction(self) -> EmittedInstruction:
+        return self._last_instruction
+
+    @property
+    def second_last_instruction(self) -> EmittedInstruction:
+        return self._second_last_instruction
 
     @property
     def instructions(self) -> Instructions:
@@ -57,7 +69,13 @@ class Compiler:
         instruction = make_instruction(opcode, *operands)
         pos = self.add_instruction_and_get_position(instruction)
 
+        self._update_last_instructions(opcode, pos)
+
         return pos
+
+    def _update_last_instructions(self, opcode: Opcode, position: int) -> None:
+        self._second_last_instruction = self._last_instruction
+        self._last_instruction = EmittedInstruction(opcode, position)
 
 
 @dataclasses.dataclass

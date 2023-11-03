@@ -1,9 +1,9 @@
 import pytest
 
-import monkey.code as code
+from monkey.compiler import bytecode_from_compiler
 from monkey.compiler import Compiler
 from monkey.compiler import compile
-from monkey.compiler import bytecode_from_compiler
+from monkey.compiler import EmittedInstruction
 
 import monkey.code.opcodes as op
 
@@ -129,3 +129,20 @@ class TestCompiler:
             output = interleave_formatted_instructions(bytecode.instructions, case.instructions)
             pytest.fail(output)
         assert bytecode.constants == case.constants
+
+    def test_emitted_instructions(self):
+        input_text = "1;"
+        program = parse(input_text)
+        compiler = Compiler()
+
+        compile(compiler, program)
+
+        # 0000 -> OPCONSTANT
+        # 0001 -> first byte of the constant
+        # 0002 -> second byte of the constant
+        # 0003 -> OPPOP
+        expected_last_instruction = EmittedInstruction(op.OPPOP, 3)
+        expected_second_last_instruction = EmittedInstruction(op.OPCONSTANT, 0)
+
+        assert compiler.last_instruction == expected_last_instruction
+        assert compiler.second_last_instruction == expected_second_last_instruction
