@@ -114,6 +114,28 @@ class TestCompiler:
                     (op.OPPOP, ()),
                 ],
             ),
+            CompilerTestCase(
+                "if (true) { 10 } else { 20 }; 3333;",
+                (10, 20, 3333),
+                [
+                    # 0000 [the condition]
+                    (op.OPTRUE, ()),
+                    # 0001 [skip to the location of the 20 if false; else, keep going]
+                    (op.OPJUMPWHENFALSE, (10,)),
+                    # 0004 [holds the 10]
+                    (op.OPCONSTANT, (0,)),
+                    # 0007 [skip past the 20, because 10 has already been loaded]
+                    (op.OPJUMP, (13,)),
+                    # 0010 [holds the 20]
+                    (op.OPCONSTANT, (1,)),
+                    # 0013 [pop the 10 or 20, whichever is there]
+                    (op.OPPOP, ()),
+                    # 0008 [holds the 3333]
+                    (op.OPCONSTANT, (2,)),
+                    # 0011 [pop the 3333]
+                    (op.OPPOP, ()),
+                ],
+            ),
         ],
     )
     def test_case(self, case: CompilerTestCase):

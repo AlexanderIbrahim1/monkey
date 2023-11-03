@@ -163,15 +163,33 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
                     raise CompilationError(f"Unknown operator for prefix expression: {node.operator}")
         case exprs.IfExpression():
             compile(compiler, node.condition)
-            consequence_jump_instruction_position = compiler.emit(opcodes.OPJUMPWHENFALSE, DUMMY_ADDRESS)
-            compile(compiler, node.consequence)
+            consequence_jump_instr_position = compiler.emit(opcodes.OPJUMPWHENFALSE, DUMMY_ADDRESS)
 
             # depending on the expression in the consequence, it might leave an extra OPPOP on the stack
+            compile(compiler, node.consequence)
             if emitted.is_pop(compiler.last_instruction):
                 compiler.remove_last_instruction()
 
-            position_after_consequence = len(compiler.instructions)
-            compiler.replace_operand(consequence_jump_instruction_position, position_after_consequence)
+            if node.alternative is None:
+                # with no alternative, we set the jump target to after the consequence instructions, if condition is false
+                consequence_jump_position = len(compiler.instructions)
+                compiler.replace_operand(consequence_jump_instr_position, consequence_jump_position)
+            else:
+                # with an alternative, we must put a jump just before it (to maybe jump past it)
+                alternative_jump_instr_position = compiler.emit(opcodes.OPJUMP, DUMMY_ADDRESS)
+
+                # with an alternative, we leapfrog over the alternative's jump instruction, if condition is false
+                consequence_jump_position = len(compiler.instructions)
+                compiler.replace_operand(consequence_jump_instr_position, consequence_jump_position)
+
+                # now compile the alternative and set the jump to just past it
+                compile(compiler, node.alternative)
+                if emitted.is_pop(compiler.last_instruction):
+                    compiler.remove_last_instruction()
+
+                alternative_jump_position = len(compiler.instructions)
+                compiler.replace_operand(alternative_jump_instr_position, alternative_jump_position)
+
         case exprs.InfixExpression():
             # NOTE: if I wanted a simpler solution, I would have just implemented an opcode for the less
             #       than operator; however, for pedagogical purposes the book wants to emphasize the ability
