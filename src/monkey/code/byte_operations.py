@@ -21,6 +21,13 @@ def extract_opcode(instructions: Instructions, position: int) -> Opcode:
     return Opcode(instructions[i_begin:i_end])
 
 
+def extract_operand(instructions: Instructions, position: int, operand_width: int) -> Instructions:
+    i_begin = position
+    i_end = i_begin + operand_width
+
+    return instructions[i_begin:i_end]
+
+
 def make_instruction(op: Opcode, *operands: int) -> Instructions:
     opcode_def = lookup_opcode_definition(op)
     if is_undefined(opcode_def):
