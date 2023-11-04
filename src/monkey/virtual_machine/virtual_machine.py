@@ -58,10 +58,36 @@ def run(vm: VirtualMachine) -> None:
                 _push_op_minus(vm)
             case opcodes.OPBANG:
                 _push_op_bang(vm)
+            case opcodes.OPJUMP:
+                instr_ptr = _new_position_after_jump(vm, instr_ptr)
+            case opcodes.OPJUMPWHENFALSE:
+                instr_ptr = _new_position_after_jump_when_false(vm, instr_ptr)
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
 
         instr_ptr += 1
+
+
+def _new_position_after_jump(vm: VirtualMachine, instr_ptr: int) -> int:
+    instructions = vm.bytecode.instructions
+    jump_position_bytes = code.extract_operand(instructions, instr_ptr + 1, opcodes.OPJUMP_WIDTH)
+    jump_position = int.from_bytes(jump_position_bytes)
+
+    return jump_position - 1
+
+
+def _new_position_after_jump_when_false(vm: VirtualMachine, instr_ptr: int) -> int:
+    condition = vm.stack.pop()
+
+    if not objs.is_truthy(condition):
+        instructions = vm.bytecode.instructions
+        jump_position_bytes = code.extract_operand(instructions, instr_ptr + 1, opcodes.OPJUMPWHENFALSE_WIDTH)
+        jump_position = int.from_bytes(jump_position_bytes)
+        new_instr_ptr = jump_position - 1
+    else:
+        new_instr_ptr = instr_ptr + opcodes.OPJUMPWHENFALSE_WIDTH
+
+    return new_instr_ptr
 
 
 def _push_op_add(vm: VirtualMachine) -> None:
