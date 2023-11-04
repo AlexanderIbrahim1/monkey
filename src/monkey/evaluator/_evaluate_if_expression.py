@@ -9,12 +9,7 @@ from monkey.parser import ASTNode
 import monkey.parser.expressions as exprs
 import monkey.object as objs
 
-
-TRUTHY_DICT: dict[objs.Object, bool] = {
-    objs.TRUE_BOOL_OBJ: True,
-    objs.FALSE_BOOL_OBJ: False,
-    objs.NULL_OBJ: False,
-}
+from monkey.object.truthy import is_truthy
 
 
 def evaluate_if_expression(
@@ -25,14 +20,10 @@ def evaluate_if_expression(
     if objs.is_error_object(condition):
         return condition
 
-    if _is_truthy(condition):
+    if is_truthy(condition):
         return eval_func(if_expr.consequence)
     elif if_expr.alternative is not None:
         return eval_func(if_expr.alternative)
     else:
         # NOTE: this is a proper use of `objs.NULL_OBJ`; an `if-expr` might return nothing!
         return objs.NULL_OBJ
-
-
-def _is_truthy(obj: objs.Object) -> bool:
-    return TRUTHY_DICT.get(obj, True)

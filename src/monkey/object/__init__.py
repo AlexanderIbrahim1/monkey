@@ -30,3 +30,5 @@ from monkey.object.object_hasher import ObjectHash
 from monkey.object.constants import NULL_OBJ
 from monkey.object.constants import TRUE_BOOL_OBJ
 from monkey.object.constants import FALSE_BOOL_OBJ
+
+from monkey.object.truthy import is_truthy
