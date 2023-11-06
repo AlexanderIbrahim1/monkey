@@ -74,6 +74,8 @@ class TestVirtualMachine:
             VirtualMachineTestCase("if (1 < 2) { 10 } else { 20 };", 10),
             VirtualMachineTestCase("if (1 > 2) { 10 } else { 20 };", 20),
             VirtualMachineTestCase("if (false) { 10 };", None),
+            VirtualMachineTestCase("!(if (false) { 10 });", True),
+            VirtualMachineTestCase("if ( (if (false) { 10 }) ) { 10 } else { 20 };", 20),
         ],
     )
     def test_basic(self, test_case: VirtualMachineTestCase):
