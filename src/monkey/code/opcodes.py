@@ -25,6 +25,7 @@ OPMINUS: Opcode = b"\x11"
 OPBANG: Opcode = b"\x12"
 OPJUMP: Opcode = b"\x13"
 OPJUMPWHENFALSE: Opcode = b"\x14"
+OPNULL: Opcode = b"\x15"
 
 # a dummy opcode used in situations where an opcode instance needs to exist
 OPDUMMY: Opcode = b"\xFF"
