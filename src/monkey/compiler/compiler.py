@@ -162,41 +162,46 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
                 case _:
                     raise CompilationError(f"Unknown operator for prefix expression: {node.operator}")
         case exprs.IfExpression():
+            # the if-expression is laid out like the following:
+            # ...
+            # CONDITION
+            # MAYBE JUMP
+            # CONSEQUENCE
+            # MANDATORY JUMP
+            # [TARGET OF MAYBE JUMP; BUT DOES NOTHING ON ITS OWN]
+            # ALTERNATIVE
+            # [TARGET OF MANDATORY JUMP, BUT DOES NOTHING ON ITS OWN]
+            # ...
             compile(compiler, node.condition)
+
+            # instruction that determines where we jump if the condition isn't true
             consequence_jump_instr_position = compiler.emit(opcodes.OPJUMPWHENFALSE, DUMMY_ADDRESS)
 
+            # if the condition is true, we don't jump, and instead continue to this bytecode
             # depending on the expression in the consequence, it might leave an extra OPPOP on the stack
             compile(compiler, node.consequence)
             if emitted.is_pop(compiler.last_instruction):
                 compiler.remove_last_instruction()
 
+            # if we didn't jump before, we have to now, past the bytecode for the alternative
+            alternative_jump_instr_position = compiler.emit(opcodes.OPJUMP, DUMMY_ADDRESS)
+
+            # if we jumped because the condition was false, it should be to here (so we don't hit the
+            # alternative's jump instr)
+            consequence_jump_position = len(compiler.instructions)
+            compiler.replace_operand(consequence_jump_instr_position, consequence_jump_position)
+
+            # the bytecode for the alternative should either be whatever it is, or NULL
             if node.alternative is None:
-                # with no alternative, the NULL is essentially the alternative
-                post_null_jump_instr_position = compiler.emit(opcodes.OPJUMP, DUMMY_ADDRESS)
-
-                # with no alternative, we leapfrog over the NULL's jump instruction, if condition is false
-                consequence_jump_position = len(compiler.instructions)
-                compiler.replace_operand(consequence_jump_instr_position, consequence_jump_position)
-
                 compiler.emit(opcodes.OPNULL)
-
-                post_null_jump_position = len(compiler.instructions)
-                compiler.replace_operand(post_null_jump_instr_position, post_null_jump_position)
             else:
-                # with an alternative, we must put a jump just before it (to maybe jump past it)
-                alternative_jump_instr_position = compiler.emit(opcodes.OPJUMP, DUMMY_ADDRESS)
-
-                # with an alternative, we leapfrog over the alternative's jump instruction, if condition is false
-                consequence_jump_position = len(compiler.instructions)
-                compiler.replace_operand(consequence_jump_instr_position, consequence_jump_position)
-
-                # now compile the alternative and set the jump to just past it
                 compile(compiler, node.alternative)
                 if emitted.is_pop(compiler.last_instruction):
                     compiler.remove_last_instruction()
 
-                alternative_jump_position = len(compiler.instructions)
-                compiler.replace_operand(alternative_jump_instr_position, alternative_jump_position)
+            # if we didn't jump, and hit the OPJUMP instruction, it should be to here
+            alternative_jump_position = len(compiler.instructions)
+            compiler.replace_operand(alternative_jump_instr_position, alternative_jump_position)
         case exprs.InfixExpression():
             # NOTE: if I wanted a simpler solution, I would have just implemented an opcode for the less
             #       than operator; however, for pedagogical purposes the book wants to emphasize the ability
