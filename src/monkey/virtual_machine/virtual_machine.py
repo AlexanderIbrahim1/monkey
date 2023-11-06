@@ -62,6 +62,8 @@ def run(vm: VirtualMachine) -> None:
                 instr_ptr = _new_position_after_jump(vm, instr_ptr)
             case opcodes.OPJUMPWHENFALSE:
                 instr_ptr = _new_position_after_jump_when_false(vm, instr_ptr)
+            case opcodes.OPNULL:
+                vm.stack.push(objs.NULL_OBJ)
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
 

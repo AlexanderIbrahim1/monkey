@@ -171,9 +171,17 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
                 compiler.remove_last_instruction()
 
             if node.alternative is None:
-                # with no alternative, we set the jump target to after the consequence instructions, if condition is false
+                # with no alternative, the NULL is essentially the alternative
+                post_null_jump_instr_position = compiler.emit(opcodes.OPJUMP, DUMMY_ADDRESS)
+
+                # with no alternative, we leapfrog over the NULL's jump instruction, if condition is false
                 consequence_jump_position = len(compiler.instructions)
                 compiler.replace_operand(consequence_jump_instr_position, consequence_jump_position)
+
+                compiler.emit(opcodes.OPNULL)
+
+                post_null_jump_position = len(compiler.instructions)
+                compiler.replace_operand(post_null_jump_instr_position, post_null_jump_position)
             else:
                 # with an alternative, we must put a jump just before it (to maybe jump past it)
                 alternative_jump_instr_position = compiler.emit(opcodes.OPJUMP, DUMMY_ADDRESS)
@@ -189,7 +197,6 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
 
                 alternative_jump_position = len(compiler.instructions)
                 compiler.replace_operand(alternative_jump_instr_position, alternative_jump_position)
-
         case exprs.InfixExpression():
             # NOTE: if I wanted a simpler solution, I would have just implemented an opcode for the less
             #       than operator; however, for pedagogical purposes the book wants to emphasize the ability

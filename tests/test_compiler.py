@@ -102,15 +102,19 @@ class TestCompiler:
                 [
                     # 0000 [the condition]
                     (op.OPTRUE, ()),
-                    # 0001 [skip to after the popping of the 10 if false]
-                    (op.OPJUMPWHENFALSE, (7,)),
+                    # 0001 [skip to the NULL if false]
+                    (op.OPJUMPWHENFALSE, (10,)),
                     # 0004 [holds the 10]
                     (op.OPCONSTANT, (0,)),
-                    # 0007 [pop the 10]
+                    # 0007 [jump over the NULL]
+                    (op.OPJUMP, (11,)),
+                    # 0010 [the instruction found if there is no alternative, and condition is false]
+                    (op.OPNULL, ()),
+                    # 0011 [pop the 10 or the NULL]
                     (op.OPPOP, ()),
-                    # 0008 [holds the 3333]
+                    # 0012 [holds the 3333]
                     (op.OPCONSTANT, (1,)),
-                    # 0011 [pop the 3333]
+                    # 0015 [pop the 3333]
                     (op.OPPOP, ()),
                 ],
             ),
