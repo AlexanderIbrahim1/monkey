@@ -51,6 +51,8 @@ def make_object(value: Any) -> objs.Object:
             return objs.BooleanObject(value)
         case int():
             return objs.IntegerObject(value)
+        case None:
+            return objs.NULL_OBJ
         case _:
             raise RuntimeError(f"Got a value for which there is no corresponding objs.Object type: '{value}'")
 
