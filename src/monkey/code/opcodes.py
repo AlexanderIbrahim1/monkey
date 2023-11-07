@@ -8,6 +8,7 @@ to break when run in this directory.
 
 from monkey.code.code import Opcode
 from monkey.code.constants import ADDRESS_POSITION_SIZE
+from monkey.code.constants import BINDING_BYTE_SIZE
 
 
 OPCONSTANT: Opcode = b"\x00"
@@ -26,10 +27,14 @@ OPBANG: Opcode = b"\x12"
 OPJUMP: Opcode = b"\x13"
 OPJUMPWHENFALSE: Opcode = b"\x14"
 OPNULL: Opcode = b"\x15"
+OPSETGLOBAL: Opcode = b"\x16"
+OPGETGLOBAL: Opcode = b"\x17"
 
 # a dummy opcode used in situations where an opcode instance needs to exist
 OPDUMMY: Opcode = b"\xFF"
 
 OPCONSTANT_WIDTH: int = ADDRESS_POSITION_SIZE
+OPSETGLOBAL_WIDTH: int = BINDING_BYTE_SIZE
+OPGETGLOBAL_WIDTH: int = BINDING_BYTE_SIZE
 OPJUMP_WIDTH: int = ADDRESS_POSITION_SIZE
 OPJUMPWHENFALSE_WIDTH: int = ADDRESS_POSITION_SIZE
