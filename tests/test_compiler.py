@@ -1,6 +1,5 @@
 import pytest
 
-from monkey.compiler import bytecode_from_compiler
 from monkey.compiler import Compiler
 from monkey.compiler import compile
 from monkey.compiler import EmittedInstruction
@@ -8,7 +7,6 @@ from monkey.compiler import EmittedInstruction
 import monkey.code.opcodes as op
 
 from compiler_utils import CompilerTestCase
-from compiler_utils import interleave_formatted_instructions
 from compiler_utils import parse
 from compiler_utils import perform_compiler_test_case
 
@@ -118,8 +116,6 @@ class TestCompiler:
     def test_prefix_operator(self, case: CompilerTestCase):
         perform_compiler_test_case(case)
 
-
-class TestCompiler:
     @pytest.mark.parametrize(
         "case",
         [
@@ -188,3 +184,21 @@ class TestCompiler:
 
         assert compiler.last_instruction == expected_last_instruction
         assert compiler.second_last_instruction == expected_second_last_instruction
+
+    @pytest.mark.parametrize(
+        "case",
+        [
+            CompilerTestCase(
+                "let one = 1; let two = 2;",
+                (1, 2),
+                [
+                    (op.OPCONSTANT, (0,)),
+                    (op.OPSETGLOBAL, (0,)),
+                    (op.OPCONSTANT, (1,)),
+                    (op.OPSETGLOBAL, (1,)),
+                ],
+            ),
+        ],
+    )
+    def test_global_let_statement(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)

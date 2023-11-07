@@ -22,12 +22,15 @@ from monkey.compiler.custom_exceptions import CompilationError
 from monkey.compiler.emitted_instruction import EmittedInstruction
 import monkey.compiler.emitted_instruction as emitted
 
+import monkey.compiler.symbol_table as sym
+
 
 class Compiler:
     def __init__(
         self,
         instructions: Optional[Instructions] = None,
         constants: Optional[list[Object]] = None,
+        symbol_table: Optional[sym.SymbolTable] = None,
     ) -> None:
         if instructions is None:
             self._instructions = Instructions()
@@ -38,6 +41,11 @@ class Compiler:
             self._constants = []
         else:
             self._constants = constants
+
+        if symbol_table is None:
+            self.symbol_table = sym.SymbolTable()
+        else:
+            self.symbol_table = symbol_table
 
         self._last_instruction = EmittedInstruction()
         self._second_last_instruction = EmittedInstruction()
@@ -202,6 +210,10 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             # if we didn't jump, and hit the OPJUMP instruction, it should be to here
             alternative_jump_position = len(compiler.instructions)
             compiler.replace_operand(alternative_jump_instr_position, alternative_jump_position)
+        case stmts.LetStatement():
+            compile(compiler, node.value)
+            symbol = compiler.symbol_table.define(node.name.value)
+            compiler.emit(opcodes.OPSETGLOBAL, symbol.index)
         case exprs.InfixExpression():
             # NOTE: if I wanted a simpler solution, I would have just implemented an opcode for the less
             #       than operator; however, for pedagogical purposes the book wants to emphasize the ability
