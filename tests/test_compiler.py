@@ -7,9 +7,10 @@ from monkey.compiler import EmittedInstruction
 
 import monkey.code.opcodes as op
 
-from compiler_utils import parse
-from compiler_utils import interleave_formatted_instructions
 from compiler_utils import CompilerTestCase
+from compiler_utils import interleave_formatted_instructions
+from compiler_utils import parse
+from compiler_utils import perform_compiler_test_case
 
 
 class TestCompiler:
@@ -22,11 +23,6 @@ class TestCompiler:
                 [(op.OPCONSTANT, (0,)), (op.OPPOP, ())],
             ),
             CompilerTestCase(
-                "1 + 2;",
-                (1, 2),
-                [(op.OPCONSTANT, (0,)), (op.OPCONSTANT, (1,)), (op.OPADD, ()), (op.OPPOP, ())],
-            ),
-            CompilerTestCase(
                 "true;",
                 (),
                 [(op.OPTRUE, ()), (op.OPPOP, ())],
@@ -35,6 +31,19 @@ class TestCompiler:
                 "false;",
                 (),
                 [(op.OPFALSE, ()), (op.OPPOP, ())],
+            ),
+        ],
+    )
+    def test_op_constant(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)
+
+    @pytest.mark.parametrize(
+        "case",
+        [
+            CompilerTestCase(
+                "1 + 2;",
+                (1, 2),
+                [(op.OPCONSTANT, (0,)), (op.OPCONSTANT, (1,)), (op.OPADD, ()), (op.OPPOP, ())],
             ),
             CompilerTestCase(
                 "1 - 2;",
@@ -86,6 +95,14 @@ class TestCompiler:
                 (),
                 [(op.OPTRUE, ()), (op.OPFALSE, ()), (op.OPNOTEQUAL, ()), (op.OPPOP, ())],
             ),
+        ],
+    )
+    def test_infix_operator(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)
+
+    @pytest.mark.parametrize(
+        "case",
+        [
             CompilerTestCase(
                 "-1;",
                 (1,),
@@ -96,6 +113,16 @@ class TestCompiler:
                 (),
                 [(op.OPTRUE, ()), (op.OPBANG, ()), (op.OPPOP, ())],
             ),
+        ],
+    )
+    def test_prefix_operator(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)
+
+
+class TestCompiler:
+    @pytest.mark.parametrize(
+        "case",
+        [
             CompilerTestCase(
                 "if (true) { 10 }; 3333;",
                 (10, 3333),
@@ -142,19 +169,8 @@ class TestCompiler:
             ),
         ],
     )
-    def test_case(self, case: CompilerTestCase):
-        program = parse(case.input_text)
-        compiler = Compiler()
-
-        compile(compiler, program)
-        bytecode = bytecode_from_compiler(compiler)
-
-        try:
-            assert bytecode.instructions == case.instructions
-        except AssertionError:
-            output = interleave_formatted_instructions(bytecode.instructions, case.instructions)
-            pytest.fail(output)
-        assert bytecode.constants == case.constants
+    def test_if_else_expressions(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)
 
     def test_emitted_instructions(self):
         input_text = "1;"

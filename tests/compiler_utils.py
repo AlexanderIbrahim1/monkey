@@ -7,6 +7,8 @@ import itertools
 from typing import Any
 from typing import Sequence
 
+import pytest
+
 from monkey import Lexer
 from monkey import Parser
 from monkey.parser.program import Program
@@ -14,6 +16,10 @@ from monkey.parser.parser import parse_program
 
 import monkey.code as code
 import monkey.object as objs
+
+from monkey.compiler import bytecode_from_compiler
+from monkey.compiler import Compiler
+from monkey.compiler import compile
 
 
 class CompilerTestCase:
@@ -26,6 +32,33 @@ class CompilerTestCase:
         self.input_text = input_text
         self.instructions = concatenate_instructions(instruction_pairs)
         self.constants = [make_object(value) for value in expected_constants]
+
+
+def perform_compiler_test_case(case: CompilerTestCase):
+    """
+    Assert that the input text in the case, when compiled, produces the expected
+    bytecode instructions and constants.
+
+    This method is so general for the test suite that all the tests end up using the
+    same body, with very little to no variation. As a result, it becomes difficult to
+    sort the different types of tests.
+
+    By extracting the body of the testing code into its own function, we can separate
+    the test cases into other functions with more descriptive names, allowing us to
+    be better organized.
+    """
+    program = parse(case.input_text)
+    compiler = Compiler()
+
+    compile(compiler, program)
+    bytecode = bytecode_from_compiler(compiler)
+
+    try:
+        assert bytecode.instructions == case.instructions
+    except AssertionError:
+        output = interleave_formatted_instructions(bytecode.instructions, case.instructions)
+        pytest.fail(output)
+    assert bytecode.constants == case.constants
 
 
 def parse(monkey_code: str) -> Program:
