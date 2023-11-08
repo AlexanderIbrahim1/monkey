@@ -192,10 +192,46 @@ class TestCompiler:
                 "let one = 1; let two = 2;",
                 (1, 2),
                 [
+                    # push '1' onto the stack
                     (op.OPCONSTANT, (0,)),
+                    # bind value '1' to variable 'one' (labelled 0)
                     (op.OPSETGLOBAL, (0,)),
+                    # push '2' onto the stack
                     (op.OPCONSTANT, (1,)),
+                    # bind value '2' to variable 'two' (labelled 1)
                     (op.OPSETGLOBAL, (1,)),
+                ],
+            ),
+            CompilerTestCase(
+                "let one = 1; one;",
+                (1,),
+                [
+                    # push '1' onto the stack
+                    (op.OPCONSTANT, (0,)),
+                    # bind value '1' to variable 'one' (labelled 0)
+                    (op.OPSETGLOBAL, (0,)),
+                    # retrieve the value bound to variable 'one' (labelled 0), put on top of stack
+                    (op.OPGETGLOBAL, (0,)),
+                    # 'one;' is an expression statement; pop its value off the stack
+                    (op.OPPOP, ()),
+                ],
+            ),
+            CompilerTestCase(
+                "let one = 1; let two = one; two;",
+                (1,),
+                [
+                    # push '1' onto the stack
+                    (op.OPCONSTANT, (0,)),
+                    # bind value '1' to variable 'one' (labelled 0)
+                    (op.OPSETGLOBAL, (0,)),
+                    # retrieve the value bound to variable 'one' (labelled 0), put on top of stack
+                    (op.OPGETGLOBAL, (0,)),
+                    # bind value '1' (from 'one') to variable 'two' (labelled 1)
+                    (op.OPSETGLOBAL, (1,)),
+                    # retrieve the value bound to variable 'two' (labelled 1), put on top of stack
+                    (op.OPGETGLOBAL, (1,)),
+                    # 'two;' is an expression statement; pop its value off the stack
+                    (op.OPPOP, ()),
                 ],
             ),
         ],

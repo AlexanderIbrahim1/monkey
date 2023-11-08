@@ -214,6 +214,11 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             compile(compiler, node.value)
             symbol = compiler.symbol_table.define(node.name.value)
             compiler.emit(opcodes.OPSETGLOBAL, symbol.index)
+        case exprs.Identifier():
+            symbol = compiler.symbol_table.resolve(node.value)
+            if symbol is None:
+                raise CompilationError(f"undefined variable: {node.value}")
+            compiler.emit(opcodes.OPGETGLOBAL, symbol.index)
         case exprs.InfixExpression():
             # NOTE: if I wanted a simpler solution, I would have just implemented an opcode for the less
             #       than operator; however, for pedagogical purposes the book wants to emphasize the ability
