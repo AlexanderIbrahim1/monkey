@@ -73,6 +73,12 @@ class FixedStack(Generic[T]):
 
         return self._data[index]
 
+    def __setitem__(self, index: int, value: T) -> None:
+        if not (0 <= index < self._stack_pointer):
+            raise FixedStackError("Attempted to write element out of bounds of the stack.")
+
+        self._data[index] = value
+
     def maybe_get(self, index: int) -> Optional[T]:
         if not (0 <= index < self._stack_pointer):
             return None

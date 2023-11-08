@@ -159,6 +159,26 @@ class TestFixedStack:
         with pytest.raises(FixedStackError):
             stack[index]
 
+    def test_setitem(self):
+        stack = FixedStack[int](3)
+        stack.push(1)
+        stack.push(2)
+
+        stack[0] = 123
+        assert stack[0] == 123
+
+    def test_raises_setitem_out_of_bounds(self):
+        stack = FixedStack[int](3)
+        stack.push(1)
+        with pytest.raises(FixedStackError):
+            stack[2] = 123
+
+    @pytest.mark.parametrize("index", [-1, 0, 1, 2])
+    def test_raises_setitem_on_empty_stack(self, index: int):
+        stack = FixedStack[int](10)
+        with pytest.raises(FixedStackError):
+            stack[index] = 123
+
     def test_values_from_maybe_pop(self):
         stack = FixedStack[int](10)
 
