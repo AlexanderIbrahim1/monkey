@@ -22,6 +22,7 @@ from monkey.virtual_machine.custom_exceptions import VirtualMachineError
 class VirtualMachine:
     bytecode: comp.Bytecode
     stack: FixedStack[objs.Object] = FixedStack[objs.Object](MAX_STACK_SIZE)
+    globals: FixedStack[objs.Object] = FixedStack[objs.Object](MAX_STACK_SIZE)
 
 
 def run(vm: VirtualMachine) -> None:
@@ -64,10 +65,38 @@ def run(vm: VirtualMachine) -> None:
                 instr_ptr = _new_position_after_jump_when_false(vm, instr_ptr)
             case opcodes.OPNULL:
                 vm.stack.push(objs.NULL_OBJ)
+            case opcodes.OPSETGLOBAL:
+                i_global = _global_identifier_index(instructions, instr_ptr)
+                instr_ptr += opcodes.OPSETGLOBAL_WIDTH
+
+                # remember that a let statement first pushes something onto the stack, and then
+                # we assign it to a particular variable
+                value_to_bind = vm.stack.pop()
+
+                if i_global >= vm.globals.size():
+                    vm.globals.push(value_to_bind)
+                else:
+                    vm.globals[i_global] = value_to_bind
+            case opcodes.OPGETGLOBAL:
+                i_global = _global_identifier_index(instructions, instr_ptr)
+                instr_ptr += opcodes.OPSETGLOBAL_WIDTH
+
+                # the identifier we want to reference could be anywhere in the globals stack, not
+                # just at the top; so we can't pop or anything
+                bound_value = vm.globals[i_global]
+                vm.stack.push(bound_value)
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
 
         instr_ptr += 1
+
+
+def _global_identifier_index(instructions: code.Instructions, instr_ptr: int) -> int:
+    global_label_position = instr_ptr + 1
+    position_bytes = code.extract_operand(instructions, global_label_position, opcodes.OPSETGLOBAL_WIDTH)
+    position = int.from_bytes(position_bytes, byteorder="big", signed=False)
+
+    return position
 
 
 def _new_position_after_jump(vm: VirtualMachine, instr_ptr: int) -> int:
