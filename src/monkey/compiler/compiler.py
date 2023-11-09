@@ -160,6 +160,10 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
                 compiler.emit(opcodes.OPTRUE)
             else:
                 compiler.emit(opcodes.OPFALSE)
+        case exprs.StringLiteral():
+            string = objs.StringObject(node.value)
+            constant_position = compiler.add_constant_and_get_position(string)
+            compiler.emit(opcodes.OPCONSTANT, constant_position)
         case exprs.PrefixExpression():
             compile(compiler, node.expr)
             match node.operator:

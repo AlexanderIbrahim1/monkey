@@ -84,6 +84,8 @@ def make_object(value: Any) -> objs.Object:
             return objs.BooleanObject(value)
         case int():
             return objs.IntegerObject(value)
+        case str():
+            return objs.StringObject(value)
         case None:
             return objs.NULL_OBJ
         case _:

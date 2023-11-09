@@ -238,3 +238,34 @@ class TestCompiler:
     )
     def test_global_let_statement(self, case: CompilerTestCase):
         perform_compiler_test_case(case)
+
+    @pytest.mark.parametrize(
+        "case",
+        [
+            CompilerTestCase(
+                '"monkey";',
+                ("monkey",),
+                [
+                    # string literals are treated as constants; push them on the stack, like ints
+                    (op.OPCONSTANT, (0,)),
+                    # we have an expression statement; need to pop it off
+                    (op.OPPOP, ()),
+                ],
+            ),
+            CompilerTestCase(
+                '"mon" + "key";',
+                ("mon", "key"),
+                [
+                    # just like for integers, push both "mon" and "key" onto the stack
+                    (op.OPCONSTANT, (0,)),
+                    (op.OPCONSTANT, (1,)),
+                    # just like for integers, OPADD adds the two topmost things on the stack
+                    (op.OPADD, ()),
+                    # we have an expression statement; need to pop it off
+                    (op.OPPOP, ()),
+                ],
+            ),
+        ],
+    )
+    def test_string_literals(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)
