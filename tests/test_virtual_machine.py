@@ -156,6 +156,17 @@ class TestVirtualMachine:
     def test_let_statement(self, test_case: VirtualMachineTestCase):
         virtual_machine_test_case_internals(test_case)
 
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            VirtualMachineTestCase('"monkey";', "monkey"),
+            VirtualMachineTestCase('"mon" + "key";', "monkey"),
+            VirtualMachineTestCase('"mon" + "key" + " banana";', "monkey banana"),
+        ],
+    )
+    def test_string_literals(self, test_case: VirtualMachineTestCase):
+        virtual_machine_test_case_internals(test_case)
+
 
 def virtual_machine_test_case_internals(test_case: VirtualMachineTestCase):
     """

@@ -9,6 +9,8 @@ def is_expected_object(actual: objs.Object, expected_value: Any) -> bool:
             return is_boolean_object(actual, expected_value)
         case int():
             return is_integer_object(actual, expected_value)
+        case str():
+            return is_string_object(actual, expected_value)
         case None:
             return is_null_object(actual)
         case _:
@@ -17,6 +19,13 @@ def is_expected_object(actual: objs.Object, expected_value: Any) -> bool:
 
 def is_integer_object(actual: objs.Object, expected_value: int) -> bool:
     if not isinstance(actual, objs.IntegerObject):
+        return False
+
+    return actual.value == expected_value
+
+
+def is_string_object(actual: objs.Object, expected_value: str) -> bool:
+    if not isinstance(actual, objs.StringObject):
         return False
 
     return actual.value == expected_value

@@ -132,6 +132,12 @@ def _push_op_add(vm: VirtualMachine) -> None:
             result = left_value + right_value
             integer = objs.IntegerObject(result)
             vm.stack.push(integer)
+        case (objs.StringObject(), objs.StringObject()):
+            left_value = left_object.value
+            right_value = right_object.value
+            result = left_value + right_value
+            integer = objs.StringObject(result)
+            vm.stack.push(integer)
         case _:
             err_msg = _invalid_infix_operation_error(token_types.PLUS, left_object, right_object)
             raise VirtualMachineError(err_msg)
