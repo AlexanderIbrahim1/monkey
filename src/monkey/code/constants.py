@@ -16,3 +16,6 @@ DUMMY_ADDRESS: int = MAXIMUM_ADDRESS
 
 # maximum number of digits an address can take in base 10
 MAXIMUM_ADDRESS_DIGITS: int = len(str(MAXIMUM_ADDRESS))
+
+# the number of bytes to describe the maximum number of elements an array can have
+MAXIMUM_ARRAY_BYTE_SIZE: int = 2

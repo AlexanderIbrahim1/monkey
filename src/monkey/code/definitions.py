@@ -30,8 +30,9 @@ OPCODE_DEFINITIONS: dict[Opcode, OpcodeDefinition] = {
     opcodes.OPJUMP: OpcodeDefinition("OPJUMP", (opcodes.OPJUMP_WIDTH,)),
     opcodes.OPJUMPWHENFALSE: OpcodeDefinition("OPJUMPWHENFALSE", (opcodes.OPJUMPWHENFALSE_WIDTH,)),
     opcodes.OPNULL: OpcodeDefinition("OPNULL", ()),
-    opcodes.OPSETGLOBAL: OpcodeDefinition("OPSETGLOBAL", (opcodes.BINDING_BYTE_SIZE,)),
-    opcodes.OPGETGLOBAL: OpcodeDefinition("OPGETGLOBAL", (opcodes.BINDING_BYTE_SIZE,)),
+    opcodes.OPSETGLOBAL: OpcodeDefinition("OPSETGLOBAL", (opcodes.OPSETGLOBAL_WIDTH,)),
+    opcodes.OPGETGLOBAL: OpcodeDefinition("OPGETGLOBAL", (opcodes.OPGETGLOBAL_WIDTH,)),
+    opcodes.OPARRAY: OpcodeDefinition("OPARRAY", (opcodes.OPARRAY_WIDTH,)),
 }
 
 
