@@ -269,3 +269,59 @@ class TestCompiler:
     )
     def test_string_literals(self, case: CompilerTestCase):
         perform_compiler_test_case(case)
+
+    @pytest.mark.parametrize(
+        "case",
+        [
+            CompilerTestCase(
+                "[];",
+                (),
+                [
+                    # an OPARRAY to indicate that there's an array, and the number of elements
+                    (op.OPARRAY, (0,)),
+                    # we have an expression statement; need to pop it off
+                    (op.OPPOP, ()),
+                ],
+            ),
+            CompilerTestCase(
+                "[1, 2, 3];",
+                (1, 2, 3),
+                [
+                    # there are three constant literals we can push onto the stack
+                    (op.OPCONSTANT, (0,)),
+                    (op.OPCONSTANT, (1,)),
+                    (op.OPCONSTANT, (2,)),
+                    # an OPARRAY to indicate that there's an array, and the number of elements
+                    (op.OPARRAY, (3,)),
+                    # we have an expression statement; need to pop it off
+                    (op.OPPOP, ()),
+                ],
+            ),
+            CompilerTestCase(
+                "[1 + 2, 3 - 4, 5 * 6];",
+                (1, 2, 3, 4, 5, 6),
+                [
+                    # the first element is made by pushing constants 1 and 2, and adding them
+                    (op.OPCONSTANT, (0,)),
+                    (op.OPCONSTANT, (1,)),
+                    (op.OPADD, ()),
+                    # the second element is made by pushing constants 3 and 4, with a subtraction
+                    (op.OPCONSTANT, (2,)),
+                    (op.OPCONSTANT, (3,)),
+                    (op.OPSUB, ()),
+                    # the third element is made by pushing constants 3 and 4, with a multiplication
+                    (op.OPCONSTANT, (4,)),
+                    (op.OPCONSTANT, (5,)),
+                    (op.OPMUL, ()),
+                    # an OPARRAY to indicate that there's an array, and the number of elements
+                    # notice that even though there are 6 things on the stack, there are still
+                    # only 3 elements
+                    (op.OPARRAY, (3,)),
+                    # we have an expression statement; need to pop it off
+                    (op.OPPOP, ()),
+                ],
+            ),
+        ],
+    )
+    def test_array_literal(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)

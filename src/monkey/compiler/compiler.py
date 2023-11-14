@@ -252,5 +252,9 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
                     compiler.emit(opcodes.OPGREATERTHAN)
                 case _:
                     raise CompilationError(f"Unknown operator for infix expression: {node.operator}")
+        case exprs.ArrayLiteral():
+            for element in node.elements:
+                compile(compiler, element)
+            compiler.emit(opcodes.OPARRAY, len(node.elements))
         case _:
             raise CompilationError(f"Invalid node encountered: {node}")
