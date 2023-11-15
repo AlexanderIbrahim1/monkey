@@ -19,3 +19,6 @@ MAXIMUM_ADDRESS_DIGITS: int = len(str(MAXIMUM_ADDRESS))
 
 # the number of bytes to describe the maximum number of elements an array can have
 MAXIMUM_ARRAY_BYTE_SIZE: int = 2
+
+# the number of bytes to describe the maximum number of key-value pairs a hashmap can have
+MAXIMUM_HASH_BYTE_SIZE: int = 2

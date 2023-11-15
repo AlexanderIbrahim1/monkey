@@ -33,6 +33,7 @@ OPCODE_DEFINITIONS: dict[Opcode, OpcodeDefinition] = {
     opcodes.OPSETGLOBAL: OpcodeDefinition("OPSETGLOBAL", (opcodes.OPSETGLOBAL_WIDTH,)),
     opcodes.OPGETGLOBAL: OpcodeDefinition("OPGETGLOBAL", (opcodes.OPGETGLOBAL_WIDTH,)),
     opcodes.OPARRAY: OpcodeDefinition("OPARRAY", (opcodes.OPARRAY_WIDTH,)),
+    opcodes.OPHASH: OpcodeDefinition("OPHASH", (opcodes.OPHASH_WIDTH,)),
 }
 
 
