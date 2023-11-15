@@ -13,8 +13,22 @@ def is_expected_object(actual: objs.Object, expected_value: Any) -> bool:
             return is_string_object(actual, expected_value)
         case None:
             return is_null_object(actual)
+        case list():
+            return is_list_object(actual, expected_value)
         case _:
             return False
+
+
+def is_list_object(actual: objs.Object, expected_value: list[Any]) -> bool:
+    if not isinstance(actual, objs.ArrayObject):
+        return False
+
+    return all(
+        [
+            is_expected_object(actual_element, expected_element)
+            for (actual_element, expected_element) in zip(actual.elements, expected_value)
+        ]
+    )
 
 
 def is_integer_object(actual: objs.Object, expected_value: int) -> bool:
