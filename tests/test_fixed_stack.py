@@ -241,3 +241,30 @@ class TestFixedStack:
     def test_empty_maybe_get_last_popped(self):
         stack = FixedStack[int](3)
         assert stack.maybe_get_last_popped() is None
+
+    def test_shrink_stack_pointer(self):
+        stack = FixedStack[int](5)
+        stack.push(1)
+        stack.push(2)
+        stack.push(3)
+
+        assert stack[0] == 1
+        assert stack[1] == 2
+        assert stack[2] == 3
+
+        stack.shrink_stack_pointer(2)
+
+        stack.push(4)
+        stack.push(5)
+
+        assert stack[0] == 1
+        assert stack[1] == 4
+        assert stack[2] == 5
+
+    def test_raises_shrink_stack_pointer_too_much(self):
+        stack = FixedStack[int](5)
+        stack.push(1)
+        stack.push(2)
+
+        with pytest.raises(FixedStackError):
+            stack.shrink_stack_pointer(3)

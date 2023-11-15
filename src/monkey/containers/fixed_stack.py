@@ -96,3 +96,14 @@ class FixedStack(Generic[T]):
 
     def is_empty(self) -> bool:
         return self.size() == 0
+
+    def shrink_stack_pointer(self, n_elements: int) -> None:
+        new_stack_pointer = self._stack_pointer - n_elements
+        if new_stack_pointer < 0:
+            raise FixedStackError(
+                "Cannot shrink the stack pointer below 0\n"
+                f"Current: {self._stack_pointer}\n"
+                f"Proposed shrink: {n_elements}"
+            )
+
+        self._stack_pointer = new_stack_pointer
