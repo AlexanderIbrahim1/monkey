@@ -85,10 +85,37 @@ def run(vm: VirtualMachine) -> None:
                 # just at the top; so we can't pop or anything
                 bound_value = vm.globals[i_global]
                 vm.stack.push(bound_value)
+            case opcodes.OPARRAY:
+                # the operand of the OPARRAY opcode is the number of elements in the array
+                n_elements = _number_of_array_elements(instructions, instr_ptr)
+                instr_ptr += opcodes.OPARRAY_WIDTH
+
+                i_first_element = vm.stack.size() - n_elements
+                print(i_first_element)
+                print(vm.stack._data)
+                array = _build_array(vm, i_first_element, n_elements)
+                vm.stack.shrink_stack_pointer(n_elements)
+
+                # we go back to the position of the first element
+                vm.stack.push(array)
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
 
         instr_ptr += 1
+
+
+def _build_array(vm: VirtualMachine, i_start: int, n_elements: int) -> objs.ArrayObject:
+    elements: list[objs.Object] = [vm.stack[i + i_start] for i in range(n_elements)]
+
+    return objs.ArrayObject(elements)
+
+
+def _number_of_array_elements(instructions: code.Instructions, instr_ptr: int) -> int:
+    array_size_position = instr_ptr + 1
+    size_bytes = code.extract_operand(instructions, array_size_position, opcodes.OPARRAY_WIDTH)
+    n_elements = int.from_bytes(size_bytes, byteorder="big", signed=False)
+
+    return n_elements
 
 
 def _global_identifier_index(instructions: code.Instructions, instr_ptr: int) -> int:

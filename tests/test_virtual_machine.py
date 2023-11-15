@@ -167,6 +167,17 @@ class TestVirtualMachine:
     def test_string_literals(self, test_case: VirtualMachineTestCase):
         virtual_machine_test_case_internals(test_case)
 
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            VirtualMachineTestCase("[];", []),
+            VirtualMachineTestCase("[1, 2, 3];", [1, 2, 3]),
+            VirtualMachineTestCase("[1 + 2, 3 - 4, 5 * 6];", [3, -1, 30]),
+        ],
+    )
+    def test_array_literals(self, test_case: VirtualMachineTestCase):
+        virtual_machine_test_case_internals(test_case)
+
 
 def virtual_machine_test_case_internals(test_case: VirtualMachineTestCase):
     """
