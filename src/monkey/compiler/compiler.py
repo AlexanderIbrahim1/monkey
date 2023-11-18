@@ -24,6 +24,8 @@ import monkey.compiler.emitted_instruction as emitted
 
 import monkey.compiler.symbol_table as sym
 
+KeyValueExpressionPair = tuple[exprs.Expression, exprs.Expression]
+
 
 class Compiler:
     def __init__(
@@ -256,5 +258,16 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             for element in node.elements:
                 compile(compiler, element)
             compiler.emit(opcodes.OPARRAY, len(node.elements))
+        case exprs.HashLiteral():
+            # NOTE: the HashLiteral type in the book used an actual hash in its data structure, and Go makes no
+            # guarantees about the order of elements in a Go map. We use a list instead of a dict, and so we
+            # don't run into the same possible ordering bugs that the authors in the Go book would; we can skip
+            # that precaution entirely, and directly use the node's key-value pairs!
+            for key, value in node.key_value_pairs:
+                compile(compiler, key)
+                compile(compiler, value)
+
+            n_pairs = len(node.key_value_pairs)
+            compiler.emit(opcodes.OPHASH, 2 * n_pairs)
         case _:
             raise CompilationError(f"Invalid node encountered: {node}")

@@ -325,3 +325,60 @@ class TestCompiler:
     )
     def test_array_literal(self, case: CompilerTestCase):
         perform_compiler_test_case(case)
+
+    @pytest.mark.parametrize(
+        "case",
+        [
+            CompilerTestCase(
+                "{};",
+                (),
+                [
+                    # an OPHASH to indicate that there's a hash, 0 = number of keys and values together
+                    (op.OPHASH, (0,)),
+                    # we have an expression statement; need to pop it off
+                    (op.OPPOP, ()),
+                ],
+            ),
+            CompilerTestCase(
+                "{1: 2, 3: 4, 5: 6};",
+                (1, 2, 3, 4, 5, 6),
+                [
+                    # there are six constant literals we can push onto the stack
+                    (op.OPCONSTANT, (0,)),
+                    (op.OPCONSTANT, (1,)),
+                    (op.OPCONSTANT, (2,)),
+                    (op.OPCONSTANT, (3,)),
+                    (op.OPCONSTANT, (4,)),
+                    (op.OPCONSTANT, (5,)),
+                    # an OPHASH to indicate that there's a hash, 6 = number of keys and values together
+                    (op.OPHASH, (6,)),
+                    # we have an expression statement; need to pop it off
+                    (op.OPPOP, ()),
+                ],
+            ),
+            CompilerTestCase(
+                "{1: 2 + 3, 4: 5 * 6};",
+                (1, 2, 3, 4, 5, 6),
+                [
+                    # the first element (1) is pushed on, and that's it
+                    (op.OPCONSTANT, (0,)),
+                    # the next two elements (2, 3) are pushed on, then added
+                    (op.OPCONSTANT, (1,)),
+                    (op.OPCONSTANT, (2,)),
+                    (op.OPADD, ()),
+                    # the fourth element (4) is pushed on, and that's it
+                    (op.OPCONSTANT, (3,)),
+                    # the next two elements (5, 6) are pushed on, then multiplied
+                    (op.OPCONSTANT, (4,)),
+                    (op.OPCONSTANT, (5,)),
+                    (op.OPMUL, ()),
+                    # an OPHASH to indicate that there's a hash, 4 = number of keys and values together
+                    (op.OPHASH, (4,)),
+                    # we have an expression statement; need to pop it off
+                    (op.OPPOP, ()),
+                ],
+            ),
+        ],
+    )
+    def test_hash_literal(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)
