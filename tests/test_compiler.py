@@ -408,5 +408,32 @@ class TestCompiler:
             ),
         ],
     )
-    def test_index_expressions(self, case: CompilerTestCase):
+    def test_array_index_expressions(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)
+
+    @pytest.mark.parametrize(
+        "case",
+        [
+            CompilerTestCase(
+                "{1: 2, 3: 4}[3];",
+                (1, 2, 3, 4, 3),
+                [
+                    # the hash begins by pushing all its constants
+                    (op.OPCONSTANT, (0,)),
+                    (op.OPCONSTANT, (1,)),
+                    (op.OPCONSTANT, (2,)),
+                    (op.OPCONSTANT, (3,)),
+                    # an OPHASH to indicate that there's a hash, and the total number of objects
+                    (op.OPHASH, (4,)),
+                    # the index is created by pushing it as a constant
+                    (op.OPCONSTANT, (4,)),
+                    # now perform the indexing expression
+                    (op.OPINDEX, ()),
+                    # we have an expression statement; need to pop it off
+                    (op.OPPOP, ()),
+                ],
+            ),
+        ],
+    )
+    def test_hash_index_expressions(self, case: CompilerTestCase):
         perform_compiler_test_case(case)
