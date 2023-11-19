@@ -382,3 +382,31 @@ class TestCompiler:
     )
     def test_hash_literal(self, case: CompilerTestCase):
         perform_compiler_test_case(case)
+
+    @pytest.mark.parametrize(
+        "case",
+        [
+            CompilerTestCase(
+                "[1, 2, 3][1 + 1];",
+                (1, 2, 3, 1, 1),
+                [
+                    # the array begins by pushing all its constants
+                    (op.OPCONSTANT, (0,)),
+                    (op.OPCONSTANT, (1,)),
+                    (op.OPCONSTANT, (2,)),
+                    # an OPARRAY to indicate that there's an array, and the number of elements
+                    (op.OPARRAY, (3,)),
+                    # the index is created by pushing all its constants, then adding them
+                    (op.OPCONSTANT, (3,)),
+                    (op.OPCONSTANT, (4,)),
+                    (op.OPADD, ()),
+                    # now perform the indexing expression
+                    (op.OPINDEX, ()),
+                    # we have an expression statement; need to pop it off
+                    (op.OPPOP, ()),
+                ],
+            ),
+        ],
+    )
+    def test_index_expressions(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)

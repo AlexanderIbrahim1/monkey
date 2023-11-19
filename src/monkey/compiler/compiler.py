@@ -269,5 +269,9 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
 
             n_pairs = len(node.key_value_pairs)
             compiler.emit(opcodes.OPHASH, 2 * n_pairs)
+        case exprs.IndexExpression():
+            compile(compiler, node.container)
+            compile(compiler, node.inside)
+            compiler.emit(opcodes.OPINDEX)
         case _:
             raise CompilationError(f"Invalid node encountered: {node}")
