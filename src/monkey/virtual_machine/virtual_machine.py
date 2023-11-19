@@ -91,17 +91,55 @@ def run(vm: VirtualMachine) -> None:
                 instr_ptr += opcodes.OPARRAY_WIDTH
 
                 i_first_element = vm.stack.size() - n_elements
-                print(i_first_element)
-                print(vm.stack._data)
                 array = _build_array(vm, i_first_element, n_elements)
-                vm.stack.shrink_stack_pointer(n_elements)
 
                 # we go back to the position of the first element
+                vm.stack.shrink_stack_pointer(n_elements)
+
                 vm.stack.push(array)
+            case opcodes.OPHASH:
+                # the operand of the OPHASH opcode is (twice) the number of elements in the hashmap
+                n_objects = _number_of_hash_objects(instructions, instr_ptr)
+                instr_ptr += opcodes.OPHASH_WIDTH
+
+                i_first_element = vm.stack.size() - n_objects
+                hashmap = _build_hashmap(vm, i_first_element, n_objects)
+
+                # we go back to the position of the first element
+                vm.stack.shrink_stack_pointer(n_objects)
+
+                vm.stack.push(hashmap)
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
 
         instr_ptr += 1
+
+
+def _build_hashmap(vm: VirtualMachine, i_start: int, n_objects: int) -> objs.HashObject:
+    hashmap: dict[objs.ObjectHash, objs.HashKeyValuePair] = {}
+
+    # the keys and values come in consecutive pairs, and each counts as an object, so we need
+    # to move forward in pairs
+    for i in range(0, n_objects, 2):
+        key_position = i + i_start
+        value_position = i + i_start + 1
+        key = vm.stack[key_position]
+        value = vm.stack[value_position]
+
+        hashvalue = objs.create_object_hash(key)
+        pair = objs.HashKeyValuePair(key, value)
+
+        hashmap[hashvalue] = pair
+
+    return objs.HashObject(hashmap)
+
+
+def _number_of_hash_objects(instructions: code.Instructions, instr_ptr: int) -> int:
+    hash_size_position = instr_ptr + 1
+    size_bytes = code.extract_operand(instructions, hash_size_position, opcodes.OPHASH_WIDTH)
+    n_objects = int.from_bytes(size_bytes, byteorder="big", signed=False)
+
+    return n_objects
 
 
 def _build_array(vm: VirtualMachine, i_start: int, n_elements: int) -> objs.ArrayObject:
