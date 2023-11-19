@@ -32,6 +32,7 @@ OPSETGLOBAL: Opcode = b"\x16"
 OPGETGLOBAL: Opcode = b"\x17"
 OPARRAY: Opcode = b"\x18"
 OPHASH: Opcode = b"\x19"
+OPINDEX: Opcode = b"\x20"
 
 # a dummy opcode used in situations where an opcode instance needs to exist
 OPDUMMY: Opcode = b"\xFF"
