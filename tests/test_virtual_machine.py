@@ -190,6 +190,56 @@ class TestVirtualMachine:
     def test_hash_literals(self, test_case: VirtualMachineTestCase):
         virtual_machine_test_case_internals(test_case)
 
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            VirtualMachineTestCase("[1, 2, 3][1];", 2),
+            VirtualMachineTestCase("[1, 2, 3][0 + 2];", 3),
+            VirtualMachineTestCase("[[1, 3, 5]][0][0];", 1),
+            VirtualMachineTestCase("[[1, 3, 5]][0][0];", 1),
+        ],
+    )
+    def test_array_indexing(self, test_case: VirtualMachineTestCase):
+        virtual_machine_test_case_internals(test_case)
+
+    @pytest.mark.parametrize(
+        "test_case_input_text",
+        [
+            "[1, 2, 3][3];",
+            "[][0];",
+            "[][1];",
+            "[1, 2, 3, 4][-1];",
+        ],
+    )
+    def test_array_index_raises(self, test_case_input_text: str):
+        virtual_machine_test_case_raises_internals(test_case_input_text)
+
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            VirtualMachineTestCase("{1: 2, 3: 4}[1];", 2),
+            VirtualMachineTestCase("{1: 2, 3: 4}[3];", 4),
+            VirtualMachineTestCase("{1: 2, 3: 4}[1 + 2];", 4),
+            VirtualMachineTestCase("{1: 2, 1 + 2: 4}[3];", 4),
+            VirtualMachineTestCase("{true: 5, false: 10, 7: 123}[true];", 5),
+            VirtualMachineTestCase("{true: 5, false: 10, 7: 123}[false];", 10),
+            VirtualMachineTestCase("{true: 5, false: 10, 7: 123}[7];", 123),
+        ],
+    )
+    def test_hash_indexing(self, test_case: VirtualMachineTestCase):
+        virtual_machine_test_case_internals(test_case)
+
+    @pytest.mark.parametrize(
+        "test_case_input_text",
+        [
+            "{1: 2}[3];",
+            "{1: 2}[0];",
+            "{}[0];",
+        ],
+    )
+    def test_hash_index_raises(self, test_case_input_text: str):
+        virtual_machine_test_case_raises_internals(test_case_input_text)
+
 
 def virtual_machine_test_case_internals(test_case: VirtualMachineTestCase):
     """
@@ -215,3 +265,19 @@ def virtual_machine_test_case_internals(test_case: VirtualMachineTestCase):
     top_object = machine.stack.maybe_get_last_popped()
     assert top_object is not None
     assert object_utils.is_expected_object(top_object, test_case.expected)
+
+
+def virtual_machine_test_case_raises_internals(input_text: str):
+    """
+    Assert that, after compilation and runnning by the VM, that a VirtualMachineError
+    is raised.
+    """
+    program = compiler_utils.parse(input_text)
+    compiler = comp.Compiler()
+    comp.compile(compiler, program)
+
+    bytecode = comp.bytecode_from_compiler(compiler)
+    machine = vm.VirtualMachine(bytecode)
+
+    with pytest.raises(vm.VirtualMachineError):
+        vm.run(machine)

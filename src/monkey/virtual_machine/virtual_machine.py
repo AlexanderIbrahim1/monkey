@@ -109,10 +109,75 @@ def run(vm: VirtualMachine) -> None:
                 vm.stack.shrink_stack_pointer(n_objects)
 
                 vm.stack.push(hashmap)
+            case opcodes.OPINDEX:
+                # when an index expression `container[inside]` is compiled, what happens is:
+                # - `container`` is compiled first
+                # - `inside` is compiled next (and is on top of the stack)
+                # - the `OPINDEX` instruction is pushed
+                inside = vm.stack.pop()
+                container = vm.stack.pop()
+
+                # can reuse functions from the interpreter
+                result = _evaluate_index_expression(container, inside)
+                vm.stack.push(result)
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
 
         instr_ptr += 1
+
+
+def _evaluate_index_expression(container: objs.Object, inside: objs.Object) -> objs.Object:
+    if isinstance(container, objs.ArrayObject) and isinstance(inside, objs.IntegerObject):
+        return _evaluate_array_index_expression(container, inside)
+    if isinstance(container, objs.StringObject) and isinstance(inside, objs.IntegerObject):
+        return _evaluate_string_index_expression(container, inside)
+    if isinstance(container, objs.HashObject):
+        return _evaluate_hash_index_expression(container, inside)
+    else:
+        container_str = OBJECT_TYPE_DICT[container.data_type()]
+        inside_str = OBJECT_TYPE_DICT[inside.data_type()]
+        raise VirtualMachineError(
+            "Indexing operation not supported by the compiler.\n"
+            f"container type: {container_str}\n"
+            f"inside type: {inside_str}\n"
+        )
+
+
+def _evaluate_array_index_expression(array: objs.ArrayObject, index: objs.IntegerObject) -> objs.Object:
+    arr_index: int = index.value
+    max_allowed: int = len(array.elements) - 1
+
+    if arr_index < 0 or arr_index > max_allowed:
+        raise VirtualMachineError(
+            "Indexing array out of bounds.\n" f"Array length: {len(array.elements)}\n" f"Index: {index}"
+        )
+
+    return array.elements[arr_index]
+
+
+def _evaluate_string_index_expression(string: objs.StringObject, index: objs.IntegerObject) -> objs.Object:
+    str_index: int = index.value
+    max_allowed: int = len(string.value) - 1
+
+    if str_index < 0 or str_index > max_allowed:
+        raise VirtualMachineError(
+            "Indexing string out of bounds.\n" f"String length: {len(string.value)}\n" f"Index: {index}"
+        )
+
+    return objs.StringObject(string.value[str_index])
+
+
+def _evaluate_hash_index_expression(hashmap: objs.HashObject, key: objs.Object) -> objs.Object:
+    hashed_key = objs.create_object_hash(key)
+    if hashed_key.data_type == objs.ObjectType.ERROR:
+        key_str = OBJECT_TYPE_DICT[key.data_type()]
+        raise VirtualMachineError("Found an unhashable type as a key in a hashmap.\n" f"key type: {key_str}")
+
+    pair = hashmap.pairs.get(hashed_key, None)
+    if pair is None:
+        raise VirtualMachineError(f"Key {key} not found in a hash map.")
+    else:
+        return pair.value
 
 
 def _build_hashmap(vm: VirtualMachine, i_start: int, n_objects: int) -> objs.HashObject:
