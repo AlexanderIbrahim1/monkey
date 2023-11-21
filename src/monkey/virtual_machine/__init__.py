@@ -1,2 +1,3 @@
 from monkey.virtual_machine.virtual_machine import run
 from monkey.virtual_machine.virtual_machine import VirtualMachine
+from monkey.virtual_machine.custom_exceptions import VirtualMachineError
