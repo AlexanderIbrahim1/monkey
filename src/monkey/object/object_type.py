@@ -21,6 +21,7 @@ class ObjectType(enum.Enum):
     BUILTIN = enum.auto()
     ARRAY = enum.auto()
     HASH = enum.auto()
+    COMPILED_FUNCTION = enum.auto()
 
 
 OBJECT_TYPE_DICT: dict[ObjectType, str] = {
@@ -34,4 +35,5 @@ OBJECT_TYPE_DICT: dict[ObjectType, str] = {
     ObjectType.BUILTIN: "BUILTIN",
     ObjectType.ARRAY: "ARRAY",
     ObjectType.HASH: "HASH",
+    ObjectType.COMPILED_FUNCTION: "COMPILED_FUNCTION",
 }

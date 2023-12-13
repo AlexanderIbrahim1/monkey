@@ -22,6 +22,7 @@ from monkey.object.string_object import StringObject
 from monkey.object.builtin_object import BuiltinObject
 from monkey.object.array_object import ArrayObject
 from monkey.object.hash_object import HashObject
+from monkey.object.compiled_function_object import CompiledFunctionObject
 
 from monkey.object.hash_object import HashKeyValuePair
 from monkey.object.object_hasher import create_object_hash

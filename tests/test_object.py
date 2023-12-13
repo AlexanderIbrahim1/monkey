@@ -10,12 +10,17 @@ from monkey.object import NullObject
 from monkey.object import ReturnObject
 from monkey.object import FunctionObject
 from monkey.object import ArrayObject
+from monkey.object import CompiledFunctionObject
 
 from monkey.parser.expressions import Identifier
 from monkey.parser.expressions import InfixExpression
 from monkey.parser.statements import BlockStatement
 from monkey.parser.statements import ReturnStatement
 import monkey.object as objs
+
+from monkey.code import make_instruction
+from monkey.code import instructions_to_string
+from monkey.code import opcodes
 
 
 def test_integer_object():
@@ -101,3 +106,16 @@ def test_array_object():
 
     assert array_obj.data_type() == ObjectType.ARRAY
     assert array_obj.inspect() == "[-3, true, 10]"
+
+
+def test_compiled_function_object():
+    opcode = opcodes.OPCONSTANT
+    operands = (2**16 - 2,)
+
+    instructions = make_instruction(opcode, *operands)
+    written_instructions = instructions_to_string(instructions)
+
+    compiled_function_obj = CompiledFunctionObject(instructions)
+
+    assert compiled_function_obj.data_type() == ObjectType.COMPILED_FUNCTION
+    assert compiled_function_obj.inspect() == f"COMPILED_FUNCTION[\n{written_instructions}\n]"
