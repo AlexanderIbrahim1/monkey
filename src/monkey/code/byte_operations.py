@@ -60,7 +60,8 @@ def instructions_to_string(instructions: Instructions) -> str:
         if is_undefined(opcode_def):
             raise ValueError(f"Cannot look up the opcode definition of '{opcode[0]}'")
 
-        operands, bytes_read = _read_operands(opcode_def, instructions[i + 1 :])
+        operand_start_position = i + 1
+        operands, bytes_read = _read_operands(opcode_def, instructions[operand_start_position:])
 
         # append the instructions to the string buffer
         formatted_instruction = _format_instruction(opcode_def, operands)
