@@ -62,19 +62,17 @@ class Compiler:
         else:
             self._compilation_scopes = copy.deepcopy(compilation_scopes)
 
-        self._scope_index = 0
-
     @property
     def last_instruction(self) -> EmittedInstruction:
-        return self._compilation_scopes[self._scope_index].last_instruction
+        return self._compilation_scopes.peek().last_instruction
 
     @property
     def second_last_instruction(self) -> EmittedInstruction:
-        return self._compilation_scopes[self._scope_index].second_last_instruction
+        return self._compilation_scopes.peek().second_last_instruction
 
     @property
     def instructions(self) -> Instructions:
-        return self._compilation_scopes[self._scope_index].instructions
+        return self._compilation_scopes.peek().instructions
 
     @property
     def constants(self) -> list[Object]:
@@ -82,7 +80,16 @@ class Compiler:
 
     @property
     def current_scope(self) -> CompilationScope:
-        return self._compilation_scopes[self._scope_index]
+        return self._compilation_scopes.peek()
+
+    def enter_scope(self) -> None:
+        new_scope = CompilationScope()
+        self._compilation_scopes.push(new_scope)
+
+    def leave_scope(self) -> Instructions:
+        current_scope = self._compilation_scopes.pop()
+
+        return current_scope.instructions
 
     def add_constant_and_get_position(self, const: Object) -> int:
         position = len(self._constants)
