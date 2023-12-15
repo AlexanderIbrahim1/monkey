@@ -139,6 +139,15 @@ class Compiler:
 
         self.replace_instructions(new_instructions, position)
 
+    def replace_last_instruction_with(self, new_opcode: opcodes.Opcode, *new_operands: int) -> None:
+        # need to replace instructions in two places; the "last instruction", as described in
+        # the function name, but also the overall sequence of instructions!
+        position = self.current_scope.last_instruction.position
+        new_instructions = make_instruction(new_opcode, *new_operands)
+        self.replace_instructions(new_instructions, position)
+
+        self.current_scope.last_instruction.opcode = new_opcode
+
     def _update_last_instructions(self, opcode: Opcode, position: int) -> None:
         scope = self.current_scope
         scope.second_last_instruction = scope.last_instruction
@@ -307,6 +316,10 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             # compile the body of the function in its own scope
             compiler.enter_scope()
             compile(compiler, node.body)
+
+            if emitted.is_pop(compiler.last_instruction):
+                compiler.replace_last_instruction_with(opcodes.OPRETURNVALUE)
+
             instructions = compiler.leave_scope()
 
             # ensures that the emitted instructions are stored in a separate object after compilation
