@@ -40,11 +40,6 @@ class Compiler:
         symbol_table: Optional[sym.SymbolTable] = None,
         compilation_scopes: Optional[FixedStack[CompilationScope]] = None,
     ) -> None:
-        if instructions is None:
-            self._instructions = Instructions()
-        else:
-            self._instructions = instructions
-
         if constants is None:
             self._constants = []
         else:
@@ -57,27 +52,37 @@ class Compiler:
 
         if compilation_scopes is None:
             self._compilation_scopes = FixedStack[CompilationScope](MAX_COMPILATION_SCOPE_STACK_SIZE)
+
+            if instructions is None:
+                main_scope = CompilationScope()
+            else:
+                main_scope = CompilationScope(instructions=instructions)
+
+            self._compilation_scopes.push(main_scope)
         else:
             self._compilation_scopes = copy.deepcopy(compilation_scopes)
 
-        self._last_instruction = EmittedInstruction()
-        self._second_last_instruction = EmittedInstruction()
+        self._scope_index = 0
 
     @property
     def last_instruction(self) -> EmittedInstruction:
-        return self._last_instruction
+        return self._compilation_scopes[self._scope_index].last_instruction
 
     @property
     def second_last_instruction(self) -> EmittedInstruction:
-        return self._second_last_instruction
+        return self._compilation_scopes[self._scope_index].second_last_instruction
 
     @property
     def instructions(self) -> Instructions:
-        return self._instructions
+        return self._compilation_scopes[self._scope_index].instructions
 
     @property
     def constants(self) -> list[Object]:
         return self._constants
+
+    @property
+    def current_scope(self) -> CompilationScope:
+        return self._compilation_scopes[self._scope_index]
 
     def add_constant_and_get_position(self, const: Object) -> int:
         position = len(self._constants)
@@ -86,8 +91,8 @@ class Compiler:
         return position
 
     def add_instruction_and_get_position(self, instr: Instructions) -> int:
-        position = len(self._instructions)
-        self._instructions += instr
+        position = len(self.current_scope.instructions)
+        self.current_scope.instructions += instr
 
         return position
 
@@ -100,38 +105,41 @@ class Compiler:
         return pos
 
     def remove_last_instruction(self) -> None:
-        if not emitted.is_valid_emitted_instruction(self._last_instruction):
+        scope = self.current_scope
+        if not emitted.is_valid_emitted_instruction(scope.last_instruction):
             raise CompilationError(
                 "Cannot remove the last instruction; it isn't a valid one.\n"
-                f"last instruction: {self._last_instruction}"
+                f"last instruction: {scope.last_instruction}"
             )
 
-        new_end_pos = self._last_instruction.position
-        self._instructions = self._instructions[:new_end_pos]
-        self._last_instruction = self._second_last_instruction
+        new_end_pos = scope.last_instruction.position
+        scope.instructions = scope.instructions[:new_end_pos]
+        scope.last_instruction = scope.second_last_instruction
 
     def replace_instructions(self, new_instructions: Instructions, start_position: int) -> None:
         self._check_last_instruction_position(new_instructions, start_position)
 
         end_position = start_position + len(new_instructions)
-        self._instructions[start_position:end_position] = new_instructions
+        self.current_scope.instructions[start_position:end_position] = new_instructions
 
     def replace_operand(self, position: int, *operands: int) -> None:
-        new_opcode = extract_opcode(self._instructions, position)
+        new_opcode = extract_opcode(self.current_scope.instructions, position)
         new_instructions = make_instruction(new_opcode, *operands)
 
         self.replace_instructions(new_instructions, position)
 
     def _update_last_instructions(self, opcode: Opcode, position: int) -> None:
-        self._second_last_instruction = self._last_instruction
-        self._last_instruction = EmittedInstruction(opcode, position)
+        scope = self.current_scope
+        scope.second_last_instruction = scope.last_instruction
+        scope.last_instruction = EmittedInstruction(opcode, position)
 
     def _check_last_instruction_position(self, new_instructions: Instructions, start_position: int) -> None:
+        scope = self.current_scope
         last_replaced_position = start_position + len(new_instructions) - 1
-        if last_replaced_position >= len(self._instructions):
+        if last_replaced_position >= len(scope.instructions):
             raise CompilationError(
                 "Attempted to replace instructions beyond the last existing instruction.\n"
-                f"len(instructions) = {len(self._instructions)}\n"
+                f"len(instructions) = {len(scope.instructions)}\n"
                 f"start_position = {start_position}\n"
                 f"len(new_instructions) = {len(new_instructions)}"
             )
