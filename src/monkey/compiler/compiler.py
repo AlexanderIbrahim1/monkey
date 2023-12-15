@@ -63,6 +63,10 @@ class Compiler:
             self._compilation_scopes = copy.deepcopy(compilation_scopes)
 
     @property
+    def number_of_scopes(self) -> int:
+        return self._compilation_scopes.size()
+
+    @property
     def last_instruction(self) -> EmittedInstruction:
         return self._compilation_scopes.peek().last_instruction
 
@@ -299,5 +303,18 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             compile(compiler, node.container)
             compile(compiler, node.inside)
             compiler.emit(opcodes.OPINDEX)
+        case exprs.FunctionLiteral():  # parameters, body
+            # compile the body of the function in its own scope
+            compiler.enter_scope()
+            compile(compiler, node.body)
+            instructions = compiler.leave_scope()
+
+            # ensures that the emitted instructions are stored in a separate object after compilation
+            compiled_function = objs.CompiledFunctionObject(instructions)
+            position = compiler.add_constant_and_get_position(compiled_function)
+            compiler.emit(opcodes.OPCONSTANT, position)
+        case stmts.ReturnStatement():  # value
+            compile(compiler, node.value)
+            compiler.emit(opcodes.OPRETURNVALUE)
         case _:
             raise CompilationError(f"Invalid node encountered: {node}")
