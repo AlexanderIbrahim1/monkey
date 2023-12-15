@@ -1,3 +1,4 @@
+import copy
 import dataclasses
 from typing import Optional
 
@@ -18,9 +19,13 @@ from monkey.code import make_instruction
 from monkey.code import DUMMY_ADDRESS
 import monkey.code.opcodes as opcodes
 
+from monkey.containers.fixed_stack import FixedStack
+
+from monkey.compiler.constants import MAX_COMPILATION_SCOPE_STACK_SIZE
 from monkey.compiler.custom_exceptions import CompilationError
 from monkey.compiler.emitted_instruction import EmittedInstruction
 import monkey.compiler.emitted_instruction as emitted
+from monkey.compiler.compilation_scope import CompilationScope
 
 import monkey.compiler.symbol_table as sym
 
@@ -33,6 +38,7 @@ class Compiler:
         instructions: Optional[Instructions] = None,
         constants: Optional[list[Object]] = None,
         symbol_table: Optional[sym.SymbolTable] = None,
+        compilation_scopes: Optional[FixedStack[CompilationScope]] = None,
     ) -> None:
         if instructions is None:
             self._instructions = Instructions()
@@ -48,6 +54,11 @@ class Compiler:
             self.symbol_table = sym.SymbolTable()
         else:
             self.symbol_table = symbol_table
+
+        if compilation_scopes is None:
+            self._compilation_scopes = FixedStack[CompilationScope](MAX_COMPILATION_SCOPE_STACK_SIZE)
+        else:
+            self._compilation_scopes = copy.deepcopy(compilation_scopes)
 
         self._last_instruction = EmittedInstruction()
         self._second_last_instruction = EmittedInstruction()
