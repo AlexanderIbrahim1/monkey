@@ -1,3 +1,4 @@
+import monkey.tokens.token_types as token_types
 import monkey.parser.statements as stmts
 
 from monkey.parser.parser.parser import Parser
@@ -22,7 +23,11 @@ def parse_block_statement(
         stmt = parse_statement(parser, parsing_fn)
 
         if stmt == FAIL_STMT:
-            return FAIL_STMT
+            if parser.current_token_type_is(token_types.SEMICOLON):
+                parser.parse_next_token()
+                continue
+            else:
+                return FAIL_STMT
 
         statements.append(stmt)
         parser.parse_next_token()
