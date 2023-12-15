@@ -33,6 +33,9 @@ OPGETGLOBAL: Opcode = b"\x17"
 OPARRAY: Opcode = b"\x18"
 OPHASH: Opcode = b"\x19"
 OPINDEX: Opcode = b"\x20"
+OPCALL: Opcode = b"\x21"
+OPRETURNVALUE: Opcode = b"\x22"
+OPRETURN: Opcode = b"\x23"
 
 # a dummy opcode used in situations where an opcode instance needs to exist
 OPDUMMY: Opcode = b"\xFF"
