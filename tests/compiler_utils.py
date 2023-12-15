@@ -76,6 +76,8 @@ def make_object(value: Any) -> objs.Object:
             return objs.IntegerObject(value)
         case str():
             return objs.StringObject(value)
+        case code.Instructions():
+            return objs.CompiledFunctionObject(value)
         case None:
             return objs.NULL_OBJ
         case _:

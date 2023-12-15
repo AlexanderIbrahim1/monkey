@@ -4,6 +4,7 @@ from monkey.compiler import Compiler
 from monkey.compiler import compile
 from monkey.compiler import EmittedInstruction
 
+import monkey.code as code
 import monkey.code.opcodes as op
 
 from compiler_utils import CompilerTestCase
@@ -436,4 +437,59 @@ class TestCompiler:
         ],
     )
     def test_hash_index_expressions(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)
+
+    @pytest.mark.parametrize(
+        "case",
+        [
+            CompilerTestCase(
+                "fn() { return 5 + 10; };",
+                (
+                    5,
+                    10,
+                    # the argument to the compiled function is the bytecode for the operations that
+                    # take place in its body
+                    code.make_instructions_from_opcode_operand_pairs(
+                        [
+                            (op.OPCONSTANT, (0,)),
+                            (op.OPCONSTANT, (1,)),
+                            (op.OPADD, ()),
+                            (op.OPRETURNVALUE, ()),
+                        ]
+                    ),
+                ),
+                [
+                    # the compiled function is a constant, so we can push it on the stack as one
+                    (op.OPCONSTANT, (2,)),
+                    # we have an expression statement; need to pop it off
+                    (op.OPPOP, ()),
+                ],
+            ),
+            #            # identical to the above case, but now for an implicit return
+            #            CompilerTestCase(
+            #                "fn() { 5 + 10 };",
+            #                (
+            #                    5,
+            #                    10,
+            #                    # the argument to the compiled function is the bytecode for the operations that
+            #                    # take place in its body
+            #                    code.make_instructions_from_opcode_operand_pairs(
+            #                        [
+            #                            (op.OPCONSTANT, (0,)),
+            #                            (op.OPCONSTANT, (1,)),
+            #                            (op.OPADD, ()),
+            #                            (op.OPRETURNVALUE, ()),
+            #                        ]
+            #                    ),
+            #                ),
+            #                [
+            #                    # the compiled function is a constant, so we can push it on the stack as one
+            #                    (op.OPCONSTANT, (2,)),
+            #                    # we have an expression statement; need to pop it off
+            #                    (op.OPPOP, ()),
+            #                ],
+            #            ),
+        ],
+    )
+    def test_compiled_function(self, case: CompilerTestCase):
         perform_compiler_test_case(case)
