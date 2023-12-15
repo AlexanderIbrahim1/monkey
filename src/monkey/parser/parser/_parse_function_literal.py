@@ -2,6 +2,7 @@ import monkey.tokens.token_types as token_types
 import monkey.parser.expressions as exprs
 
 from monkey.parser.parser._constants import FAIL_EXPR
+from monkey.parser.parser._constants import FAIL_STMT
 from monkey.parser.parser._constants import ParsingFunction
 from monkey.parser.parser.parser import Parser
 from monkey.parser.parser._parse_block_statement import parse_block_statement
@@ -26,7 +27,7 @@ def parse_function_literal(
         return FAIL_EXPR
 
     body = parse_block_statement(parser, parsing_fn)
-    if body == FAIL_EXPR:
+    if body == FAIL_STMT:
         return FAIL_EXPR
 
     # ignore reason: already checked for possibilities of 'parameters' and 'body' being FailedExpression
