@@ -337,6 +337,45 @@ def test_function_literal():
     assert not parser.has_errors()
 
 
+@pytest.mark.skip
+def test_function_literal_with_redundant_statements():
+    monkey_code = "fn(x, y) { 5; return x + y; };"
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parse_program(parser)
+
+    expected_token = Token(token_types.FUNCTION, "fn")
+    expected_parameters = [
+        Identifier(Token(token_types.IDENTIFIER, "x"), "x"),
+        Identifier(Token(token_types.IDENTIFIER, "y"), "y"),
+    ]
+
+    expected_integer_statement = ExpressionStatement(
+        Token(token_types.INT, "5"), IntegerLiteral(expected_token, "5")
+    )
+
+    summation = InfixExpression(
+        Token(token_types.PLUS, "+"),
+        Identifier(Token(token_types.IDENTIFIER, "x"), "x"),
+        token_types.PLUS,
+        Identifier(Token(token_types.IDENTIFIER, "y"), "y"),
+    )
+    ret_statement = ReturnStatement(
+        Token(token_types.RETURN, "return"),
+        summation,
+    )
+    expected_body = BlockStatement(
+        Token(token_types.LBRACE, "{"), [expected_integer_statement, ret_statement]
+    )
+
+    expected_expr = FunctionLiteral(expected_token, expected_parameters, expected_body)
+    expected_statement = ExpressionStatement(Token(token_types.FUNCTION, "fn"), expected_expr)
+
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement
+    assert not parser.has_errors()
+
+
 def test_call_expression0():
     monkey_code = "add(1, 2);"
     lexer = Lexer(monkey_code)
