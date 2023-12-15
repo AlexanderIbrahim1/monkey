@@ -11,5 +11,7 @@ import monkey.parser.statements as stmts
 
 
 FAIL_EXPR = exprs.FailedExpression()
+EMPTY_EXPR = exprs.EmptyExpression()
 FAIL_STMT = stmts.FailedStatement()
+EMPTY_STMT = stmts.EmptyStatement()
 ParsingFunction = Callable[[Parser, Precedence], exprs.Expression]
