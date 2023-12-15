@@ -8,8 +8,7 @@ import dataclasses
 from monkey.code import Opcode
 import monkey.code.opcodes as opcodes
 
-
-DUMMY_EMITTED_INSTRUCTION_POSITION = -1
+from monkey.compiler.constants import DUMMY_EMITTED_INSTRUCTION_POSITION
 
 
 @dataclasses.dataclass
