@@ -3,11 +3,10 @@ import pytest
 from monkey.code import Instructions
 from monkey.code import lookup_opcode_definition
 from monkey.code import make_instruction
+from monkey.code import make_instructions_from_opcode_operand_pairs
 from monkey.code import instructions_to_string
 
 import monkey.code.opcodes as opcodes
-
-from compiler_utils import concatenate_instructions
 
 
 def test_make_instruction():
@@ -43,7 +42,7 @@ def test_make_instruction():
     ],
 )
 def test_instruction_to_string(instruction_pairs):
-    instructions = concatenate_instructions(instruction_pairs)
+    instructions = make_instructions_from_opcode_operand_pairs(instruction_pairs)
     formatted_instructions = instructions_to_string(instructions)
     token_pairs = formatted_instructions.split("\n")
 

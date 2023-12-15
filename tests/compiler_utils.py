@@ -2,7 +2,6 @@
 This module contains functions needed to help run the `test_compiler.py` file.
 """
 
-import functools
 import itertools
 from typing import Any
 from typing import Sequence
@@ -30,7 +29,7 @@ class CompilerTestCase:
         instruction_pairs: Sequence[tuple[code.Opcode, tuple[int, ...]]],
     ) -> None:
         self.input_text = input_text
-        self.instructions = concatenate_instructions(instruction_pairs)
+        self.instructions = code.make_instructions_from_opcode_operand_pairs(instruction_pairs)
         self.constants = [make_object(value) for value in expected_constants]
 
 
@@ -67,15 +66,6 @@ def parse(monkey_code: str) -> Program:
     program = parse_program(parser)
 
     return program
-
-
-def concatenate_instructions(
-    instruction_pairs: Sequence[tuple[code.Opcode, tuple[int, ...]]]
-) -> code.Instructions:
-    instructions = (code.make_instruction(opcode, *operands) for (opcode, operands) in instruction_pairs)
-    concat_instructions = functools.reduce(lambda x, y: x + y, instructions)
-
-    return concat_instructions
 
 
 def make_object(value: Any) -> objs.Object:

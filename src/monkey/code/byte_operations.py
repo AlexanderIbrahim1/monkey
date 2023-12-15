@@ -3,6 +3,9 @@ This module contains opcode-related functions used throughout the rest of the
 compiler.
 """
 
+import functools
+from typing import Sequence
+
 from monkey.code.code import Instructions
 from monkey.code.code import Opcode
 from monkey.code.code import OPCODE_SIZE
@@ -12,6 +15,8 @@ from monkey.code.definitions import is_undefined
 from monkey.code.definitions import lookup_opcode_definition
 
 from monkey.code.constants import MAXIMUM_ADDRESS_DIGITS
+
+from monkey.code.custom_types import OpcodeOperandPair
 
 
 def extract_opcode(instructions: Instructions, position: int) -> Opcode:
@@ -47,6 +52,19 @@ def make_instruction(op: Opcode, *operands: int) -> Instructions:
         offset += width
 
     return Instructions(mutable_instruction)
+
+
+def make_instructions_from_opcode_operand_pairs(
+    instruction_pairs: Sequence[OpcodeOperandPair],
+) -> Instructions:
+    """
+    Create a single instruction byte sequence from a sequence of pairs of opcodes
+    and their corresponding operands.
+    """
+    instructions = (make_instruction(opcode, *operands) for (opcode, operands) in instruction_pairs)
+    concat_instructions = functools.reduce(lambda x, y: x + y, instructions)
+
+    return concat_instructions
 
 
 def instructions_to_string(instructions: Instructions) -> str:
