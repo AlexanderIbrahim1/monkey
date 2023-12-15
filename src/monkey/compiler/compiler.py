@@ -336,5 +336,9 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
         case stmts.ReturnStatement():  # value
             compile(compiler, node.value)
             compiler.emit(opcodes.OPRETURNVALUE)
+        case exprs.CallExpression():  # function, arguments
+            compile(compiler, node.function)
+            compiler.emit(opcodes.OPCALL)
+            pass
         case _:
             raise CompilationError(f"Invalid node encountered: {node}")

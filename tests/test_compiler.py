@@ -532,3 +532,55 @@ class TestCompiler:
     )
     def test_compiled_function(self, case: CompilerTestCase):
         perform_compiler_test_case(case)
+
+    @pytest.mark.parametrize(
+        "case",
+        [
+            CompilerTestCase(
+                "fn() { 24 }();",
+                (
+                    24,
+                    code.make_instructions_from_opcode_operand_pairs(
+                        [
+                            (op.OPCONSTANT, (0,)),
+                            (op.OPRETURNVALUE, ()),
+                        ]
+                    ),
+                ),
+                [
+                    # the compiled function is a constant, so we can push it on the stack as one
+                    (op.OPCONSTANT, (1,)),
+                    # we are calling the function on top of the stack
+                    (op.OPCALL, ()),
+                    # we have an expression statement; we need to pop it off
+                    (op.OPPOP, ()),
+                ],
+            ),
+            CompilerTestCase(
+                "let my_func = fn() { 24 }; my_func();",
+                (
+                    24,
+                    code.make_instructions_from_opcode_operand_pairs(
+                        [
+                            (op.OPCONSTANT, (0,)),
+                            (op.OPRETURNVALUE, ()),
+                        ]
+                    ),
+                ),
+                [
+                    # the compiled function is a constant, so we can push it on the stack as one
+                    (op.OPCONSTANT, (1,)),
+                    # bind variable '0' to the object on top of the stack (the compiled function)
+                    (op.OPSETGLOBAL, (0,)),
+                    # retrieve the variable referred to by '0' (the compiled function)
+                    (op.OPGETGLOBAL, (0,)),
+                    # we are calling the function on top of the stack
+                    (op.OPCALL, ()),
+                    # we have an expression statement; we need to pop it off
+                    (op.OPPOP, ()),
+                ],
+            ),
+        ],
+    )
+    def test_function_call(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)
