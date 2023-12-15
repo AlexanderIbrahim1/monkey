@@ -148,6 +148,9 @@ class Compiler:
 
         self.current_scope.last_instruction.opcode = new_opcode
 
+    def is_last_instruction_opcode(self, opcode: opcodes.Opcode) -> bool:
+        return self.last_instruction.opcode == opcode
+
     def _update_last_instructions(self, opcode: Opcode, position: int) -> None:
         scope = self.current_scope
         scope.second_last_instruction = scope.last_instruction
@@ -233,7 +236,7 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             # if the condition is true, we don't jump, and instead continue to this bytecode
             # depending on the expression in the consequence, it might leave an extra OPPOP on the stack
             compile(compiler, node.consequence)
-            if emitted.is_pop(compiler.last_instruction):
+            if compiler.is_last_instruction_opcode(opcodes.OPPOP):
                 compiler.remove_last_instruction()
 
             # if we didn't jump before, we have to now, past the bytecode for the alternative
@@ -249,7 +252,7 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
                 compiler.emit(opcodes.OPNULL)
             else:
                 compile(compiler, node.alternative)
-                if emitted.is_pop(compiler.last_instruction):
+                if compiler.is_last_instruction_opcode(opcodes.OPPOP):
                     compiler.remove_last_instruction()
 
             # if we didn't jump, and hit the OPJUMP instruction, it should be to here
@@ -317,8 +320,12 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             compiler.enter_scope()
             compile(compiler, node.body)
 
-            if emitted.is_pop(compiler.last_instruction):
+            # covers the case of an implicit return (no return statement, so no ReturnStatement case)
+            if compiler.is_last_instruction_opcode(opcodes.OPPOP):
                 compiler.replace_last_instruction_with(opcodes.OPRETURNVALUE)
+
+            if not compiler.is_last_instruction_opcode(opcodes.OPRETURNVALUE):
+                compiler.emit(opcodes.OPRETURN)
 
             instructions = compiler.leave_scope()
 

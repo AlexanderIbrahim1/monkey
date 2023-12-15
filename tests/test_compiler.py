@@ -512,6 +512,22 @@ class TestCompiler:
                     (op.OPPOP, ()),
                 ],
             ),
+            CompilerTestCase(
+                "fn() {};",
+                (
+                    code.make_instructions_from_opcode_operand_pairs(
+                        [
+                            (op.OPRETURN, ()),
+                        ]
+                    ),
+                ),
+                [
+                    # the compiled function is a constant, so we can push it on the stack as one
+                    (op.OPCONSTANT, (0,)),
+                    # we have an expression statement; need to pop it off
+                    (op.OPPOP, ()),
+                ],
+            ),
         ],
     )
     def test_compiled_function(self, case: CompilerTestCase):
