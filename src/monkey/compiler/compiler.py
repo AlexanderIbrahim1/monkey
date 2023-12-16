@@ -184,6 +184,9 @@ def bytecode_from_compiler(compiler: Compiler) -> Bytecode:
 
 
 def compile(compiler: Compiler, node: ASTNode) -> None:
+    print()
+    print(f"TYPE: {type(node)}")
+    print(f"NODE: {node}")
     match node:
         case Program():
             for stmt in node.statements:
@@ -339,6 +342,5 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
         case exprs.CallExpression():  # function, arguments
             compile(compiler, node.function)
             compiler.emit(opcodes.OPCALL)
-            pass
         case _:
             raise CompilationError(f"Invalid node encountered: {node}")

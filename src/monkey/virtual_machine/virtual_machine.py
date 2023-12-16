@@ -140,25 +140,34 @@ def run(vm: VirtualMachine) -> None:
                 result = _evaluate_index_expression(container, inside)
                 vm.stack.push(result)
             case opcodes.OPCALL:
-                function = vm.stack.pop()
+                function = vm.stack.peek()
                 if not isinstance(function, objs.CompiledFunctionObject):
                     raise VirtualMachineError("Attempted to call a non-function.")
 
                 frame = StackFrame(function)
                 vm.frames.push(frame)
             case opcodes.OPRETURNVALUE:
-                # this case differs from the one in the Go compiler book; in our case, we already
-                # popped the CompiledFunctionObject off the stack in the case for `opcodes.OPCALL`;
+                # by the end of the function's body, the object we want should be on top of the stack
+                return_value = vm.stack.pop()
 
-                # as long as the body of the function doesn't pop off whatever we want left on the
-                # stack (and that's the responsibility of the compiler's bytecode for the
-                # CompiledFunctionObject) we don't have to do anything here except go back to the
-                # parent frame
+                # go back to the parent frame
                 vm.frames.pop()
+
+                # the function we just went through should be right under the returned value; it was
+                # sitting there the whole time we moved through the function's body; we want it gone now
+                vm.stack.pop()
+
+                # this is replacing the compiled function with the return value we actually want
+                vm.stack.push(return_value)
             case opcodes.OPRETURN:
                 # a function that ends with an `opcodes.OPRETURN` call doesn't put anything on the
                 # stack within its body; so we need to explicitly put NULL on the stack
                 vm.frames.pop()
+
+                # because nothing is returned, the function we just went through should be on top of the
+                # stack; no need to pop off, and then push back on, some kind of returned value
+                vm.stack.pop()
+
                 vm.stack.push(objs.NULL_OBJ)
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
