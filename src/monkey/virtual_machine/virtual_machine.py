@@ -47,7 +47,8 @@ class VirtualMachine:
 
 
 def run(vm: VirtualMachine) -> None:
-    while vm.instruction_pointer < len(vm.instructions):
+    while vm.instruction_pointer < len(vm.instructions) - 1:
+        vm.instruction_pointer += 1
         opcode = code.extract_opcode(vm.instructions, vm.instruction_pointer)
 
         match opcode:
@@ -138,10 +139,29 @@ def run(vm: VirtualMachine) -> None:
                 # can reuse functions from the interpreter
                 result = _evaluate_index_expression(container, inside)
                 vm.stack.push(result)
+            case opcodes.OPCALL:
+                function = vm.stack.pop()
+                if not isinstance(function, objs.CompiledFunctionObject):
+                    raise VirtualMachineError("Attempted to call a non-function.")
+
+                frame = StackFrame(function)
+                vm.frames.push(frame)
+            case opcodes.OPRETURNVALUE:
+                # this case differs from the one in the Go compiler book; in our case, we already
+                # popped the CompiledFunctionObject off the stack in the case for `opcodes.OPCALL`;
+
+                # as long as the body of the function doesn't pop off whatever we want left on the
+                # stack (and that's the responsibility of the compiler's bytecode for the
+                # CompiledFunctionObject) we don't have to do anything here except go back to the
+                # parent frame
+                vm.frames.pop()
+            case opcodes.OPRETURN:
+                # a function that ends with an `opcodes.OPRETURN` call doesn't put anything on the
+                # stack within its body; so we need to explicitly put NULL on the stack
+                vm.frames.pop()
+                vm.stack.push(objs.NULL_OBJ)
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
-
-        vm.instruction_pointer += 1
 
 
 def _evaluate_index_expression(container: objs.Object, inside: objs.Object) -> objs.Object:

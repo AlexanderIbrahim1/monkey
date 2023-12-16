@@ -240,6 +240,71 @@ class TestVirtualMachine:
     def test_hash_index_raises(self, test_case_input_text: str):
         virtual_machine_test_case_raises_internals(test_case_input_text)
 
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            VirtualMachineTestCase("fn() { 5 + 10 }();", 15),
+            VirtualMachineTestCase("let my_func = fn() { 5 + 10 }; my_func();", 15),
+            VirtualMachineTestCase(
+                """
+                let one = fn() { return 1; };
+                let two = fn() { return 2; };
+                one() + two();
+                """,
+                3,
+            ),
+            VirtualMachineTestCase(
+                """
+                let a = fn() { 1 };
+                let b = fn() { a() + 1 };
+                let c = fn() { b() + 1 };
+                c();
+                """,
+                3,
+            ),
+            VirtualMachineTestCase(
+                """
+                let early_exit = fn() { return 99; 100; };
+                early_exit();
+                """,
+                99,
+            ),
+            VirtualMachineTestCase(
+                """
+                let early_exit = fn() { return 99; return 100; };
+                early_exit();
+                """,
+                99,
+            ),
+        ],
+    )
+    def test_function_call_no_arguments(self, test_case: VirtualMachineTestCase):
+        virtual_machine_test_case_internals(test_case)
+
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            VirtualMachineTestCase(
+                """
+                let no_return = fn() {};
+                no_return();
+                """,
+                None,
+            ),
+            VirtualMachineTestCase(
+                """
+                let no_return = fn() {};
+                let no_return_two = fn() { no_return(); };
+                no_return();
+                no_return_two();
+                """,
+                None,
+            ),
+        ],
+    )
+    def test_function_call_no_return_value_no_arguments(self, test_case: VirtualMachineTestCase):
+        virtual_machine_test_case_internals(test_case)
+
 
 def virtual_machine_test_case_internals(test_case: VirtualMachineTestCase):
     """
