@@ -14,27 +14,45 @@ from monkey.tokens import token_types
 from monkey.object.object_type import OBJECT_TYPE_DICT
 
 from monkey.containers import FixedStack
-from monkey.virtual_machine.constants import MAX_STACK_SIZE
+from monkey.virtual_machine.constants import MAX_VM_STACK_SIZE
+from monkey.virtual_machine.constants import MAX_VM_GLOBALS_SIZE
+from monkey.virtual_machine.constants import MAX_VM_FRAME_SIZE
 from monkey.virtual_machine.custom_exceptions import VirtualMachineError
+from monkey.virtual_machine.stack_frame import StackFrame
 
 
 @dataclasses.dataclass
 class VirtualMachine:
-    bytecode: comp.Bytecode
-    stack: FixedStack[objs.Object] = FixedStack[objs.Object](MAX_STACK_SIZE)
-    globals: FixedStack[objs.Object] = FixedStack[objs.Object](MAX_STACK_SIZE)
+    def __init__(self, bytecode: comp.Bytecode) -> None:
+        self.stack = FixedStack[objs.Object](MAX_VM_STACK_SIZE)
+        self.globals = FixedStack[objs.Object](MAX_VM_GLOBALS_SIZE)
+        self.frames = FixedStack[StackFrame](MAX_VM_FRAME_SIZE)
+        self.constants = bytecode.constants
+
+        main_function = objs.CompiledFunctionObject(bytecode.instructions)
+        main_frame = StackFrame(main_function)
+        self.frames.push(main_frame)
+
+    @property
+    def instructions(self) -> code.Instructions:
+        return self.frames.peek().instructions
+
+    @property
+    def instruction_pointer(self) -> int:
+        return self.frames.peek().instruction_pointer
+
+    @instruction_pointer.setter
+    def instruction_pointer(self, other: int) -> None:
+        self.frames.peek().instruction_pointer = other
 
 
 def run(vm: VirtualMachine) -> None:
-    instructions = vm.bytecode.instructions
-
-    instr_ptr = 0
-    while instr_ptr < len(instructions):
-        opcode = code.extract_opcode(instructions, instr_ptr)
+    while vm.instruction_pointer < len(vm.instructions):
+        opcode = code.extract_opcode(vm.instructions, vm.instruction_pointer)
 
         match opcode:
             case opcodes.OPCONSTANT:
-                instr_ptr += _push_opconstant(vm, instr_ptr)
+                vm.instruction_pointer += _push_opconstant(vm, vm.instruction_pointer)
             case opcodes.OPADD:
                 _push_op_add(vm)
             case opcodes.OPSUB:
@@ -60,14 +78,14 @@ def run(vm: VirtualMachine) -> None:
             case opcodes.OPBANG:
                 _push_op_bang(vm)
             case opcodes.OPJUMP:
-                instr_ptr = _new_position_after_jump(vm, instr_ptr)
+                vm.instruction_pointer = _new_position_after_jump(vm, vm.instruction_pointer)
             case opcodes.OPJUMPWHENFALSE:
-                instr_ptr = _new_position_after_jump_when_false(vm, instr_ptr)
+                vm.instruction_pointer = _new_position_after_jump_when_false(vm, vm.instruction_pointer)
             case opcodes.OPNULL:
                 vm.stack.push(objs.NULL_OBJ)
             case opcodes.OPSETGLOBAL:
-                i_global = _global_identifier_index(instructions, instr_ptr)
-                instr_ptr += opcodes.OPSETGLOBAL_WIDTH
+                i_global = _global_identifier_index(vm.instructions, vm.instruction_pointer)
+                vm.instruction_pointer += opcodes.OPSETGLOBAL_WIDTH
 
                 # remember that a let statement first pushes something onto the stack, and then
                 # we assign it to a particular variable
@@ -78,8 +96,8 @@ def run(vm: VirtualMachine) -> None:
                 else:
                     vm.globals[i_global] = value_to_bind
             case opcodes.OPGETGLOBAL:
-                i_global = _global_identifier_index(instructions, instr_ptr)
-                instr_ptr += opcodes.OPSETGLOBAL_WIDTH
+                i_global = _global_identifier_index(vm.instructions, vm.instruction_pointer)
+                vm.instruction_pointer += opcodes.OPSETGLOBAL_WIDTH
 
                 # the identifier we want to reference could be anywhere in the globals stack, not
                 # just at the top; so we can't pop or anything
@@ -87,8 +105,8 @@ def run(vm: VirtualMachine) -> None:
                 vm.stack.push(bound_value)
             case opcodes.OPARRAY:
                 # the operand of the OPARRAY opcode is the number of elements in the array
-                n_elements = _number_of_array_elements(instructions, instr_ptr)
-                instr_ptr += opcodes.OPARRAY_WIDTH
+                n_elements = _number_of_array_elements(vm.instructions, vm.instruction_pointer)
+                vm.instruction_pointer += opcodes.OPARRAY_WIDTH
 
                 i_first_element = vm.stack.size() - n_elements
                 array = _build_array(vm, i_first_element, n_elements)
@@ -99,8 +117,8 @@ def run(vm: VirtualMachine) -> None:
                 vm.stack.push(array)
             case opcodes.OPHASH:
                 # the operand of the OPHASH opcode is (twice) the number of elements in the hashmap
-                n_objects = _number_of_hash_objects(instructions, instr_ptr)
-                instr_ptr += opcodes.OPHASH_WIDTH
+                n_objects = _number_of_hash_objects(vm.instructions, vm.instruction_pointer)
+                vm.instruction_pointer += opcodes.OPHASH_WIDTH
 
                 i_first_element = vm.stack.size() - n_objects
                 hashmap = _build_hashmap(vm, i_first_element, n_objects)
@@ -123,7 +141,7 @@ def run(vm: VirtualMachine) -> None:
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
 
-        instr_ptr += 1
+        vm.instruction_pointer += 1
 
 
 def _evaluate_index_expression(container: objs.Object, inside: objs.Object) -> objs.Object:
@@ -230,7 +248,7 @@ def _global_identifier_index(instructions: code.Instructions, instr_ptr: int) ->
 
 
 def _new_position_after_jump(vm: VirtualMachine, instr_ptr: int) -> int:
-    instructions = vm.bytecode.instructions
+    instructions = vm.instructions
     jump_position_bytes = code.extract_operand(instructions, instr_ptr + 1, opcodes.OPJUMP_WIDTH)
     jump_position = int.from_bytes(jump_position_bytes)
 
@@ -241,7 +259,7 @@ def _new_position_after_jump_when_false(vm: VirtualMachine, instr_ptr: int) -> i
     condition = vm.stack.pop()
 
     if not objs.is_truthy(condition):
-        instructions = vm.bytecode.instructions
+        instructions = vm.instructions
         jump_position_bytes = code.extract_operand(instructions, instr_ptr + 1, opcodes.OPJUMPWHENFALSE_WIDTH)
         jump_position = int.from_bytes(jump_position_bytes)
         new_instr_ptr = jump_position - 1
@@ -374,7 +392,7 @@ def _push_op_greaterthan(vm: VirtualMachine) -> None:
 
 def _push_opconstant(vm: VirtualMachine, instr_ptr: int) -> int:
     position = _read_position(vm, instr_ptr, opcodes.OPCONSTANT_WIDTH)
-    constant = vm.bytecode.constants[position]
+    constant = vm.constants[position]
     vm.stack.push(constant)
 
     return opcodes.OPCONSTANT_WIDTH
@@ -412,7 +430,7 @@ def _push_op_bang(vm: VirtualMachine) -> None:
 def _read_position(vm: VirtualMachine, instr_ptr: int, size: int) -> int:
     begin_ptr = instr_ptr + 1
     end_ptr = begin_ptr + size
-    position_bytes = vm.bytecode.instructions[begin_ptr:end_ptr]
+    position_bytes = vm.instructions[begin_ptr:end_ptr]
     return int.from_bytes(position_bytes, byteorder="big", signed=False)
 
 
