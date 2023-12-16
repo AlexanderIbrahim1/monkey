@@ -12,7 +12,7 @@ import monkey.object as objs
 @dataclasses.dataclass
 class StackFrame:
     function: objs.CompiledFunctionObject
-    instruction_pointer: int = 0
+    instruction_pointer: int = -1
 
     @property
     def instructions(self) -> code.Instructions:
