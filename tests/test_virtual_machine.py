@@ -305,6 +305,23 @@ class TestVirtualMachine:
     def test_function_call_no_return_value_no_arguments(self, test_case: VirtualMachineTestCase):
         virtual_machine_test_case_internals(test_case)
 
+    @pytest.mark.skip
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            VirtualMachineTestCase(
+                """
+                let returns_one = fn() { return 1; };
+                let returns_returns_one = fn() { return returns_one; };
+                returns_returns_one()();
+                """,
+                1,
+            )
+        ],
+    )
+    def test_function_call_return_function(self, test_case: VirtualMachineTestCase):
+        virtual_machine_test_case_internals(test_case)
+
 
 def virtual_machine_test_case_internals(test_case: VirtualMachineTestCase):
     """
