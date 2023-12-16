@@ -652,7 +652,6 @@ class TestCompiler:
     def test_first_class_function_call(self, case: CompilerTestCase):
         perform_compiler_test_case(case)
 
-    @pytest.mark.skip
     @pytest.mark.parametrize(
         "case",
         [
@@ -700,15 +699,11 @@ class TestCompiler:
                     # `outer` is the second variable to be bound; set it to label `1`
                     (op.OPSETGLOBAL, (1,)),
                     # we are looking up the `outer` function (remember it was set to `1`)
+                    # this OPGETGLOBAL puts it on top of the stack
                     (op.OPGETGLOBAL, (1,)),
-                    # we are calling the `outer` function (remember it is on top of the stack, at `2`)
+                    # we are calling the `outer` function (remember, it is now on top of the stack)
                     (op.OPCALL, ()),
-                    # `f` is the third variable to be bound; set it to label `2`
-                    (op.OPSETGLOBAL, (2,)),
-                    # on the very next line, we refer to variable `f` (remember it was set to label `2`)
-                    (op.OPGETGLOBAL, (2,)),
-                    # OPGETGLOBAL puts whatever we just asked from, from the constants, on top of the stack
-                    # so now we can call the thing on top of the stack
+                    # we (again) call the thing on top of the stack; this is whatever `outer()` returned
                     (op.OPCALL, ()),
                     # the last line `f();` is an expression statement; we want it off the stack now
                     (op.OPPOP, ()),

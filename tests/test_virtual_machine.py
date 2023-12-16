@@ -305,7 +305,6 @@ class TestVirtualMachine:
     def test_function_call_no_return_value_no_arguments(self, test_case: VirtualMachineTestCase):
         virtual_machine_test_case_internals(test_case)
 
-    @pytest.mark.skip
     @pytest.mark.parametrize(
         "test_case",
         [
