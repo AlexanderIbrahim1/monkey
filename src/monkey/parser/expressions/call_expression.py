@@ -11,14 +11,12 @@ from monkey.tokens.monkey_token import Token
 from monkey.tokens.token_types import Literal
 
 from monkey.parser.expressions.expression import Expression
-from monkey.parser.expressions.identifier import Identifier
-from monkey.parser.expressions.function_literal import FunctionLiteral
 
 
 @dataclass(frozen=True)
 class CallExpression(Expression):
     token: Token  # '(' token
-    function: Identifier | FunctionLiteral
+    function: Expression
     arguments: Sequence[Expression]
 
     def token_literal(self) -> Literal:

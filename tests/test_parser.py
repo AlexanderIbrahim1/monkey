@@ -431,6 +431,37 @@ def test_call_expression1():
     assert not parser.has_errors()
 
 
+def test_call_expression_paired0():
+    monkey_code = "function()();"
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parse_program(parser)
+
+    expected_call_token = Token(token_types.LPAREN, "(")
+    expected_arguments = []
+
+    expected_function_name_inner = Identifier(Token(token_types.IDENTIFIER, "function"), "function")
+    expected_call_expr_inner = CallExpression(
+        expected_call_token,
+        expected_function_name_inner,
+        expected_arguments,
+    )
+
+    expected_call_expr_outer = CallExpression(
+        expected_call_token,
+        expected_call_expr_inner,
+        expected_arguments,
+    )
+
+    expected_statement = ExpressionStatement(
+        Token(token_types.IDENTIFIER, "function"), expected_call_expr_outer
+    )
+
+    assert program.number_of_statements() == 1
+    assert program[0] == expected_statement
+    assert not parser.has_errors()
+
+
 def test_string_literal():
     monkey_code = '"hello";'
     lexer = Lexer(monkey_code)

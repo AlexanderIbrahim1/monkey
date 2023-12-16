@@ -11,7 +11,7 @@ from monkey.parser.parser._parse_expression_list import parse_expression_list
 def parse_call_expression(
     parser: Parser, parsing_fn: ParsingFunction, function: exprs.Expression
 ) -> exprs.CallExpression | exprs.FailedExpression:
-    if not (isinstance(function, exprs.Identifier) or isinstance(function, exprs.FunctionLiteral)):
+    if not _is_callable_expression(function):
         return FAIL_EXPR
 
     call_token = parser.current_token
@@ -21,3 +21,12 @@ def parse_call_expression(
         return FAIL_EXPR
 
     return exprs.CallExpression(call_token, function, arguments)
+
+
+def _is_callable_expression(expression: exprs.Expression) -> bool:
+    return any(
+        [
+            isinstance(expression, valid_type)
+            for valid_type in [exprs.Identifier, exprs.FunctionLiteral, exprs.CallExpression]
+        ]
+    )
