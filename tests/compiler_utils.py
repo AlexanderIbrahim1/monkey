@@ -57,7 +57,18 @@ def perform_compiler_test_case(case: CompilerTestCase):
     except AssertionError:
         output = interleave_formatted_instructions(bytecode.instructions, case.instructions)
         pytest.fail(output)
-    assert bytecode.constants == case.constants
+
+    try:
+        assert bytecode.constants == case.constants
+    except AssertionError:
+        output = f"""
+            ACTUAL CONSTANTS
+            {bytecode.constants}
+            EXPECTED CONSTANTS
+            {case.constants}
+        """
+
+        pytest.fail(output)
 
 
 def parse(monkey_code: str) -> Program:
