@@ -39,6 +39,10 @@ def test_make_instruction():
         ([(opcodes.OPCALL, ())]),
         ([(opcodes.OPRETURNVALUE, ())]),
         ([(opcodes.OPRETURN, ())]),
+        ([(opcodes.OPSETLOCAL, (0,))]),
+        ([(opcodes.OPGETLOCAL, (1,))]),
+        ([(opcodes.OPSETGLOBAL, (0,))]),
+        ([(opcodes.OPGETGLOBAL, (1,))]),
     ],
 )
 def test_instruction_to_string(instruction_pairs):

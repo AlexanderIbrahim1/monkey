@@ -8,7 +8,8 @@ to break when run in this directory.
 
 from monkey.code.code import Opcode
 from monkey.code.constants import ADDRESS_POSITION_SIZE
-from monkey.code.constants import BINDING_BYTE_SIZE
+from monkey.code.constants import GLOBAL_BINDING_BYTE_SIZE
+from monkey.code.constants import LOCAL_BINDING_BYTE_SIZE
 from monkey.code.constants import MAXIMUM_ARRAY_BYTE_SIZE
 from monkey.code.constants import MAXIMUM_HASH_BYTE_SIZE
 
@@ -36,13 +37,17 @@ OPINDEX: Opcode = b"\x20"
 OPCALL: Opcode = b"\x21"
 OPRETURNVALUE: Opcode = b"\x22"
 OPRETURN: Opcode = b"\x23"
+OPSETLOCAL: Opcode = b"\x24"
+OPGETLOCAL: Opcode = b"\x25"
 
 # a dummy opcode used in situations where an opcode instance needs to exist
 OPDUMMY: Opcode = b"\xFF"
 
 OPCONSTANT_WIDTH: int = ADDRESS_POSITION_SIZE
-OPSETGLOBAL_WIDTH: int = BINDING_BYTE_SIZE
-OPGETGLOBAL_WIDTH: int = BINDING_BYTE_SIZE
+OPSETGLOBAL_WIDTH: int = GLOBAL_BINDING_BYTE_SIZE
+OPGETGLOBAL_WIDTH: int = GLOBAL_BINDING_BYTE_SIZE
+OPSETLOCAL_WIDTH: int = LOCAL_BINDING_BYTE_SIZE
+OPGETLOCAL_WIDTH: int = LOCAL_BINDING_BYTE_SIZE
 OPJUMP_WIDTH: int = ADDRESS_POSITION_SIZE
 OPJUMPWHENFALSE_WIDTH: int = ADDRESS_POSITION_SIZE
 OPARRAY_WIDTH: int = MAXIMUM_ARRAY_BYTE_SIZE

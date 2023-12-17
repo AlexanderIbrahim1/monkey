@@ -32,6 +32,8 @@ OPCODE_DEFINITIONS: dict[Opcode, OpcodeDefinition] = {
     opcodes.OPNULL: OpcodeDefinition("OPNULL", ()),
     opcodes.OPSETGLOBAL: OpcodeDefinition("OPSETGLOBAL", (opcodes.OPSETGLOBAL_WIDTH,)),
     opcodes.OPGETGLOBAL: OpcodeDefinition("OPGETGLOBAL", (opcodes.OPGETGLOBAL_WIDTH,)),
+    opcodes.OPSETLOCAL: OpcodeDefinition("OPSETLOCAL", (opcodes.OPSETLOCAL_WIDTH,)),
+    opcodes.OPGETLOCAL: OpcodeDefinition("OPGETLOCAL", (opcodes.OPGETLOCAL_WIDTH,)),
     opcodes.OPARRAY: OpcodeDefinition("OPARRAY", (opcodes.OPARRAY_WIDTH,)),
     opcodes.OPHASH: OpcodeDefinition("OPHASH", (opcodes.OPHASH_WIDTH,)),
     opcodes.OPINDEX: OpcodeDefinition("OPINDEX", ()),

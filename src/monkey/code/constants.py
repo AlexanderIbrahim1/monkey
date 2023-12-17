@@ -5,8 +5,11 @@ This module contains constants that could be used in other areas of the project.
 # number of bytes used to describe position of address
 ADDRESS_POSITION_SIZE: int = 2
 
-# number of bytes used to describe the number assigned to a binding
-BINDING_BYTE_SIZE: int = 2
+# number of bytes used to describe the number assigned to a global binding
+GLOBAL_BINDING_BYTE_SIZE: int = 2
+
+# number of bytes used to describe the number assigned to a local binding
+LOCAL_BINDING_BYTE_SIZE: int = 1
 
 # the maximum allowed address
 MAXIMUM_ADDRESS: int = 2 ** (8 * ADDRESS_POSITION_SIZE) - 1
