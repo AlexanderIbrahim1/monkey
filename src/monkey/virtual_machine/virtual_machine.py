@@ -14,6 +14,7 @@ from monkey.tokens import token_types
 from monkey.object.object_type import OBJECT_TYPE_DICT
 
 from monkey.containers import FixedStack
+from monkey.virtual_machine.constants import DUMMY_MAIN_FUNCTION_NUMBER_OF_LOCALS
 from monkey.virtual_machine.constants import MAX_VM_STACK_SIZE
 from monkey.virtual_machine.constants import MAX_VM_GLOBALS_SIZE
 from monkey.virtual_machine.constants import MAX_VM_FRAME_SIZE
@@ -29,7 +30,8 @@ class VirtualMachine:
         self.frames = FixedStack[StackFrame](MAX_VM_FRAME_SIZE)
         self.constants = bytecode.constants
 
-        main_function = objs.CompiledFunctionObject(bytecode.instructions)
+        dummy_value = DUMMY_MAIN_FUNCTION_NUMBER_OF_LOCALS
+        main_function = objs.CompiledFunctionObject(bytecode.instructions, dummy_value)
         main_frame = StackFrame(main_function)
         self.frames.push(main_frame)
 
