@@ -195,9 +195,6 @@ def bytecode_from_compiler(compiler: Compiler) -> Bytecode:
 
 
 def compile(compiler: Compiler, node: ASTNode) -> None:
-    print()
-    print(f"TYPE: {type(node)}")
-    print(f"NODE: {node}")
     match node:
         case Program():
             for stmt in node.statements:
@@ -349,10 +346,14 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             if not compiler.is_last_instruction_opcode(opcodes.OPRETURNVALUE):
                 compiler.emit(opcodes.OPRETURN)
 
+            # get the number of locals here, before we switch symbol tables in `compiler.leave_scope()`
+            n_locals = compiler.symbol_table.n_definitions
+
             instructions = compiler.leave_scope()
 
             # ensures that the emitted instructions are stored in a separate object after compilation
-            compiled_function = objs.CompiledFunctionObject(instructions)
+            compiled_function = objs.CompiledFunctionObject(instructions, n_locals)
+
             position = compiler.add_constant_and_get_position(compiled_function)
             compiler.emit(opcodes.OPCONSTANT, position)
         case stmts.ReturnStatement():  # value

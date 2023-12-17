@@ -18,6 +18,7 @@ from monkey.object.object import Object
 @dataclass(frozen=True)
 class CompiledFunctionObject(Object):
     instructions: Instructions
+    n_locals: int
 
     def data_type(self) -> ObjectType:
         return ObjectType.COMPILED_FUNCTION
@@ -33,4 +34,4 @@ class CompiledFunctionObject(Object):
 
     def __repr__(self) -> str:
         written_instructions = instructions_to_string(self.instructions)
-        return f"COMPILED_FUNCTION[\n{written_instructions}\n]"
+        return f"COMPILED_FUNCTION[\n{written_instructions}\n][n_locals={self.n_locals}]"

@@ -115,7 +115,11 @@ def test_compiled_function_object():
     instructions = make_instruction(opcode, *operands)
     written_instructions = instructions_to_string(instructions)
 
-    compiled_function_obj = CompiledFunctionObject(instructions)
+    dummy_n_locals = 0
+    compiled_function_obj = CompiledFunctionObject(instructions, dummy_n_locals)
 
     assert compiled_function_obj.data_type() == ObjectType.COMPILED_FUNCTION
-    assert compiled_function_obj.inspect() == f"COMPILED_FUNCTION[\n{written_instructions}\n]"
+    assert (
+        compiled_function_obj.inspect()
+        == f"COMPILED_FUNCTION[\n{written_instructions}\n][n_locals={dummy_n_locals}]"
+    )

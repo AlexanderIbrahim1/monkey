@@ -449,13 +449,16 @@ class TestCompiler:
                     10,
                     # the argument to the compiled function is the bytecode for the operations that
                     # take place in its body
-                    code.make_instructions_from_opcode_operand_pairs(
-                        [
-                            (op.OPCONSTANT, (0,)),
-                            (op.OPCONSTANT, (1,)),
-                            (op.OPADD, ()),
-                            (op.OPRETURNVALUE, ()),
-                        ]
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                (op.OPCONSTANT, (0,)),
+                                (op.OPCONSTANT, (1,)),
+                                (op.OPADD, ()),
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        0,
                     ),
                 ),
                 [
@@ -473,13 +476,16 @@ class TestCompiler:
                     10,
                     # the argument to the compiled function is the bytecode for the operations that
                     # take place in its body
-                    code.make_instructions_from_opcode_operand_pairs(
-                        [
-                            (op.OPCONSTANT, (0,)),
-                            (op.OPCONSTANT, (1,)),
-                            (op.OPADD, ()),
-                            (op.OPRETURNVALUE, ()),
-                        ]
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                (op.OPCONSTANT, (0,)),
+                                (op.OPCONSTANT, (1,)),
+                                (op.OPADD, ()),
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        0,
                     ),
                 ),
                 [
@@ -496,13 +502,16 @@ class TestCompiler:
                     2,
                     # the argument to the compiled function is the bytecode for the operations that
                     # take place in its body
-                    code.make_instructions_from_opcode_operand_pairs(
-                        [
-                            (op.OPCONSTANT, (0,)),
-                            (op.OPPOP, ()),
-                            (op.OPCONSTANT, (1,)),
-                            (op.OPRETURNVALUE, ()),
-                        ]
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                (op.OPCONSTANT, (0,)),
+                                (op.OPPOP, ()),
+                                (op.OPCONSTANT, (1,)),
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        0,
                     ),
                 ),
                 [
@@ -515,10 +524,13 @@ class TestCompiler:
             CompilerTestCase(
                 "fn() {};",
                 (
-                    code.make_instructions_from_opcode_operand_pairs(
-                        [
-                            (op.OPRETURN, ()),
-                        ]
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                (op.OPRETURN, ()),
+                            ]
+                        ),
+                        0,
                     ),
                 ),
                 [
@@ -540,11 +552,14 @@ class TestCompiler:
                 "fn() { 24 }();",
                 (
                     24,
-                    code.make_instructions_from_opcode_operand_pairs(
-                        [
-                            (op.OPCONSTANT, (0,)),
-                            (op.OPRETURNVALUE, ()),
-                        ]
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                (op.OPCONSTANT, (0,)),
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        0,
                     ),
                 ),
                 [
@@ -560,11 +575,14 @@ class TestCompiler:
                 "let my_func = fn() { 24 }; my_func();",
                 (
                     24,
-                    code.make_instructions_from_opcode_operand_pairs(
-                        [
-                            (op.OPCONSTANT, (0,)),
-                            (op.OPRETURNVALUE, ()),
-                        ]
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                (op.OPCONSTANT, (0,)),
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        0,
                     ),
                 ),
                 [
@@ -600,31 +618,37 @@ class TestCompiler:
                 (
                     1,
                     # bytecode instructions for the body of the `inner` function
-                    code.make_instructions_from_opcode_operand_pairs(
-                        [
-                            # we create the constant `1`, and put it on the stack
-                            # it is the first constant, so we assign it label 0
-                            (op.OPCONSTANT, (0,)),
-                            # we do nothing but return the thing on top of the stack (constant label 0)
-                            (op.OPRETURNVALUE, ()),
-                        ]
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # we create the constant `1`, and put it on the stack
+                                # it is the first constant, so we assign it label 0
+                                (op.OPCONSTANT, (0,)),
+                                # we do nothing but return the thing on top of the stack (constant label 0)
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        0,
                     ),
                     # bytecode instructions for the body of the `outer` function
-                    code.make_instructions_from_opcode_operand_pairs(
-                        [
-                            # the `inner` function is a constant; we put it on top of the stack
-                            # it is the second constant, so we assign it label 1
-                            (op.OPCONSTANT, (1,)),
-                            # we bind the variable name `inner`
-                            # it is the first binding, so we assign it a label of `0`
-                            # the VM will map the index `0` in the bindings list, to the index `1` of the constants
-                            (op.OPSETLOCAL, (0,)),
-                            # we are about to return `inner`, and to do this, we need to refer to it
-                            # put `inner` on top of the stack, with OPSETGLOBAL
-                            (op.OPGETLOCAL, (0,)),
-                            # we want the thing we just put on top of the stack to remain there
-                            (op.OPRETURNVALUE, ()),
-                        ]
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # the `inner` function is a constant; we put it on top of the stack
+                                # it is the second constant, so we assign it label 1
+                                (op.OPCONSTANT, (1,)),
+                                # we bind the variable name `inner`
+                                # it is the first binding, so we assign it a label of `0`
+                                # the VM will map the index `0` in the bindings list, to the index `1` of the constants
+                                (op.OPSETLOCAL, (0,)),
+                                # we are about to return `inner`, and to do this, we need to refer to it
+                                # put `inner` on top of the stack, with OPSETGLOBAL
+                                (op.OPGETLOCAL, (0,)),
+                                # we want the thing we just put on top of the stack to remain there
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        1,
                     ),
                 ),
                 [
@@ -668,31 +692,37 @@ class TestCompiler:
                 (
                     1,
                     # bytecode instructions for the body of the `inner` function
-                    code.make_instructions_from_opcode_operand_pairs(
-                        [
-                            # we create the constant `1`, and put it on the stack
-                            # it is the first constant, so we assign it label 0
-                            (op.OPCONSTANT, (0,)),
-                            # we do nothing but return the thing on top of the stack (constant label 0)
-                            (op.OPRETURNVALUE, ()),
-                        ]
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # we create the constant `1`, and put it on the stack
+                                # it is the first constant, so we assign it label 0
+                                (op.OPCONSTANT, (0,)),
+                                # we do nothing but return the thing on top of the stack (constant label 0)
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        0,
                     ),
                     # bytecode instructions for the body of the `outer` function
-                    code.make_instructions_from_opcode_operand_pairs(
-                        [
-                            # the `inner` function is a constant; we put it on top of the stack
-                            # it is the second constant, so we assign it label 1
-                            (op.OPCONSTANT, (1,)),
-                            # we bind the variable name `inner`
-                            # it is the first binding, so we assign it a label of `0`
-                            # the VM will map the index `0` in the bindings list, to the index `1` of the constants
-                            (op.OPSETLOCAL, (0,)),
-                            # we are about to return `inner`, and to do this, we need to refer to it
-                            # put `inner` on top of the stack, with OPSETGLOBAL
-                            (op.OPGETLOCAL, (0,)),
-                            # we want the thing we just put on top of the stack to remain there
-                            (op.OPRETURNVALUE, ()),
-                        ]
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # the `inner` function is a constant; we put it on top of the stack
+                                # it is the second constant, so we assign it label 1
+                                (op.OPCONSTANT, (1,)),
+                                # we bind the variable name `inner`
+                                # it is the first binding, so we assign it a label of `0`
+                                # the VM will map the index `0` in the bindings list, to the index `1` of the constants
+                                (op.OPSETLOCAL, (0,)),
+                                # we are about to return `inner`, and to do this, we need to refer to it
+                                # put `inner` on top of the stack, with OPSETGLOBAL
+                                (op.OPGETLOCAL, (0,)),
+                                # we want the thing we just put on top of the stack to remain there
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        1,
                     ),
                 ),
                 [
@@ -727,11 +757,14 @@ class TestCompiler:
                 """,
                 (
                     55,
-                    code.make_instructions_from_opcode_operand_pairs(
-                        [
-                            (op.OPGETGLOBAL, (0,)),
-                            (op.OPRETURNVALUE, ()),
-                        ]
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                (op.OPGETGLOBAL, (0,)),
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        0,
                     ),
                 ),
                 [
@@ -757,21 +790,24 @@ class TestCompiler:
                 """,
                 (
                     55,
-                    code.make_instructions_from_opcode_operand_pairs(
-                        [
-                            # the number '55' is the first constant; find it in the 'constants', and
-                            # put it on top of the stack
-                            (op.OPCONSTANT, (0,)),
-                            # take the thing on top of the stack (the number '55'), pop it off, bind it to
-                            # a name, and put it in the binding stack;
-                            # it is the first bound name, so it is labelled 0
-                            (op.OPSETLOCAL, (0,)),
-                            # look for the symbol in the binding stack that corresponds to 0; push it on top
-                            # of the stack
-                            (op.OPGETLOCAL, (0,)),
-                            # we want the thing we just put on top of the stack to remain there
-                            (op.OPRETURNVALUE, ()),
-                        ]
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # the number '55' is the first constant; find it in the 'constants', and
+                                # put it on top of the stack
+                                (op.OPCONSTANT, (0,)),
+                                # take the thing on top of the stack (the number '55'), pop it off, bind it to
+                                # a name, and put it in the binding stack;
+                                # it is the first bound name, so it is labelled 0
+                                (op.OPSETLOCAL, (0,)),
+                                # look for the symbol in the binding stack that corresponds to 0; push it on top
+                                # of the stack
+                                (op.OPGETLOCAL, (0,)),
+                                # we want the thing we just put on top of the stack to remain there
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        1,
                     ),
                 ),
                 [
@@ -786,3 +822,9 @@ class TestCompiler:
     )
     def test_let_statement_scopes(self, case: CompilerTestCase):
         perform_compiler_test_case(case)
+
+
+# NOTE TO DEV: the number of locals in a function is the unique number of variables
+# that are defined in the function's body; not every constant gets a binding, so the
+# constants that are just expression statements on their own do not count towards
+# the number of local bindings
