@@ -1,4 +1,7 @@
 """
+This module contains the SymbolTable class, a data structure that maps the names
+of symbols to information that allows us to retrieve those symbols (such as their
+index in the globals stack, or their name, etc.).
 """
 
 from typing import Optional
@@ -8,6 +11,7 @@ import enum
 
 
 class SymbolScope(enum.Enum):
+    LOCAL = enum.auto()
     GLOBAL = enum.auto()
 
 
@@ -18,29 +22,19 @@ class Symbol:
     index: int
 
 
+@dataclasses.dataclass
 class SymbolTable:
-    def __init__(
-        self,
-        store: Optional[dict[str, Symbol]] = None,
-        n_definitions: int = 0,
-    ) -> None:
-        if store is None:
-            self._store: dict[str, Symbol] = {}
-        else:
-            self._store = store
-
-        self._n_definitions = n_definitions
+    store: dict[str, Symbol] = dataclasses.field(default_factory=dict)
 
     @property
     def n_definitions(self) -> int:
-        return self._n_definitions
+        return len(self.store)
 
     def define(self, name: str) -> Symbol:
-        new_symbol = Symbol(name, SymbolScope.GLOBAL, self._n_definitions)
-        self._store[name] = new_symbol
-        self._n_definitions += 1
+        new_symbol = Symbol(name, SymbolScope.GLOBAL, self.n_definitions)
+        self.store[name] = new_symbol
 
         return new_symbol
 
     def resolve(self, name: str) -> Optional[Symbol]:
-        return self._store.get(name)
+        return self.store.get(name)
