@@ -25,16 +25,35 @@ class Symbol:
 @dataclasses.dataclass
 class SymbolTable:
     store: dict[str, Symbol] = dataclasses.field(default_factory=dict)
+    outer_table: Optional["SymbolTable"] = None
 
     @property
     def n_definitions(self) -> int:
         return len(self.store)
 
     def define(self, name: str) -> Symbol:
-        new_symbol = Symbol(name, SymbolScope.GLOBAL, self.n_definitions)
+        if self.outer_table is None:
+            symbol_scope = SymbolScope.GLOBAL
+        else:
+            symbol_scope = SymbolScope.LOCAL
+
+        new_symbol = Symbol(name, symbol_scope, self.n_definitions)
         self.store[name] = new_symbol
 
         return new_symbol
 
     def resolve(self, name: str) -> Optional[Symbol]:
-        return self.store.get(name)
+        symbol = self.store.get(name)
+
+        # if the symbol couldn't be found locally, recursively try higher scopes
+        if symbol is None and self.outer_table is not None:
+            symbol = self.outer_table.resolve(name)
+
+        return symbol
+
+
+def build_enclosed_symbol_table(outer_table: SymbolTable) -> SymbolTable:
+    s = SymbolTable()
+    s.outer_table = outer_table
+
+    return s
