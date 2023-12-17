@@ -618,10 +618,10 @@ class TestCompiler:
                             # we bind the variable name `inner`
                             # it is the first binding, so we assign it a label of `0`
                             # the VM will map the index `0` in the bindings list, to the index `1` of the constants
-                            (op.OPSETGLOBAL, (0,)),
+                            (op.OPSETLOCAL, (0,)),
                             # we are about to return `inner`, and to do this, we need to refer to it
                             # put `inner` on top of the stack, with OPSETGLOBAL
-                            (op.OPGETGLOBAL, (0,)),
+                            (op.OPGETLOCAL, (0,)),
                             # we want the thing we just put on top of the stack to remain there
                             (op.OPRETURNVALUE, ()),
                         ]
@@ -630,16 +630,18 @@ class TestCompiler:
                 [
                     # push the `outer` function as a constant to the stack
                     (op.OPCONSTANT, (2,)),
-                    # `outer` is the second variable to be bound; set it to label `1`
-                    (op.OPSETGLOBAL, (1,)),
-                    # we are looking up the `outer` function (remember it was set to `1`)
-                    (op.OPGETGLOBAL, (1,)),
+                    # `outer` is the first variable to be bound globally; set it to 0
+                    # it gets popped off the stack, and into the globals
+                    (op.OPSETGLOBAL, (0,)),
+                    # we are looking up the `outer` function (remember it was set to `0`)
+                    # this OPGETGLOBAL puts it on top of the stack
+                    (op.OPGETGLOBAL, (0,)),
                     # we are calling the `outer` function (remember it is on top of the stack, at `2`)
                     (op.OPCALL, ()),
                     # `f` is the third variable to be bound; set it to label `2`
-                    (op.OPSETGLOBAL, (2,)),
+                    (op.OPSETGLOBAL, (1,)),
                     # on the very next line, we refer to variable `f` (remember it was set to label `2`)
-                    (op.OPGETGLOBAL, (2,)),
+                    (op.OPGETGLOBAL, (1,)),
                     # OPGETGLOBAL puts whatever we just asked from, from the constants, on top of the stack
                     # so now we can call the thing on top of the stack
                     (op.OPCALL, ()),
@@ -684,10 +686,10 @@ class TestCompiler:
                             # we bind the variable name `inner`
                             # it is the first binding, so we assign it a label of `0`
                             # the VM will map the index `0` in the bindings list, to the index `1` of the constants
-                            (op.OPSETGLOBAL, (0,)),
+                            (op.OPSETLOCAL, (0,)),
                             # we are about to return `inner`, and to do this, we need to refer to it
                             # put `inner` on top of the stack, with OPSETGLOBAL
-                            (op.OPGETGLOBAL, (0,)),
+                            (op.OPGETLOCAL, (0,)),
                             # we want the thing we just put on top of the stack to remain there
                             (op.OPRETURNVALUE, ()),
                         ]
@@ -696,11 +698,12 @@ class TestCompiler:
                 [
                     # push the `outer` function as a constant to the stack
                     (op.OPCONSTANT, (2,)),
-                    # `outer` is the second variable to be bound; set it to label `1`
-                    (op.OPSETGLOBAL, (1,)),
-                    # we are looking up the `outer` function (remember it was set to `1`)
+                    # `outer` is the first variable to be bound globally; set it to 0
+                    # it gets popped off the stack, and into the globals
+                    (op.OPSETGLOBAL, (0,)),
+                    # we are looking up the `outer` function (remember it was set to `0`)
                     # this OPGETGLOBAL puts it on top of the stack
-                    (op.OPGETGLOBAL, (1,)),
+                    (op.OPGETGLOBAL, (0,)),
                     # we are calling the `outer` function (remember, it is now on top of the stack)
                     (op.OPCALL, ()),
                     # we (again) call the thing on top of the stack; this is whatever `outer()` returned
@@ -712,4 +715,74 @@ class TestCompiler:
         ],
     )
     def test_first_class_function_call_direct(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)
+
+    @pytest.mark.parametrize(
+        "case",
+        [
+            CompilerTestCase(
+                """
+                let num = 55;
+                fn() { num };
+                """,
+                (
+                    55,
+                    code.make_instructions_from_opcode_operand_pairs(
+                        [
+                            (op.OPGETGLOBAL, (0,)),
+                            (op.OPRETURNVALUE, ()),
+                        ]
+                    ),
+                ),
+                [
+                    # look for the constant '55' in the 'constants'; push it onto the stack
+                    # it is the first constant, so it is labelled 0
+                    (op.OPCONSTANT, (0,)),
+                    # take the thing on top of the stack (number '55'), pop it off the stack, then
+                    # bind it to a global name 'num'; it is the first global name, so it is labelled 0
+                    (op.OPSETGLOBAL, (0,)),
+                    # look for the constant function in the 'constants'; put it onto the stack
+                    # the function is the second global name, so it is labelled 1
+                    (op.OPCONSTANT, (1,)),
+                    # this is an expression statement; we don't want it to linger on the stack
+                    (op.OPPOP, ()),
+                ],
+            ),
+            CompilerTestCase(
+                """
+                fn() {
+                    let num = 55;
+                    return num;
+                };
+                """,
+                (
+                    55,
+                    code.make_instructions_from_opcode_operand_pairs(
+                        [
+                            # the number '55' is the first constant; find it in the 'constants', and
+                            # put it on top of the stack
+                            (op.OPCONSTANT, (0,)),
+                            # take the thing on top of the stack (the number '55'), pop it off, bind it to
+                            # a name, and put it in the binding stack;
+                            # it is the first bound name, so it is labelled 0
+                            (op.OPSETLOCAL, (0,)),
+                            # look for the symbol in the binding stack that corresponds to 0; push it on top
+                            # of the stack
+                            (op.OPGETLOCAL, (0,)),
+                            # we want the thing we just put on top of the stack to remain there
+                            (op.OPRETURNVALUE, ()),
+                        ]
+                    ),
+                ),
+                [
+                    # the function itself is a constant; look for it in the 'constants', and push it
+                    # on top of the stack
+                    (op.OPCONSTANT, (1,)),
+                    # this is an expression statement; we don't want it to linger on the stack
+                    (op.OPPOP, ()),
+                ],
+            ),
+        ],
+    )
+    def test_let_statement_scopes(self, case: CompilerTestCase):
         perform_compiler_test_case(case)

@@ -46,8 +46,10 @@ class Compiler:
             self._constants = constants
 
         if symbol_table is None:
+            # self.symbol_table: sym.SymbolTable = sym.SymbolTable()
             self.symbol_table = sym.SymbolTable()
         else:
+            # self.symbol_table: sym.SymbolTable = symbol_table
             self.symbol_table = symbol_table
 
         if compilation_scopes is None:
@@ -97,6 +99,9 @@ class Compiler:
         current_scope = self._compilation_scopes.pop()
 
         # abandon the current symbol table for the parent symbol table as we go up as scope
+        if self.symbol_table.outer_table is None:
+            raise CompilationError("Unable to leave scope; already in the top scope")
+
         self.symbol_table = self.symbol_table.outer_table
 
         return current_scope.instructions
@@ -270,12 +275,20 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
         case stmts.LetStatement():
             compile(compiler, node.value)
             symbol = compiler.symbol_table.define(node.name.value)
-            compiler.emit(opcodes.OPSETGLOBAL, symbol.index)
+
+            if symbol.scope == sym.SymbolScope.GLOBAL:
+                compiler.emit(opcodes.OPSETGLOBAL, symbol.index)
+            else:
+                compiler.emit(opcodes.OPSETLOCAL, symbol.index)
         case exprs.Identifier():
             symbol = compiler.symbol_table.resolve(node.value)
             if symbol is None:
                 raise CompilationError(f"undefined variable: {node.value}")
-            compiler.emit(opcodes.OPGETGLOBAL, symbol.index)
+
+            if symbol.scope == sym.SymbolScope.GLOBAL:
+                compiler.emit(opcodes.OPGETGLOBAL, symbol.index)
+            else:
+                compiler.emit(opcodes.OPGETLOCAL, symbol.index)
         case exprs.InfixExpression():
             # NOTE: if I wanted a simpler solution, I would have just implemented an opcode for the less
             #       than operator; however, for pedagogical purposes the book wants to emphasize the ability
