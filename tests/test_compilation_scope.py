@@ -121,6 +121,28 @@ class TestCompilerWithCompilationScopes:
         assert compiler.current_scope.second_last_instruction == EmittedInstruction(opcodes.OPMUL, 0)
         assert compiler.current_scope.last_instruction == EmittedInstruction(opcodes.OPSUB, 1)
 
+    def test_enter_scope_symbol_table(self) -> None:
+        compiler = Compiler()
+
+        current_symbol_table = compiler.symbol_table
+        assert current_symbol_table.outer_table is None
+
+        compiler.enter_scope()
+
+        assert current_symbol_table is not compiler.symbol_table
+        assert current_symbol_table is compiler.symbol_table.outer_table
+
+    def test_enter_scope_and_leave_scope_symbol_table(self) -> None:
+        compiler = Compiler()
+
+        current_symbol_table = compiler.symbol_table
+        assert current_symbol_table.outer_table is None
+
+        compiler.enter_scope()
+        compiler.leave_scope()
+
+        assert current_symbol_table is compiler.symbol_table
+
 
 class TestCompilationScope:
     def test_default_construction(self) -> None:

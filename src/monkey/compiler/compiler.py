@@ -90,8 +90,14 @@ class Compiler:
         new_scope = CompilationScope()
         self._compilation_scopes.push(new_scope)
 
+        # a new scope has a different table of symbols
+        self.symbol_table = sym.build_enclosed_symbol_table(self.symbol_table)
+
     def leave_scope(self) -> Instructions:
         current_scope = self._compilation_scopes.pop()
+
+        # abandon the current symbol table for the parent symbol table as we go up as scope
+        self.symbol_table = self.symbol_table.outer_table
 
         return current_scope.instructions
 
