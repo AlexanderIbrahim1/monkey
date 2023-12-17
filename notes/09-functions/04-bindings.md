@@ -24,3 +24,17 @@ We need to define opcodes that create and retrieve local bindings
 The compiler needs to output these new opcodes correctly.
 - must distinguish between local bindings and global bindings
 - must distinguish between local bindings with the same name in different functions
+
+
+## Nested Scopes
+We implement local bindings by creating nested symbol scopes
+- sort of like a linked list of symbol scopes
+
+Each symbol scope has an `outer` field
+- the global symbol scope pointers to nothing
+- when a new symbol scope is created, it is given the current symbol scope as its `outer` field
+
+1. if we enter a scope:
+- we create a new symbol scope, and set the current symbol scope as its `outer` field
+2. if we leave a scope:
+- we set the current symbol scope to the symbol scope of the `outer` field
