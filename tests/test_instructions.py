@@ -36,7 +36,7 @@ def test_make_instruction():
         ([(opcodes.OPGREATERTHAN, ())]),
         ([(opcodes.OPMINUS, ())]),
         ([(opcodes.OPBANG, ())]),
-        ([(opcodes.OPCALL, ())]),
+        ([(opcodes.OPCALL, (0,))]),
         ([(opcodes.OPRETURNVALUE, ())]),
         ([(opcodes.OPRETURN, ())]),
         ([(opcodes.OPSETLOCAL, (0,))]),

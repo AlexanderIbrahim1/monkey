@@ -12,6 +12,7 @@ from monkey.code.constants import GLOBAL_BINDING_BYTE_SIZE
 from monkey.code.constants import LOCAL_BINDING_BYTE_SIZE
 from monkey.code.constants import MAXIMUM_ARRAY_BYTE_SIZE
 from monkey.code.constants import MAXIMUM_HASH_BYTE_SIZE
+from monkey.code.constants import NUMBER_OF_ARGUMENTS_BYTE_SIZE
 
 OPCONSTANT: Opcode = b"\x00"
 OPPOP: Opcode = b"\x01"
@@ -52,3 +53,4 @@ OPJUMP_WIDTH: int = ADDRESS_POSITION_SIZE
 OPJUMPWHENFALSE_WIDTH: int = ADDRESS_POSITION_SIZE
 OPARRAY_WIDTH: int = MAXIMUM_ARRAY_BYTE_SIZE
 OPHASH_WIDTH: int = MAXIMUM_HASH_BYTE_SIZE
+OPCALL_WIDTH: int = NUMBER_OF_ARGUMENTS_BYTE_SIZE

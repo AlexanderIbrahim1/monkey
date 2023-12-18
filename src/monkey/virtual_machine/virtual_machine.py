@@ -162,7 +162,11 @@ def run(vm: VirtualMachine) -> None:
                 result = _evaluate_index_expression(container, inside)
                 vm.stack.push(result)
             case opcodes.OPCALL:
-                function = vm.stack.peek()
+                n_arguments = _number_of_function_arguments(vm.instructions, vm.instruction_pointer)
+                vm.instruction_pointer += opcodes.OPCALL_WIDTH
+
+                function_position = vm.stack.size() - 1 - n_arguments
+                function = vm.stack[function_position]
                 if not isinstance(function, objs.CompiledFunctionObject):
                     raise VirtualMachineError("Attempted to call a non-function.")
 
@@ -308,6 +312,10 @@ def _local_identifier_index(instructions: code.Instructions, instr_ptr: int) -> 
 def _new_position_after_jump(vm: VirtualMachine, instr_ptr: int) -> int:
     jump_position = _read_position(vm.instructions, instr_ptr, opcodes.OPJUMP_WIDTH)
     return jump_position - 1
+
+
+def _number_of_function_arguments(instructions: code.Instructions, instr_ptr: int) -> int:
+    return _read_position(instructions, instr_ptr, opcodes.OPCALL_WIDTH)
 
 
 def _new_position_after_jump_when_false(vm: VirtualMachine, instr_ptr: int) -> int:

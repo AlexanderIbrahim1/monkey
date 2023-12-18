@@ -37,7 +37,7 @@ OPCODE_DEFINITIONS: dict[Opcode, OpcodeDefinition] = {
     opcodes.OPARRAY: OpcodeDefinition("OPARRAY", (opcodes.OPARRAY_WIDTH,)),
     opcodes.OPHASH: OpcodeDefinition("OPHASH", (opcodes.OPHASH_WIDTH,)),
     opcodes.OPINDEX: OpcodeDefinition("OPINDEX", ()),
-    opcodes.OPCALL: OpcodeDefinition("OPCALL", ()),
+    opcodes.OPCALL: OpcodeDefinition("OPCALL", (opcodes.OPCALL_WIDTH,)),
     opcodes.OPRETURNVALUE: OpcodeDefinition("OPRETURNVALUE", ()),
     opcodes.OPRETURN: OpcodeDefinition("OPRETURN", ()),
 }

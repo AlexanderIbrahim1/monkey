@@ -32,6 +32,11 @@ import monkey.compiler.symbol_table as sym
 KeyValueExpressionPair = tuple[exprs.Expression, exprs.Expression]
 
 
+# we add the number of arguments as an operand to OPCALL; we currently don't have
+# arguments implemented, but we need a value to set it to
+TEMPORARY_OPCALL_OPERAND: int = 0
+
+
 class Compiler:
     def __init__(
         self,
@@ -361,6 +366,7 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             compiler.emit(opcodes.OPRETURNVALUE)
         case exprs.CallExpression():  # function, arguments
             compile(compiler, node.function)
-            compiler.emit(opcodes.OPCALL)
+            # TODO: remove the TEMPORARY_OPCALL_OPERAND when arguments are implmemented
+            compiler.emit(opcodes.OPCALL, TEMPORARY_OPCALL_OPERAND)
         case _:
             raise CompilationError(f"Invalid node encountered: {node}")

@@ -25,3 +25,6 @@ MAXIMUM_ARRAY_BYTE_SIZE: int = 2
 
 # the number of bytes to describe the maximum number of key-value pairs a hashmap can have
 MAXIMUM_HASH_BYTE_SIZE: int = 2
+
+# the number of bytes to describe the number of arguments a function can accept
+NUMBER_OF_ARGUMENTS_BYTE_SIZE: int = 1

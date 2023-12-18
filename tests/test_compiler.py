@@ -566,7 +566,7 @@ class TestCompiler:
                     # the compiled function is a constant, so we can push it on the stack as one
                     (op.OPCONSTANT, (1,)),
                     # we are calling the function on top of the stack
-                    (op.OPCALL, ()),
+                    (op.OPCALL, (0,)),
                     # we have an expression statement; we need to pop it off
                     (op.OPPOP, ()),
                 ],
@@ -593,7 +593,7 @@ class TestCompiler:
                     # retrieve the variable referred to by '0' (the compiled function)
                     (op.OPGETGLOBAL, (0,)),
                     # we are calling the function on top of the stack
-                    (op.OPCALL, ()),
+                    (op.OPCALL, (0,)),
                     # we have an expression statement; we need to pop it off
                     (op.OPPOP, ()),
                 ],
@@ -661,14 +661,14 @@ class TestCompiler:
                     # this OPGETGLOBAL puts it on top of the stack
                     (op.OPGETGLOBAL, (0,)),
                     # we are calling the `outer` function (remember it is on top of the stack, at `2`)
-                    (op.OPCALL, ()),
+                    (op.OPCALL, (0,)),
                     # `f` is the third variable to be bound; set it to label `2`
                     (op.OPSETGLOBAL, (1,)),
                     # on the very next line, we refer to variable `f` (remember it was set to label `2`)
                     (op.OPGETGLOBAL, (1,)),
                     # OPGETGLOBAL puts whatever we just asked from, from the constants, on top of the stack
                     # so now we can call the thing on top of the stack
-                    (op.OPCALL, ()),
+                    (op.OPCALL, (0,)),
                     # the last line `f();` is an expression statement; we want it off the stack now
                     (op.OPPOP, ()),
                 ],
@@ -735,9 +735,9 @@ class TestCompiler:
                     # this OPGETGLOBAL puts it on top of the stack
                     (op.OPGETGLOBAL, (0,)),
                     # we are calling the `outer` function (remember, it is now on top of the stack)
-                    (op.OPCALL, ()),
+                    (op.OPCALL, (0,)),
                     # we (again) call the thing on top of the stack; this is whatever `outer()` returned
-                    (op.OPCALL, ()),
+                    (op.OPCALL, (0,)),
                     # the last line `f();` is an expression statement; we want it off the stack now
                     (op.OPPOP, ()),
                 ],
