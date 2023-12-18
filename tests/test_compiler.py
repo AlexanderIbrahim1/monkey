@@ -823,6 +823,152 @@ class TestCompiler:
     def test_let_statement_scopes(self, case: CompilerTestCase):
         perform_compiler_test_case(case)
 
+    @pytest.mark.parametrize(
+        "case",
+        [
+            CompilerTestCase(
+                """
+                fn(a) {};
+                """,
+                (
+                    (
+                        # bytecode instructions for the body of the function
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # the function body is empty; all it does is go back to where we left off
+                                # i.e. OPRETURN tells it to pop the function body off the stack, and push a NULL
+                                (op.OPRETURN, ()),
+                            ]
+                        ),
+                        # there are no local bindings
+                        0,
+                    ),
+                ),
+                [
+                    # the function itself is a contant; it is the first, so label it as 0
+                    (op.OPCONSTANT, (0,)),
+                    # we have an expression statement, so we need to pop it off the stack
+                    (op.OPPOP, ()),
+                ],
+            ),
+            CompilerTestCase(
+                """
+                let one_arg = fn(a) {};
+                """,
+                (
+                    (
+                        # bytecode instructions for the body of the function
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # the function body is empty; all it does is go back to where we left off
+                                # i.e. OPRETURN pops the function body off the stack, and pushes a NULL
+                                (op.OPRETURN, ()),
+                            ]
+                        ),
+                        # there are no local bindings
+                        0,
+                    ),
+                ),
+                [
+                    # the function itself is a constant; it is the first, so label it as 0
+                    (op.OPCONSTANT, (0,)),
+                    # we create a global binding for the name `one_arg` (pop off stack, put in globals)
+                    (op.OPSETGLOBAL, (0,)),
+                    # note that a let statement is not an expression statement; we don't pop the thing
+                    # off the top of the stack right away
+                ],
+            ),
+            CompilerTestCase(
+                """
+                let one_arg = fn(a) {};
+                one_arg(25);
+                """,
+                (
+                    # the first constant is the function
+                    (
+                        # bytecode instructions for the body of the function
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # the function body is empty; all it does is go back to where we left off
+                                # i.e. OPRETURN pops the function body off the stack, and pushes a NULL
+                                (op.OPRETURN, ()),
+                            ]
+                        ),
+                        # there are no local bindings
+                        0,
+                    ),
+                    # the next constant is the 25 that gets passed as an argument
+                    25,
+                ),
+                [
+                    # the function itself is a constant; it is the first, so label it as 0
+                    (op.OPCONSTANT, (0,)),
+                    # we create a global binding for the name `one_arg` (pop off stack, put in globals)
+                    # note that a let statement is not an expression statement; we don't pop the thing
+                    # off the top of the stack right away
+                    (op.OPSETGLOBAL, (0,)),
+                    # we are referencing a name `one_arg`, so search for it in the globals, and push it
+                    # on top of the stack; the function was labelled as 0
+                    (op.OPGETGLOBAL, (0,)),
+                    # the function takes one argument
+                    # the argument is a constant, so we deal with it using OPCONSTANT
+                    (op.OPCONSTANT, (1,)),
+                    # with the function and its arguments on the stack, we call!
+                    (op.OPCALL, (1,)),
+                    # the line with the call is an expression statement; we pop it off the stack
+                    (op.OPPOP, ()),
+                ],
+            ),
+            CompilerTestCase(
+                """
+                let three_args = fn(a, b, c) {};
+                three_args(24, 25, 26);
+                """,
+                (
+                    # the first constant is the function
+                    (
+                        # bytecode instructions for the body of the function
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # the function body is empty; all it does is go back to where we left off
+                                # i.e. OPRETURN pops the function body off the stack, and pushes a NULL
+                                (op.OPRETURN, ()),
+                            ]
+                        ),
+                        # there are no local bindings
+                        0,
+                    ),
+                    # the next constants are the 24, 25, 26 that get passed as arguments
+                    24,
+                    25,
+                    26,
+                ),
+                [
+                    # the function itself is a constant; it is the first, so label it as 0
+                    (op.OPCONSTANT, (0,)),
+                    # we create a global binding for the name `three_args` (pop off stack, put in globals)
+                    # note that a let statement is not an expression statement; we don't pop the thing
+                    # off the top of the stack right away
+                    (op.OPSETGLOBAL, (0,)),
+                    # we are referencing a name `three_args`, so search for it in the globals, and push it
+                    # on top of the stack; the function was labelled as 0
+                    (op.OPGETGLOBAL, (0,)),
+                    # the function takes three arguments
+                    # all three arguments are constants, so we put them in the constants
+                    (op.OPCONSTANT, (1,)),
+                    (op.OPCONSTANT, (2,)),
+                    (op.OPCONSTANT, (3,)),
+                    # with the function and its arguments on the stack, we call!
+                    (op.OPCALL, (3,)),
+                    # the line with the call is an expression statement; we pop it off the stack
+                    (op.OPPOP, ()),
+                ],
+            ),
+        ],
+    )
+    def test_function_call_with_arguments_no_body(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)
+
 
 # NOTE TO DEV: the number of locals in a function is the unique number of variables
 # that are defined in the function's body; not every constant gets a binding, so the
