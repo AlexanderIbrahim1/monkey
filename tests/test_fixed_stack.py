@@ -268,3 +268,86 @@ class TestFixedStack:
 
         with pytest.raises(FixedStackError):
             stack.shrink_stack_pointer(3)
+
+    def test_raises_shrink_stack_pointer_negative_value(self):
+        stack = FixedStack[int](5)
+        stack.push(1)
+        stack.push(2)
+
+        with pytest.raises(FixedStackError):
+            stack.shrink_stack_pointer(-1)
+
+    def test_advance_stack_pointer(self):
+        stack = FixedStack[int](10, default_element_factory=lambda: 123)
+        stack.push(5)
+        stack.push(10)
+        stack.push(15)
+
+        stack.advance_stack_pointer(3)
+
+        assert stack.size() == 6
+        for i, expected in enumerate([5, 10, 15, 123, 123, 123]):
+            assert stack[i] == expected
+
+    def test_shrink_then_advance_pointer(self):
+        stack = FixedStack[int](10, default_element_factory=lambda: 123)
+
+        expected_elements = [5, 10, 15, 20]
+        change_value = 2
+
+        # first, we push all the elements; the size should be as expected
+        for expected in expected_elements:
+            stack.push(expected)
+        assert stack.size() == len(expected_elements)
+
+        # shrinking the stack pointer should change the size accordingly
+        stack.shrink_stack_pointer(change_value)
+        assert stack.size() == len(expected_elements) - change_value
+
+        # now advance the stack pointer by the same amount; the size should be restored
+        stack.advance_stack_pointer(change_value)
+        assert stack.size() == len(expected_elements)
+
+        # we shrank and advanced by the same amount, so we should never have advanced
+        # beyond the size of the inner list; the default element factory should never
+        # have been called
+        #
+        # HOWEVER; I don't want to make any guarantees about the values in those entries
+        # that we advanced past; they should technically remain the same, but I don't want
+        # to depend on that behaviour; it should essentially be undefined
+
+    def test_raises_advance_stack_pointer_negative_value(self):
+        stack = FixedStack[int](5)
+        stack.push(1)
+        stack.push(2)
+
+        with pytest.raises(FixedStackError):
+            stack.advance_stack_pointer(-1)
+
+    def test_raises_advance_stack_pointer_too_much(self):
+        stack = FixedStack[int](5)
+        stack.push(1)
+        stack.push(2)
+
+        with pytest.raises(FixedStackError):
+            stack.advance_stack_pointer(5)
+
+    def test_raises_advance_stack_pointer_no_default_factory(self):
+        stack = FixedStack[int](5)
+        stack.push(1)
+
+        with pytest.raises(FixedStackError):
+            stack.advance_stack_pointer(1)
+
+    def test_advance_stack_pointer_no_default_factor(self):
+        # if there are already entries in the underlying list, there should be no problem
+        # advancing the stack pointer; no need to call any function to fill in the underlying data!
+
+        stack = FixedStack[int](5)
+        stack.push(1)
+        stack.push(2)
+
+        stack.shrink_stack_pointer(2)
+        stack.advance_stack_pointer(2)
+
+        assert stack.size() == 2

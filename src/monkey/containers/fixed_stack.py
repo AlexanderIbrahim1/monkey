@@ -7,6 +7,7 @@ system's available memory. But because this is a pedagogical project, I want to 
 the effects of having a maximum stack size.
 """
 
+from typing import Callable
 from typing import Generic
 from typing import Optional
 from typing import TypeVar
@@ -19,10 +20,11 @@ class FixedStackError(Exception):
 
 
 class FixedStack(Generic[T]):
-    def __init__(self, max_size: int) -> None:
+    def __init__(self, max_size: int, default_element_factory: Optional[Callable[[], T]] = None) -> None:
         self._data: list[T] = []
         self._max_size = max_size
         self._stack_pointer = 0
+        self._default_element_factory = default_element_factory
 
     def push(self, element: T) -> None:
         if self._stack_pointer == self._max_size:
@@ -98,6 +100,11 @@ class FixedStack(Generic[T]):
         return self.size() == 0
 
     def shrink_stack_pointer(self, n_elements: int) -> None:
+        if n_elements < 0:
+            raise FixedStackError(
+                "Must provide a positive value to shrink the stack pointer by.\n" f"Provided: {n_elements}"
+            )
+
         new_stack_pointer = self._stack_pointer - n_elements
         if new_stack_pointer < 0:
             raise FixedStackError(
@@ -105,5 +112,39 @@ class FixedStack(Generic[T]):
                 f"Current: {self._stack_pointer}\n"
                 f"Proposed shrink: {n_elements}"
             )
+
+        self._stack_pointer = new_stack_pointer
+
+    def advance_stack_pointer(self, n_elements: int) -> None:
+        if n_elements < 0:
+            raise FixedStackError(
+                "Must provide a positive value to advance the stack pointer by.\n" f"Provided: {n_elements}"
+            )
+
+        new_stack_pointer = self._stack_pointer + n_elements
+
+        if new_stack_pointer > self._max_size:
+            raise FixedStackError(
+                f"Cannot advance the stack pointer above the maximum size of {self._max_size}.\n"
+                f"Current: {self._stack_pointer}\n"
+                f"Proposed shrink: {n_elements}"
+            )
+
+        # checking the edge case: `self._stack_pointer` always points to the element ahead of
+        # the number of elements in the stack; i.e. the index of where the next element will be
+        # - if the stack is empty, `self._stack_pointer == 0`
+        # - if the stack has 1 element, `self._stack_pointer == 1`
+        # ...
+        # so the new stack pointer is only an issue if it is greater than the inner data's length
+        if new_stack_pointer > len(self._data):
+            if self._default_element_factory is None:
+                raise FixedStackError(
+                    "Attempted to advance the stack pointer past the size of the\n"
+                    "wrapped list, but no default element factory has been set."
+                )
+
+            while len(self._data) < new_stack_pointer:
+                new_element = self._default_element_factory()
+                self._data.append(new_element)
 
         self._stack_pointer = new_stack_pointer
