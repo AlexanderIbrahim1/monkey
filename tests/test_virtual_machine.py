@@ -321,6 +321,91 @@ class TestVirtualMachine:
     def test_function_call_return_function(self, test_case: VirtualMachineTestCase):
         virtual_machine_test_case_internals(test_case)
 
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            VirtualMachineTestCase(
+                """
+                let one = fn() {
+                    let one = 1;
+                    return one;
+                };
+                one();
+                """,
+                1,
+            ),
+            VirtualMachineTestCase(
+                """
+                let one_and_two = fn() {
+                    let one = 1;
+                    let two = 2;
+                    return one + two;
+                };
+                one_and_two();
+                """,
+                3,
+            ),
+            VirtualMachineTestCase(
+                """
+                let one_and_two = fn() {
+                    let one = 1;
+                    let two = 2;
+                    return one + two;
+                };
+                one_and_two();
+                """,
+                3,
+            ),
+            VirtualMachineTestCase(
+                """
+                let one_and_two = fn() {
+                    let one = 1;
+                    let two = 2;
+                    return one + two;
+                };
+                let three_and_four = fn() {
+                    let three = 3;
+                    let four = 4;
+                    return three + four;
+                };
+                one_and_two() + three_and_four();
+                """,
+                10,
+            ),
+            VirtualMachineTestCase(
+                """
+                let first_foobar = fn() {
+                    let foobar = 50;
+                    foobar;
+                };
+                let second_foobar = fn() {
+                    let foobar = 100;
+                    foobar;
+                };
+                first_foobar() + second_foobar();
+                """,
+                150,
+            ),
+            VirtualMachineTestCase(
+                """
+                let global_seed = 50;
+                let minus_one = fn() {
+                    let num = 1;
+                    return global_seed - num;
+                };
+                let minus_two = fn() {
+                    let num = 2;
+                    return global_seed - num;
+                };
+                minus_one() + minus_two();
+                """,
+                97,
+            ),
+        ],
+    )
+    def test_function_call_with_local_bindings(self, test_case: VirtualMachineTestCase):
+        virtual_machine_test_case_internals(test_case)
+
 
 def virtual_machine_test_case_internals(test_case: VirtualMachineTestCase):
     """

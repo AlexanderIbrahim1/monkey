@@ -20,23 +20,21 @@ from monkey.virtual_machine.constants import MAX_VM_GLOBALS_SIZE
 from monkey.virtual_machine.constants import MAX_VM_FRAME_SIZE
 from monkey.virtual_machine.custom_exceptions import VirtualMachineError
 from monkey.virtual_machine.stack_frame import StackFrame
-from monkey.virtual_machine.stack_frame import default_stack_frame_factory
 
 
 @dataclasses.dataclass
 class VirtualMachine:
     def __init__(self, bytecode: comp.Bytecode) -> None:
-        self.stack = FixedStack[objs.Object](MAX_VM_STACK_SIZE)
         self.globals = FixedStack[objs.Object](MAX_VM_GLOBALS_SIZE)
+        self.frames = FixedStack[StackFrame](MAX_VM_FRAME_SIZE)
         self.constants = bytecode.constants
 
-        dummy_factory = default_stack_frame_factory
         dummy_value = DUMMY_MAIN_FUNCTION_NUMBER_OF_LOCALS
-
-        self.frames = FixedStack[StackFrame](MAX_VM_FRAME_SIZE, default_element_factory=dummy_factory)
         main_function = objs.CompiledFunctionObject(bytecode.instructions, dummy_value)
         main_frame = StackFrame(main_function, base_pointer=0)
         self.frames.push(main_frame)
+
+        self.stack = FixedStack[objs.Object](MAX_VM_STACK_SIZE, default_element_factory=objs.DefaultObject)
 
     @property
     def instructions(self) -> code.Instructions:
@@ -109,6 +107,25 @@ def run(vm: VirtualMachine) -> None:
                 # just at the top; so we can't pop or anything
                 bound_value = vm.globals[i_global]
                 vm.stack.push(bound_value)
+            case opcodes.OPSETLOCAL:
+                i_local = _local_identifier_index(vm.instructions, vm.instruction_pointer)
+                vm.instruction_pointer += opcodes.OPSETLOCAL_WIDTH
+
+                current_frame = vm.frames.peek()
+                base_pointer = current_frame.base_pointer
+                local_pointer = base_pointer + i_local
+
+                vm.stack[local_pointer] = vm.stack.pop()
+            case opcodes.OPGETLOCAL:
+                i_local = _local_identifier_index(vm.instructions, vm.instruction_pointer)
+                vm.instruction_pointer += opcodes.OPSETLOCAL_WIDTH
+
+                current_frame = vm.frames.peek()
+                base_pointer = current_frame.base_pointer
+                local_pointer = base_pointer + i_local
+
+                object_to_push = vm.stack[local_pointer]
+                vm.stack.push(object_to_push)
             case opcodes.OPARRAY:
                 # the operand of the OPARRAY opcode is the number of elements in the array
                 n_elements = _number_of_array_elements(vm.instructions, vm.instruction_pointer)
@@ -159,7 +176,9 @@ def run(vm: VirtualMachine) -> None:
                 return_value = vm.stack.pop()
 
                 # go back to the parent frame
-                vm.frames.pop()
+                current_frame = vm.frames.pop()
+                n_locals = current_frame.function.n_locals
+                vm.stack.shrink_stack_pointer(n_locals)
 
                 # the function we just went through should be right under the returned value; it was
                 # sitting there the whole time we moved through the function's body; we want it gone now
@@ -170,7 +189,9 @@ def run(vm: VirtualMachine) -> None:
             case opcodes.OPRETURN:
                 # a function that ends with an `opcodes.OPRETURN` call doesn't put anything on the
                 # stack within its body; so we need to explicitly put NULL on the stack
-                vm.frames.pop()
+                current_frame = vm.frames.pop()
+                n_locals = current_frame.function.n_locals
+                vm.stack.shrink_stack_pointer(n_locals)
 
                 # because nothing is returned, the function we just went through should be on top of the
                 # stack; no need to pop off, and then push back on, some kind of returned value
