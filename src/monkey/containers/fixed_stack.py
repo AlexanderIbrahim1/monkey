@@ -20,7 +20,7 @@ class FixedStackError(Exception):
 
 
 class FixedStack(Generic[T]):
-    def __init__(self, max_size: int, default_element_factory: Optional[Callable[[], T]] = None) -> None:
+    def __init__(self, max_size: int, *, default_element_factory: Optional[Callable[[], T]] = None) -> None:
         self._data: list[T] = []
         self._max_size = max_size
         self._stack_pointer = 0
