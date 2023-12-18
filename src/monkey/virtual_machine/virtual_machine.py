@@ -20,6 +20,7 @@ from monkey.virtual_machine.constants import MAX_VM_GLOBALS_SIZE
 from monkey.virtual_machine.constants import MAX_VM_FRAME_SIZE
 from monkey.virtual_machine.custom_exceptions import VirtualMachineError
 from monkey.virtual_machine.stack_frame import StackFrame
+from monkey.virtual_machine.stack_frame import default_stack_frame_factory
 
 
 @dataclasses.dataclass
@@ -27,12 +28,14 @@ class VirtualMachine:
     def __init__(self, bytecode: comp.Bytecode) -> None:
         self.stack = FixedStack[objs.Object](MAX_VM_STACK_SIZE)
         self.globals = FixedStack[objs.Object](MAX_VM_GLOBALS_SIZE)
-        self.frames = FixedStack[StackFrame](MAX_VM_FRAME_SIZE)
         self.constants = bytecode.constants
 
+        dummy_factory = default_stack_frame_factory
         dummy_value = DUMMY_MAIN_FUNCTION_NUMBER_OF_LOCALS
+
+        self.frames = FixedStack[StackFrame](MAX_VM_FRAME_SIZE, default_element_factory=dummy_factory)
         main_function = objs.CompiledFunctionObject(bytecode.instructions, dummy_value)
-        main_frame = StackFrame(main_function)
+        main_frame = StackFrame(main_function, base_pointer=0)
         self.frames.push(main_frame)
 
     @property
@@ -146,8 +149,11 @@ def run(vm: VirtualMachine) -> None:
                 if not isinstance(function, objs.CompiledFunctionObject):
                     raise VirtualMachineError("Attempted to call a non-function.")
 
-                frame = StackFrame(function)
+                frame = StackFrame(function, base_pointer=vm.stack.size())
                 vm.frames.push(frame)
+
+                # reserve `n_locals` entries on the stack for the function's local parameters
+                vm.stack.advance_stack_pointer(function.n_locals)
             case opcodes.OPRETURNVALUE:
                 # by the end of the function's body, the object we want should be on top of the stack
                 return_value = vm.stack.pop()
@@ -271,18 +277,15 @@ def _number_of_array_elements(instructions: code.Instructions, instr_ptr: int) -
 
 
 def _global_identifier_index(instructions: code.Instructions, instr_ptr: int) -> int:
-    global_label_position = instr_ptr + 1
-    position_bytes = code.extract_operand(instructions, global_label_position, opcodes.OPSETGLOBAL_WIDTH)
-    position = int.from_bytes(position_bytes, byteorder="big", signed=False)
+    return _read_position(instructions, instr_ptr, opcodes.OPSETGLOBAL_WIDTH)
 
-    return position
+
+def _local_identifier_index(instructions: code.Instructions, instr_ptr: int) -> int:
+    return _read_position(instructions, instr_ptr, opcodes.OPSETLOCAL_WIDTH)
 
 
 def _new_position_after_jump(vm: VirtualMachine, instr_ptr: int) -> int:
-    instructions = vm.instructions
-    jump_position_bytes = code.extract_operand(instructions, instr_ptr + 1, opcodes.OPJUMP_WIDTH)
-    jump_position = int.from_bytes(jump_position_bytes)
-
+    jump_position = _read_position(vm.instructions, instr_ptr, opcodes.OPJUMP_WIDTH)
     return jump_position - 1
 
 
@@ -290,9 +293,7 @@ def _new_position_after_jump_when_false(vm: VirtualMachine, instr_ptr: int) -> i
     condition = vm.stack.pop()
 
     if not objs.is_truthy(condition):
-        instructions = vm.instructions
-        jump_position_bytes = code.extract_operand(instructions, instr_ptr + 1, opcodes.OPJUMPWHENFALSE_WIDTH)
-        jump_position = int.from_bytes(jump_position_bytes)
+        jump_position = _read_position(vm.instructions, instr_ptr, opcodes.OPJUMPWHENFALSE_WIDTH)
         new_instr_ptr = jump_position - 1
     else:
         new_instr_ptr = instr_ptr + opcodes.OPJUMPWHENFALSE_WIDTH
@@ -422,7 +423,7 @@ def _push_op_greaterthan(vm: VirtualMachine) -> None:
 
 
 def _push_opconstant(vm: VirtualMachine, instr_ptr: int) -> int:
-    position = _read_position(vm, instr_ptr, opcodes.OPCONSTANT_WIDTH)
+    position = _read_position(vm.instructions, instr_ptr, opcodes.OPCONSTANT_WIDTH)
     constant = vm.constants[position]
     vm.stack.push(constant)
 
@@ -458,10 +459,10 @@ def _push_op_bang(vm: VirtualMachine) -> None:
             vm.stack.push(objs.FALSE_BOOL_OBJ)
 
 
-def _read_position(vm: VirtualMachine, instr_ptr: int, size: int) -> int:
+def _read_position(instructions: code.Instructions, instr_ptr: int, operand_width: int) -> int:
     begin_ptr = instr_ptr + 1
-    end_ptr = begin_ptr + size
-    position_bytes = vm.instructions[begin_ptr:end_ptr]
+    end_ptr = begin_ptr + operand_width
+    position_bytes = instructions[begin_ptr:end_ptr]
     return int.from_bytes(position_bytes, byteorder="big", signed=False)
 
 
