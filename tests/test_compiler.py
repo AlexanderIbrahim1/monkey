@@ -840,8 +840,8 @@ class TestCompiler:
                                 (op.OPRETURN, ()),
                             ]
                         ),
-                        # there are no local bindings
-                        0,
+                        # one local binding: the monkey language treats arguments as local bindings
+                        1,
                     ),
                 ),
                 [
@@ -865,8 +865,8 @@ class TestCompiler:
                                 (op.OPRETURN, ()),
                             ]
                         ),
-                        # there are no local bindings
-                        0,
+                        # one local binding: the monkey language treats arguments as local bindings
+                        1,
                     ),
                 ),
                 [
@@ -894,8 +894,8 @@ class TestCompiler:
                                 (op.OPRETURN, ()),
                             ]
                         ),
-                        # there are no local bindings
-                        0,
+                        # one local binding: the monkey language treats arguments as local bindings
+                        1,
                     ),
                     # the next constant is the 25 that gets passed as an argument
                     25,
@@ -935,8 +935,8 @@ class TestCompiler:
                                 (op.OPRETURN, ()),
                             ]
                         ),
-                        # there are no local bindings
-                        0,
+                        # three local bindings: the monkey language treats arguments as local bindings
+                        3,
                     ),
                     # the next constants are the 24, 25, 26 that get passed as arguments
                     24,

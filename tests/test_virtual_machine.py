@@ -406,6 +406,28 @@ class TestVirtualMachine:
     def test_function_call_with_local_bindings(self, test_case: VirtualMachineTestCase):
         virtual_machine_test_case_internals(test_case)
 
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            VirtualMachineTestCase(
+                """
+                let identity = fn(a) { return a; };
+                identity(5);
+                """,
+                5,
+            ),
+            VirtualMachineTestCase(
+                """
+                let sum = fn(a, b) { a + b };
+                sum(1, 2);
+                """,
+                3,
+            ),
+        ],
+    )
+    def test_function_call_with_arguments(self, test_case: VirtualMachineTestCase):
+        virtual_machine_test_case_internals(test_case)
+
 
 def virtual_machine_test_case_internals(test_case: VirtualMachineTestCase):
     """

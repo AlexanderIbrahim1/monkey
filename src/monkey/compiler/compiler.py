@@ -337,6 +337,10 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
         case exprs.FunctionLiteral():  # parameters, body
             # compile the body of the function in its own scope
             compiler.enter_scope()
+
+            for param in node.parameters:
+                compiler.symbol_table.define(param.value)
+
             compile(compiler, node.body)
 
             # covers the case of an implicit return (no return statement, so no ReturnStatement case)

@@ -165,12 +165,19 @@ def run(vm: VirtualMachine) -> None:
                 n_arguments = _number_of_function_arguments(vm.instructions, vm.instruction_pointer)
                 vm.instruction_pointer += opcodes.OPCALL_WIDTH
 
-                function_position = vm.stack.size() - 1 - n_arguments
-                function = vm.stack[function_position]
+                # before calling a function, we put on the stack:
+                # - the compiled function object itself
+                # - *then* the arguments to that function
+                # so we need to take that into account when finding the function's location on the stack
+                function_pointer = vm.stack.size() - 1 - n_arguments
+                function = vm.stack[function_pointer]
                 if not isinstance(function, objs.CompiledFunctionObject):
                     raise VirtualMachineError("Attempted to call a non-function.")
 
-                frame = StackFrame(function, base_pointer=vm.stack.size())
+                # we want to return to just after the function (which we will then pop off the
+                # stack using OPRETURNVALUE or OPRETURN)
+                base_pointer = function_pointer + 1
+                frame = StackFrame(function, base_pointer=base_pointer)
                 vm.frames.push(frame)
 
                 # reserve `n_locals` entries on the stack for the function's local parameters
