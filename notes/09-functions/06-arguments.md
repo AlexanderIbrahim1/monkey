@@ -79,3 +79,15 @@ PROBLEM:
 
 SOLUTION:
 - give `OPCALL` an operand, representing the number of arguments!
+
+
+## Resolving References to Arguments
+There are multiple ways to treat arguments inside a function body
+
+Should we treat function arguments as different from local bindings?
+- this is more complicated (need new opcodes to push arguments onto the stack)
+- but it allows more flexibility (easier if we want to implement reference arguments)
+
+Should we treat function arguments the same way we do local bindings?
+- much simpler
+  - we can just reuse `OPGETLOCAL` (after we put the parameters into a symbol table, of course)
