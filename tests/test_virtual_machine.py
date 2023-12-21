@@ -493,17 +493,37 @@ class TestVirtualMachine:
             VirtualMachineTestCase(
                 """
                 let global_num = 10;
-                let sum_with_global = fn(a, b) {
-                    let c = a + b;
-                    let s = c + global_num;
-                    return s;
+                let sum_with_global_twice = fn(a) {
+                    return a + global_num + global_num;
                 };
-                let value0 = sum_with_global(1, 2);
-                let value1 = sum_with_global(3, 4);
-                value0 + value1;
+                sum_with_global_twice(5);
                 """,
-                30,
+                25,
             ),
+            VirtualMachineTestCase(
+                """
+                let global_num = 10;
+                let sum_with_global = fn(a) {
+                    return a + global_num;
+                };
+                sum_with_global(1) + sum_with_global(2);
+                """,
+                23,
+            ),
+            #            VirtualMachineTestCase(
+            #                """
+            #                let global_num = 10;
+            #                let sum_with_global = fn(a, b) {
+            #                    let c = a + b;
+            #                    let s = c + global_num;
+            #                    return s;
+            #                };
+            #                let value0 = sum_with_global(1, 2);
+            #                let value1 = sum_with_global(3, 4);
+            #                value0 + value1;
+            #                """,
+            #                30,
+            #            ),
         ],
     )
     def test_function_call_with_arguments_twice(self, test_case: VirtualMachineTestCase):

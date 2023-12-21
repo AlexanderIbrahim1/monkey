@@ -53,6 +53,8 @@ def run(vm: VirtualMachine) -> None:
     while vm.instruction_pointer < len(vm.instructions) - 1:
         vm.instruction_pointer += 1
         opcode = code.extract_opcode(vm.instructions, vm.instruction_pointer)
+        print(f"STACK: {vm.stack._data[:vm.stack.size()]}")
+        print(f"OPCODE: {code.lookup_opcode_definition(opcode).name}")
 
         match opcode:
             case opcodes.OPCONSTANT:
