@@ -969,6 +969,89 @@ class TestCompiler:
     def test_function_call_with_arguments_no_body(self, case: CompilerTestCase):
         perform_compiler_test_case(case)
 
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            CompilerTestCase(
+                """
+                let global_num = 10;
+                let sum_with_global_twice = fn(a) {
+                    return a + global_num + global_num;
+                };
+                sum_with_global_twice(5);
+                """,
+                (
+                    10,
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                (op.OPGETLOCAL, (0,)),
+                                (op.OPGETGLOBAL, (0,)),
+                                (op.OPADD, ()),
+                                (op.OPGETGLOBAL, (0,)),
+                                (op.OPADD, ()),
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        1,
+                    ),
+                    5,
+                ),
+                [
+                    (op.OPCONSTANT, (0,)),
+                    (op.OPSETGLOBAL, (0,)),
+                    (op.OPCONSTANT, (1,)),
+                    (op.OPSETGLOBAL, (1,)),
+                    (op.OPGETGLOBAL, (1,)),
+                    (op.OPCONSTANT, (2,)),
+                    (op.OPCALL, (1,)),
+                    (op.OPPOP, ()),
+                ],
+            ),
+            CompilerTestCase(
+                """
+                let global_num = 10;
+                let sum_with_global = fn(a) {
+                    return a + global_num;
+                };
+                sum_with_global(1) + sum_with_global(2);
+                """,
+                (
+                    10,
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                (op.OPGETLOCAL, (0,)),
+                                (op.OPGETGLOBAL, (0,)),
+                                (op.OPADD, ()),
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        1,
+                    ),
+                    1,
+                    2,
+                ),
+                [
+                    (op.OPCONSTANT, (0,)),
+                    (op.OPSETGLOBAL, (0,)),
+                    (op.OPCONSTANT, (1,)),
+                    (op.OPSETGLOBAL, (1,)),
+                    (op.OPGETGLOBAL, (1,)),
+                    (op.OPCONSTANT, (2,)),
+                    (op.OPCALL, (1,)),
+                    (op.OPGETGLOBAL, (1,)),
+                    (op.OPCONSTANT, (3,)),
+                    (op.OPCALL, (1,)),
+                    (op.OPADD, ()),
+                    (op.OPPOP, ()),
+                ],
+            ),
+        ],
+    )
+    def test_function_call_with_arguments_twice(self, test_case: CompilerTestCase):
+        perform_compiler_test_case(test_case)
+
 
 # NOTE TO DEV: the number of locals in a function is the unique number of variables
 # that are defined in the function's body; not every constant gets a binding, so the
