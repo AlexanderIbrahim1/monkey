@@ -12,7 +12,7 @@ from monkey.compiler.emitted_instruction import EmittedInstruction
 
 
 @dataclasses.dataclass
-class CompilationScope:
+class ScopeInstructions:
     instructions: Instructions = dataclasses.field(default_factory=Instructions)
     last_instruction: EmittedInstruction = dataclasses.field(default_factory=EmittedInstruction)
     second_last_instruction: EmittedInstruction = dataclasses.field(default_factory=EmittedInstruction)

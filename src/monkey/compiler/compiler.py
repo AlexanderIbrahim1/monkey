@@ -25,7 +25,7 @@ from monkey.compiler.constants import MAX_COMPILATION_SCOPE_STACK_SIZE
 from monkey.compiler.custom_exceptions import CompilationError
 from monkey.compiler.emitted_instruction import EmittedInstruction
 import monkey.compiler.emitted_instruction as emitted
-from monkey.compiler.compilation_scope import CompilationScope
+from monkey.compiler.scope_instructions import ScopeInstructions
 
 import monkey.compiler.symbol_table as sym
 
@@ -38,7 +38,7 @@ class Compiler:
         instructions: Optional[Instructions] = None,
         constants: Optional[list[Object]] = None,
         symbol_table: Optional[sym.SymbolTable] = None,
-        compilation_scopes: Optional[FixedStack[CompilationScope]] = None,
+        compilation_scopes: Optional[FixedStack[ScopeInstructions]] = None,
     ) -> None:
         if constants is None:
             self._constants = []
@@ -53,12 +53,12 @@ class Compiler:
             self.symbol_table = symbol_table
 
         if compilation_scopes is None:
-            self._compilation_scopes = FixedStack[CompilationScope](MAX_COMPILATION_SCOPE_STACK_SIZE)
+            self._compilation_scopes = FixedStack[ScopeInstructions](MAX_COMPILATION_SCOPE_STACK_SIZE)
 
             if instructions is None:
-                main_scope = CompilationScope()
+                main_scope = ScopeInstructions()
             else:
-                main_scope = CompilationScope(instructions=instructions)
+                main_scope = ScopeInstructions(instructions=instructions)
 
             self._compilation_scopes.push(main_scope)
         else:
@@ -85,11 +85,11 @@ class Compiler:
         return self._constants
 
     @property
-    def current_scope(self) -> CompilationScope:
+    def current_scope(self) -> ScopeInstructions:
         return self._compilation_scopes.peek()
 
     def enter_scope(self) -> None:
-        new_scope = CompilationScope()
+        new_scope = ScopeInstructions()
         self._compilation_scopes.push(new_scope)
 
         # a new scope has a different table of symbols

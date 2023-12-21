@@ -3,7 +3,7 @@ from monkey.code.byte_operations import make_instruction
 import monkey.code.opcodes as opcodes
 
 from monkey.compiler.compiler import Compiler
-from monkey.compiler.compilation_scope import CompilationScope
+from monkey.compiler.scope_instructions import ScopeInstructions
 from monkey.compiler.emitted_instruction import EmittedInstruction
 
 
@@ -146,7 +146,7 @@ class TestCompilerWithCompilationScopes:
 
 class TestCompilationScope:
     def test_default_construction(self) -> None:
-        default_scope = CompilationScope()
+        default_scope = ScopeInstructions()
 
         assert default_scope.instructions == Instructions()
         assert default_scope.last_instruction == EmittedInstruction()
