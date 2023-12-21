@@ -55,7 +55,7 @@ class Lexer:
             tok_type = token_types.STRING
             string = self._read_string()
             token = Token(tok_type, string)
-        elif _is_identifier_character(c):
+        elif _is_identifier_starter(c):
             identifier = self._read_identifier()
             tok_type = _lookup_identifier_token_type(identifier)
             token = Token(tok_type, identifier)
@@ -128,7 +128,15 @@ class Lexer:
             self._errors.append(err_msg)
 
 
+def _is_identifier_starter(char: str) -> bool:
+    return _is_alphabetic_or_underscore(char)
+
+
 def _is_identifier_character(char: str) -> bool:
+    return _is_alphabetic_or_underscore(char) or _is_digit_character(char)
+
+
+def _is_alphabetic_or_underscore(char: str) -> bool:
     return "a" <= char <= "z" or "A" <= char <= "Z" or char == "_"
 
 

@@ -95,9 +95,23 @@ class TestLexer:
         lexer = Lexer(input_text)
         assert lexer.next_token().token_type == token_types.ILLEGAL
 
-    def test_read_identifier(self):
-        lexer = Lexer(r"hello")
-        assert lexer.next_token() == Token(token_types.IDENTIFIER, "hello")
+    @pytest.mark.parametrize(
+        "identifier",
+        [
+            "hello",
+            "hello123",
+            "x",
+            "y",
+            "z",
+            "_ident",
+            "_abcd_",
+            "_abcd_efg_",
+            "_abcd123_45efg_klajsd",
+        ],
+    )
+    def test_read_identifier(self, identifier: str):
+        lexer = Lexer(identifier)
+        assert lexer.next_token() == Token(token_types.IDENTIFIER, identifier)
 
     @pytest.mark.parametrize(
         "keyword, token",
