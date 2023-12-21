@@ -486,7 +486,6 @@ class TestVirtualMachine:
     def test_function_call_with_arguments(self, test_case: VirtualMachineTestCase):
         virtual_machine_test_case_internals(test_case)
 
-    @pytest.mark.skip
     @pytest.mark.parametrize(
         "test_case",
         [
@@ -510,20 +509,20 @@ class TestVirtualMachine:
                 """,
                 23,
             ),
-            #            VirtualMachineTestCase(
-            #                """
-            #                let global_num = 10;
-            #                let sum_with_global = fn(a, b) {
-            #                    let c = a + b;
-            #                    let s = c + global_num;
-            #                    return s;
-            #                };
-            #                let value0 = sum_with_global(1, 2);
-            #                let value1 = sum_with_global(3, 4);
-            #                value0 + value1;
-            #                """,
-            #                30,
-            #            ),
+            VirtualMachineTestCase(
+                """
+                let global_num = 10;
+                let sum_with_global = fn(a, b) {
+                    let c = a + b;
+                    let s = c + global_num;
+                    return s;
+                };
+                let value_x = sum_with_global(1, 2);
+                let value_y = sum_with_global(3, 4);
+                value_x + value_y;
+                """,
+                30,
+            ),
         ],
     )
     def test_function_call_with_arguments_twice(self, test_case: VirtualMachineTestCase):

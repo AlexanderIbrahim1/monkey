@@ -53,8 +53,6 @@ def run(vm: VirtualMachine) -> None:
     while vm.instruction_pointer < len(vm.instructions) - 1:
         vm.instruction_pointer += 1
         opcode = code.extract_opcode(vm.instructions, vm.instruction_pointer)
-        print(f"STACK: {vm.stack._data[:vm.stack.size()]}")
-        print(f"OPCODE: {code.lookup_opcode_definition(opcode).name}")
 
         match opcode:
             case opcodes.OPCONSTANT:
@@ -107,6 +105,7 @@ def run(vm: VirtualMachine) -> None:
 
                 # the identifier we want to reference could be anywhere in the globals stack, not
                 # just at the top; so we can't pop or anything
+                print(f"OPGETGLOBAL: {i_global}")
                 bound_value = vm.globals[i_global]
                 vm.stack.push(bound_value)
             case opcodes.OPSETLOCAL:
@@ -125,6 +124,7 @@ def run(vm: VirtualMachine) -> None:
                 current_frame = vm.frames.peek()
                 base_pointer = current_frame.base_pointer
                 local_pointer = base_pointer + i_local
+                print(f"OPGETLOCAL: {local_pointer}")
 
                 object_to_push = vm.stack[local_pointer]
                 vm.stack.push(object_to_push)
@@ -172,6 +172,7 @@ def run(vm: VirtualMachine) -> None:
                 # - *then* the arguments to that function
                 # so we need to take that into account when finding the function's location on the stack
                 function_pointer = vm.stack.size() - 1 - n_arguments
+                print(f"OPCALL: function_pointer: {function_pointer}")
                 function = vm.stack[function_pointer]
                 if not isinstance(function, objs.CompiledFunctionObject):
                     raise VirtualMachineError("Attempted to call a non-function.")
@@ -183,7 +184,14 @@ def run(vm: VirtualMachine) -> None:
                 vm.frames.push(frame)
 
                 # reserve `n_locals` entries on the stack for the function's local parameters
-                vm.stack.advance_stack_pointer(function.n_locals)
+                # our compiler treats arguments using local bindings
+                # however, we need to make a distinction when we allocate memory for these locals
+                # - arguments are pushed onto the stack right after the function
+                #   - so we don't need to allocate memory for them
+                # - "true" local bindings (from `let` statements inside the function) are not yet on the stack
+                #   - so we need to allocate some memory for them
+                n_let_statements = function.n_locals - n_arguments
+                vm.stack.advance_stack_pointer(n_let_statements)
             case opcodes.OPRETURNVALUE:
                 # by the end of the function's body, the object we want should be on top of the stack
                 return_value = vm.stack.pop()
