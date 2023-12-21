@@ -2,8 +2,10 @@
 This module contains functions needed to help run the `test_compiler.py` file.
 """
 
+import dataclasses
 import itertools
 from typing import Any
+from typing import Optional
 from typing import Sequence
 
 import pytest
@@ -33,6 +35,12 @@ class CompilerTestCase:
         self.constants = [make_object(value) for value in expected_constants]
 
 
+@dataclasses.dataclass
+class CompilerTestCaseResult:
+    is_successful: bool
+    error_msg: Optional[str] = None
+
+
 def perform_compiler_test_case(case: CompilerTestCase):
     """
     Assert that the input text in the case, when compiled, produces the expected
@@ -52,23 +60,48 @@ def perform_compiler_test_case(case: CompilerTestCase):
     compile(compiler, program)
     bytecode = bytecode_from_compiler(compiler)
 
-    try:
-        assert bytecode.instructions == case.instructions
-    except AssertionError:
-        output = interleave_formatted_instructions(bytecode.instructions, case.instructions)
-        pytest.fail(output)
+    instructions_result = _assert_test_case_instructions(bytecode.instructions, case.instructions)
+    constants_result = _assert_test_case_constants(bytecode.constants, case.constants)
 
+    if not instructions_result.is_successful or not constants_result.is_successful:
+        total_output = ""
+        if instructions_result.error_msg is not None:
+            total_output += f"{instructions_result.error_msg}\n"
+        if instructions_result.error_msg is not None:
+            total_output += f"{constants_result.error_msg}\n"
+
+        pytest.fail(total_output)
+
+
+def _assert_test_case_instructions(
+    bytecode_instructions: code.Instructions, case_instructions: code.Instructions
+) -> CompilerTestCaseResult:
     try:
-        assert bytecode.constants == case.constants
-    except AssertionError:
-        output = f"""
+        assert bytecode_instructions == case_instructions
+        return CompilerTestCaseResult(True, None)
+    except AssertionError as e:
+        original_output = str(e)
+        formatted_output = interleave_formatted_instructions(bytecode_instructions, case_instructions)
+        output = f"{original_output}\n{formatted_output}"
+        return CompilerTestCaseResult(False, output)
+
+
+def _assert_test_case_constants(
+    bytecode_constants: list[objs.Object], case_constants: list[objs.Object]
+) -> CompilerTestCaseResult:
+    try:
+        assert bytecode_constants == case_constants
+        return CompilerTestCaseResult(True, None)
+    except AssertionError as e:
+        original_output = str(e)
+        formatted_output = f"""
             ACTUAL CONSTANTS
-            {bytecode.constants}
+            {bytecode_constants}
             EXPECTED CONSTANTS
-            {case.constants}
+            {case_constants}
         """
-
-        pytest.fail(output)
+        output = f"{original_output}\n{formatted_output}"
+        return CompilerTestCaseResult(False, output)
 
 
 def parse(monkey_code: str) -> Program:
