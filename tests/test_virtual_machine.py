@@ -423,9 +423,90 @@ class TestVirtualMachine:
                 """,
                 3,
             ),
+            VirtualMachineTestCase(
+                """
+                let sum = fn(a, b) {
+                    let c = a + b;
+                    return c;
+                };
+                sum(1, 2);
+                """,
+                3,
+            ),
+            VirtualMachineTestCase(
+                """
+                let sum = fn(a, b) {
+                    let c = a + b;
+                    return c;
+                };
+                sum(1, 2) + sum(3, 4);
+                """,
+                10,
+            ),
+            VirtualMachineTestCase(
+                """
+                let sum = fn(a, b) {
+                    let c = a + b;
+                    return c;
+                };
+                let outer = fn() {
+                    sum(1, 2) + sum(3, 4)
+                };
+                outer();
+                """,
+                10,
+            ),
+            VirtualMachineTestCase(
+                """
+                let global_num = 10;
+                let sum_with_global = fn(a, b) {
+                    let c = a + b;
+                    let s = c + global_num;
+                    return s;
+                };
+                sum_with_global(1, 2);
+                """,
+                13,
+            ),
+            VirtualMachineTestCase(
+                """
+                let global_num = 10;
+                let sum_with_global = fn(a, b) {
+                    let c = a + b;
+                    let s = c + global_num;
+                    return s;
+                };
+                let value = sum_with_global(1, 2);
+                value;
+                """,
+                13,
+            ),
         ],
     )
     def test_function_call_with_arguments(self, test_case: VirtualMachineTestCase):
+        virtual_machine_test_case_internals(test_case)
+
+    @pytest.mark.skip
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            VirtualMachineTestCase(
+                """
+                let global_num = 10;
+                let sum_with_global = fn(a, b) {
+                    let c = a + b;
+                    let s = c + global_num;
+                    return s;
+                };
+                let value0 = sum_with_global(1, 2);
+                let value1 = sum_with_global(3, 4);
+                value0 + value1;
+                """,
+                30,
+            ),
+        ],
+    )
+    def test_function_call_with_arguments_twice(self, test_case: VirtualMachineTestCase):
         virtual_machine_test_case_internals(test_case)
 
 
