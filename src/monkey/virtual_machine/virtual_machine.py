@@ -105,7 +105,6 @@ def run(vm: VirtualMachine) -> None:
 
                 # the identifier we want to reference could be anywhere in the globals stack, not
                 # just at the top; so we can't pop or anything
-                print(f"OPGETGLOBAL: {i_global}")
                 bound_value = vm.globals[i_global]
                 vm.stack.push(bound_value)
             case opcodes.OPSETLOCAL:
@@ -124,7 +123,6 @@ def run(vm: VirtualMachine) -> None:
                 current_frame = vm.frames.peek()
                 base_pointer = current_frame.base_pointer
                 local_pointer = base_pointer + i_local
-                print(f"OPGETLOCAL: {local_pointer}")
 
                 object_to_push = vm.stack[local_pointer]
                 vm.stack.push(object_to_push)
@@ -172,7 +170,6 @@ def run(vm: VirtualMachine) -> None:
                 # - *then* the arguments to that function
                 # so we need to take that into account when finding the function's location on the stack
                 function_pointer = vm.stack.size() - 1 - n_arguments
-                print(f"OPCALL: function_pointer: {function_pointer}")
                 function = vm.stack[function_pointer]
                 if not isinstance(function, objs.CompiledFunctionObject):
                     raise VirtualMachineError("Attempted to call a non-function.")
