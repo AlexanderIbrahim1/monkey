@@ -517,9 +517,9 @@ class TestVirtualMachine:
                     let s = c + global_num;
                     return s;
                 };
-                let value_x = sum_with_global(1, 2);
-                let value_y = sum_with_global(3, 4);
-                value_x + value_y;
+                let value0 = sum_with_global(1, 2);
+                let value1 = sum_with_global(3, 4);
+                value0 + value1;
                 """,
                 30,
             ),
