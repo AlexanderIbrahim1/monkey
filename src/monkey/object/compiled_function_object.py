@@ -19,6 +19,7 @@ from monkey.object.object import Object
 class CompiledFunctionObject(Object):
     instructions: Instructions
     n_locals: int
+    n_arguments: int
 
     def data_type(self) -> ObjectType:
         return ObjectType.COMPILED_FUNCTION
@@ -34,4 +35,6 @@ class CompiledFunctionObject(Object):
 
     def __repr__(self) -> str:
         written_instructions = instructions_to_string(self.instructions)
-        return f"COMPILED_FUNCTION[\n{written_instructions}\n][n_locals={self.n_locals}]"
+        locals_line = f"[n_locals={self.n_locals}]"
+        arguments_line = f"[n_arguments={self.n_arguments}]"
+        return f"COMPILED_FUNCTION[\n{written_instructions}\n]{locals_line}{arguments_line}"

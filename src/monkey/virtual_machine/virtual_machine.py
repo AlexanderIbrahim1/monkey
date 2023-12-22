@@ -14,6 +14,7 @@ from monkey.tokens import token_types
 from monkey.object.object_type import OBJECT_TYPE_DICT
 
 from monkey.containers import FixedStack
+from monkey.virtual_machine.constants import DUMMY_MAIN_FUNCTION_NUMBER_OF_ARGUMENTS
 from monkey.virtual_machine.constants import DUMMY_MAIN_FUNCTION_NUMBER_OF_LOCALS
 from monkey.virtual_machine.constants import MAX_VM_STACK_SIZE
 from monkey.virtual_machine.constants import MAX_VM_GLOBALS_SIZE
@@ -29,8 +30,9 @@ class VirtualMachine:
         self.frames = FixedStack[StackFrame](MAX_VM_FRAME_SIZE)
         self.constants = bytecode.constants
 
-        dummy_value = DUMMY_MAIN_FUNCTION_NUMBER_OF_LOCALS
-        main_function = objs.CompiledFunctionObject(bytecode.instructions, dummy_value)
+        dummy_locals = DUMMY_MAIN_FUNCTION_NUMBER_OF_LOCALS
+        dummy_arguments = DUMMY_MAIN_FUNCTION_NUMBER_OF_ARGUMENTS
+        main_function = objs.CompiledFunctionObject(bytecode.instructions, dummy_locals, dummy_arguments)
         main_frame = StackFrame(main_function, base_pointer=0)
         self.frames.push(main_frame)
 
@@ -181,14 +183,8 @@ def run(vm: VirtualMachine) -> None:
                 vm.frames.push(frame)
 
                 # reserve `n_locals` entries on the stack for the function's local parameters
-                # our compiler treats arguments using local bindings
-                # however, we need to make a distinction when we allocate memory for these locals
-                # - arguments are pushed onto the stack right after the function
-                #   - so we don't need to allocate memory for them
-                # - "true" local bindings (from `let` statements inside the function) are not yet on the stack
-                #   - so we need to allocate some memory for them
-                n_let_statements = function.n_locals - n_arguments
-                vm.stack.advance_stack_pointer(n_let_statements)
+                # note that the function's arguments are already on the stack, on top of it
+                vm.stack.advance_stack_pointer(function.n_locals)
             case opcodes.OPRETURNVALUE:
                 # by the end of the function's body, the object we want should be on top of the stack
                 return_value = vm.stack.pop()
@@ -196,7 +192,8 @@ def run(vm: VirtualMachine) -> None:
                 # go back to the parent frame
                 current_frame = vm.frames.pop()
                 n_locals = current_frame.function.n_locals
-                vm.stack.shrink_stack_pointer(n_locals)
+                n_arguments = current_frame.function.n_arguments
+                vm.stack.shrink_stack_pointer(n_locals + n_arguments)
 
                 # the function we just went through should be right under the returned value; it was
                 # sitting there the whole time we moved through the function's body; we want it gone now

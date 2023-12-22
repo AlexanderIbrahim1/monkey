@@ -351,12 +351,13 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
                 compiler.emit(opcodes.OPRETURN)
 
             # get the number of locals here, before we switch symbol tables in `compiler.leave_scope()`
-            n_locals = compiler.symbol_table.n_definitions
+            n_arguments = len(node.parameters)
+            n_locals = compiler.symbol_table.n_definitions - n_arguments
 
             instructions = compiler.leave_scope()
 
             # ensures that the emitted instructions are stored in a separate object after compilation
-            compiled_function = objs.CompiledFunctionObject(instructions, n_locals)
+            compiled_function = objs.CompiledFunctionObject(instructions, n_locals, n_arguments)
 
             position = compiler.add_constant_and_get_position(compiled_function)
             compiler.emit(opcodes.OPCONSTANT, position)

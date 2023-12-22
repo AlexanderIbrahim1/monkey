@@ -120,11 +120,11 @@ def make_object(value: Any) -> objs.Object:
             return objs.IntegerObject(value)
         case str():
             return objs.StringObject(value)
-        case (code.Instructions(), int()):
+        case (code.Instructions(), int(), int()):
             # NOTE TO DEV [2023-12-17]: pyright thinks that `value` here is a sequence of
             # `code.Instructions | int`, instead of the first element being `code.Instructions`
             # and the second element being an `int`; I couldn't find a fix for this
-            return objs.CompiledFunctionObject(value[0], value[1])  # type: ignore
+            return objs.CompiledFunctionObject(value[0], value[1], value[2])  # type: ignore
         case None:
             return objs.NULL_OBJ
         case _:

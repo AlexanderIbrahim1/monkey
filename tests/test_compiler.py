@@ -458,6 +458,9 @@ class TestCompiler:
                                 (op.OPRETURNVALUE, ()),
                             ]
                         ),
+                        # no local bindings
+                        0,
+                        # no arguments
                         0,
                     ),
                 ),
@@ -485,6 +488,9 @@ class TestCompiler:
                                 (op.OPRETURNVALUE, ()),
                             ]
                         ),
+                        # no local bindings
+                        0,
+                        # no arguments
                         0,
                     ),
                 ),
@@ -511,6 +517,9 @@ class TestCompiler:
                                 (op.OPRETURNVALUE, ()),
                             ]
                         ),
+                        # no local bindings
+                        0,
+                        # no arguments
                         0,
                     ),
                 ),
@@ -530,6 +539,9 @@ class TestCompiler:
                                 (op.OPRETURN, ()),
                             ]
                         ),
+                        # no local bindings
+                        0,
+                        # no arguments
                         0,
                     ),
                 ),
@@ -559,6 +571,9 @@ class TestCompiler:
                                 (op.OPRETURNVALUE, ()),
                             ]
                         ),
+                        # no local bindings
+                        0,
+                        # no arguments
                         0,
                     ),
                 ),
@@ -582,6 +597,9 @@ class TestCompiler:
                                 (op.OPRETURNVALUE, ()),
                             ]
                         ),
+                        # no local bindings
+                        0,
+                        # no arguments
                         0,
                     ),
                 ),
@@ -628,6 +646,9 @@ class TestCompiler:
                                 (op.OPRETURNVALUE, ()),
                             ]
                         ),
+                        # no local bindings
+                        0,
+                        # no arguments
                         0,
                     ),
                     # bytecode instructions for the body of the `outer` function
@@ -648,7 +669,10 @@ class TestCompiler:
                                 (op.OPRETURNVALUE, ()),
                             ]
                         ),
+                        # no local bindings
                         1,
+                        # no arguments
+                        0,
                     ),
                 ),
                 [
@@ -702,6 +726,9 @@ class TestCompiler:
                                 (op.OPRETURNVALUE, ()),
                             ]
                         ),
+                        # no local bindings
+                        0,
+                        # no arguments
                         0,
                     ),
                     # bytecode instructions for the body of the `outer` function
@@ -722,7 +749,10 @@ class TestCompiler:
                                 (op.OPRETURNVALUE, ()),
                             ]
                         ),
+                        # one local binding (`inner`)
                         1,
+                        # no arguments
+                        0,
                     ),
                 ),
                 [
@@ -764,6 +794,9 @@ class TestCompiler:
                                 (op.OPRETURNVALUE, ()),
                             ]
                         ),
+                        # no local bindings
+                        0,
+                        # no arguments
                         0,
                     ),
                 ),
@@ -807,7 +840,10 @@ class TestCompiler:
                                 (op.OPRETURNVALUE, ()),
                             ]
                         ),
+                        # one local binding (`num`)
                         1,
+                        # no arguments
+                        0,
                     ),
                 ),
                 [
@@ -840,7 +876,9 @@ class TestCompiler:
                                 (op.OPRETURN, ()),
                             ]
                         ),
-                        # one local binding: the monkey language treats arguments as local bindings
+                        # no local bindings
+                        0,
+                        # one argument
                         1,
                     ),
                 ),
@@ -865,7 +903,9 @@ class TestCompiler:
                                 (op.OPRETURN, ()),
                             ]
                         ),
-                        # one local binding: the monkey language treats arguments as local bindings
+                        # no local bindings
+                        0,
+                        # one argument
                         1,
                     ),
                 ),
@@ -894,7 +934,9 @@ class TestCompiler:
                                 (op.OPRETURN, ()),
                             ]
                         ),
-                        # one local binding: the monkey language treats arguments as local bindings
+                        # no local bindings
+                        0,
+                        # one argument
                         1,
                     ),
                     # the next constant is the 25 that gets passed as an argument
@@ -935,7 +977,9 @@ class TestCompiler:
                                 (op.OPRETURN, ()),
                             ]
                         ),
-                        # three local bindings: the monkey language treats arguments as local bindings
+                        # no local bindings
+                        0,
+                        # three arguments
                         3,
                     ),
                     # the next constants are the 24, 25, 26 that get passed as arguments
@@ -993,6 +1037,9 @@ class TestCompiler:
                                 (op.OPRETURNVALUE, ()),
                             ]
                         ),
+                        # no local bindings
+                        0,
+                        # one argument (`a`)
                         1,
                     ),
                     5,
@@ -1027,6 +1074,9 @@ class TestCompiler:
                                 (op.OPRETURNVALUE, ()),
                             ]
                         ),
+                        # no local bindings
+                        0,
+                        # one argument (`a`)
                         1,
                     ),
                     1,

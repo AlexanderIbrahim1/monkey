@@ -116,10 +116,11 @@ def test_compiled_function_object():
     written_instructions = instructions_to_string(instructions)
 
     dummy_n_locals = 0
-    compiled_function_obj = CompiledFunctionObject(instructions, dummy_n_locals)
+    dummy_n_arguments = 0
+    compiled_function_obj = CompiledFunctionObject(instructions, dummy_n_locals, dummy_n_arguments)
 
     assert compiled_function_obj.data_type() == ObjectType.COMPILED_FUNCTION
     assert (
         compiled_function_obj.inspect()
-        == f"COMPILED_FUNCTION[\n{written_instructions}\n][n_locals={dummy_n_locals}]"
+        == f"COMPILED_FUNCTION[\n{written_instructions}\n][n_locals={dummy_n_locals}][n_arguments={dummy_n_arguments}]"
     )
