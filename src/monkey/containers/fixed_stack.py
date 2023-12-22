@@ -11,6 +11,7 @@ from typing import Callable
 from typing import Generic
 from typing import Optional
 from typing import TypeVar
+from typing import overload
 
 T = TypeVar("T")
 
@@ -69,9 +70,25 @@ class FixedStack(Generic[T]):
 
         return self._data[self._stack_pointer - 1]
 
+    @overload
     def __getitem__(self, index: int) -> T:
-        if not (0 <= index < self._stack_pointer):
-            raise FixedStackError("Attempted to access element out of bounds of the stack.")
+        ...
+
+    @overload
+    def __getitem__(self, index: slice) -> list[T]:
+        ...
+
+    def __getitem__(self, index: slice | int) -> list[T] | T:
+        if isinstance(index, slice):
+            if not (0 <= index.start < self._stack_pointer):
+                raise FixedStackError("Attempted to access element out of bounds of the stack.")
+            if not (0 < index.stop <= self._stack_pointer):
+                raise FixedStackError("Attempted to access element out of bounds of the stack.")
+
+            return self._data[index.start : index.stop : index.step]
+        else:
+            if not (0 <= index < self._stack_pointer):
+                raise FixedStackError("Attempted to access element out of bounds of the stack.")
 
         return self._data[index]
 

@@ -159,6 +159,28 @@ class TestFixedStack:
         with pytest.raises(FixedStackError):
             stack[index]
 
+    def test_getitem_slice(self):
+        stack = FixedStack[int](3)
+        stack.push(1)
+        stack.push(2)
+        stack.push(3)
+
+        assert stack[0:2] == [1, 2]
+        assert stack[1:3] == [2, 3]
+
+    @pytest.mark.parametrize(
+        "slice_object",
+        [
+            slice(0, 2),
+            slice(-1, 1),
+        ],
+    )
+    def test_raises_getitem_slice_out_of_bounds(self, slice_object: slice):
+        stack = FixedStack[int](3)
+        stack.push(1)
+        with pytest.raises(FixedStackError):
+            stack[slice_object]
+
     def test_setitem(self):
         stack = FixedStack[int](3)
         stack.push(1)
