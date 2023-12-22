@@ -5,11 +5,12 @@ which writes its arguments to sys.stdout.
 
 import sys
 
-import monkey.object as objs
+from monkey.object.object import Object
+from monkey.object.constants import NULL_OBJ
 
 
-def puts_builtin_impl(*args: objs.Object) -> objs.Object:
+def puts_builtin_impl(*args: Object) -> Object:
     for arg in args:
         sys.stdout.write(f"{arg}\n")
 
-    return objs.NULL_OBJ
+    return NULL_OBJ

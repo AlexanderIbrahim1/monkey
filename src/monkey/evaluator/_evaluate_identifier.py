@@ -5,7 +5,7 @@ This module contains code specific to evaluating instances of Identifier.
 import monkey.object as objs
 import monkey.parser.expressions as exprs
 
-from monkey.evaluator.monkey_builtins import BUILTINS_DICT
+from monkey.object.monkey_builtins import BUILTINS_DICT
 
 
 def evaluate_identifier(node: exprs.Identifier, env: objs.Environment) -> objs.Object:
