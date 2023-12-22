@@ -539,7 +539,7 @@ class TestVirtualMachine:
             ),
         ],
     )
-    def test_function_call_with_arguments_twice(self, test_case: VirtualMachineTestCase):
+    def test_function_call_with_arguments_and_globals(self, test_case: VirtualMachineTestCase):
         virtual_machine_test_case_internals(test_case)
 
     @pytest.mark.parametrize(
@@ -591,6 +591,115 @@ class TestVirtualMachine:
         ],
     )
     def test_function_call_wrong_number_of_arguments_raises(self, input_text: str):
+        virtual_machine_test_case_raises_internals(input_text)
+
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            VirtualMachineTestCase(
+                """
+                len("");
+                """,
+                0,
+            ),
+            VirtualMachineTestCase(
+                """
+                len("four");
+                """,
+                4,
+            ),
+            VirtualMachineTestCase(
+                """
+                len("hello world");
+                """,
+                11,
+            ),
+            VirtualMachineTestCase(
+                """
+                len([]);
+                """,
+                0,
+            ),
+            VirtualMachineTestCase(
+                """
+                len([1, 2, 3]);
+                """,
+                3,
+            ),
+            VirtualMachineTestCase(
+                """
+                puts("hello", "world");
+                """,
+                None,
+            ),
+            VirtualMachineTestCase(
+                """
+                first([1, 2, 3]);
+                """,
+                1,
+            ),
+            VirtualMachineTestCase(
+                """
+                first("hello");
+                """,
+                "h",
+            ),
+            VirtualMachineTestCase(
+                """
+                last([1, 2, 3]);
+                """,
+                3,
+            ),
+            VirtualMachineTestCase(
+                """
+                rest([1, 2, 3]);
+                """,
+                [2, 3],
+            ),
+            VirtualMachineTestCase(
+                """
+                push([], 1);
+                """,
+                [1],
+            ),
+        ],
+    )
+    def test_builtins(self, test_case: VirtualMachineTestCase):
+        virtual_machine_test_case_internals(test_case)
+
+    @pytest.mark.parametrize(
+        "input_text",
+        [
+            """
+            len(1);
+            """,
+            """
+            len("one", "two");
+            """,
+            """
+            first([]);
+            """,
+            """
+            last([]);
+            """,
+            """
+            rest([]);
+            """,
+            """
+            first(1);
+            """,
+            """
+            last(2);
+            """,
+            """
+            rest(3);
+            """,
+            """
+            push(1, 1);
+            """,
+        ],
+    )
+    def test_builtins_raises(self, input_text: str):
         virtual_machine_test_case_raises_internals(input_text)
 
 

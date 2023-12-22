@@ -12,6 +12,7 @@ import monkey.object as objs
 
 from monkey.tokens import token_types
 from monkey.object.object_type import OBJECT_TYPE_DICT
+from monkey.object.monkey_builtins import BUILTINS_LIST
 
 from monkey.containers import FixedStack
 from monkey.virtual_machine.constants import DUMMY_MAIN_FUNCTION_NUMBER_OF_ARGUMENTS
@@ -103,7 +104,7 @@ def run(vm: VirtualMachine) -> None:
                     vm.globals[i_global] = value_to_bind
             case opcodes.OPGETGLOBAL:
                 i_global = _global_identifier_index(vm.instructions, vm.instruction_pointer)
-                vm.instruction_pointer += opcodes.OPSETGLOBAL_WIDTH
+                vm.instruction_pointer += opcodes.OPGETGLOBAL_WIDTH
 
                 # the identifier we want to reference could be anywhere in the globals stack, not
                 # just at the top; so we can't pop or anything
@@ -120,13 +121,19 @@ def run(vm: VirtualMachine) -> None:
                 vm.stack[local_pointer] = vm.stack.pop()
             case opcodes.OPGETLOCAL:
                 i_local = _local_identifier_index(vm.instructions, vm.instruction_pointer)
-                vm.instruction_pointer += opcodes.OPSETLOCAL_WIDTH
+                vm.instruction_pointer += opcodes.OPGETLOCAL_WIDTH
 
                 current_frame = vm.frames.peek()
                 base_pointer = current_frame.base_pointer
                 local_pointer = base_pointer + i_local
 
                 object_to_push = vm.stack[local_pointer]
+                vm.stack.push(object_to_push)
+            case opcodes.OPGETBUILTIN:
+                i_builtin = _builtin_identifier_index(vm.instructions, vm.instruction_pointer)
+                vm.instruction_pointer += opcodes.OPGETBUILTIN_WIDTH
+
+                object_to_push = BUILTINS_LIST[i_builtin]
                 vm.stack.push(object_to_push)
             case opcodes.OPARRAY:
                 # the operand of the OPARRAY opcode is the number of elements in the array
@@ -172,27 +179,15 @@ def run(vm: VirtualMachine) -> None:
                 # - *then* the arguments to that function
                 # so we need to take that into account when finding the function's location on the stack
                 function_pointer = vm.stack.size() - 1 - n_arguments
-                function = vm.stack[function_pointer]
-                if not isinstance(function, objs.CompiledFunctionObject):
-                    raise VirtualMachineError("Attempted to call a non-function.")
+                callable = vm.stack[function_pointer]
 
-                if not n_arguments == function.n_arguments:
-                    raise VirtualMachineError(
-                        "The number of arguments passed into the function doesn't match the\n"
-                        "number of function parameters.\n"
-                        f"Number of passed arguments: {n_arguments}\n"
-                        f"Number of parameters the function accepts: {function.n_arguments}"
-                    )
-
-                # we want to return to just after the function (which we will then pop off the
-                # stack using OPRETURNVALUE or OPRETURN)
-                base_pointer = function_pointer + 1
-                frame = StackFrame(function, base_pointer=base_pointer)
-                vm.frames.push(frame)
-
-                # reserve `n_locals` entries on the stack for the function's local parameters
-                # note that the function's arguments are already on the stack, on top of it
-                vm.stack.advance_stack_pointer(function.n_locals)
+                match callable:
+                    case objs.CompiledFunctionObject():
+                        _execute_function_call(callable, vm, n_arguments, function_pointer)
+                    case objs.BuiltinObject():
+                        _execute_builtin_call(callable, vm, n_arguments)
+                    case _:
+                        raise VirtualMachineError("Attempted to call a non-function or non-builtin.")
             case opcodes.OPRETURNVALUE:
                 # by the end of the function's body, the object we want should be on top of the stack
                 return_value = vm.stack.pop()
@@ -223,6 +218,55 @@ def run(vm: VirtualMachine) -> None:
                 vm.stack.push(objs.NULL_OBJ)
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
+
+
+def _execute_builtin_call(
+    function: objs.BuiltinObject,
+    vm: VirtualMachine,
+    n_arguments: int,
+) -> None:
+    i_args_lower = vm.stack.size() - n_arguments
+    i_args_upper = vm.stack.size()
+    arguments = vm.stack[i_args_lower:i_args_upper]
+
+    # unlike a user-defined function, a builtin function does not end with a call to
+    # OPRETURN or OPRETURNVALUE; so the clean-up should be done here
+    #
+    # there are no local bindings; all we have to account for are:
+    # - arguments to the builtin function on top of the stack (n_arguments)
+    # - the builtin function just underneath them (1 element)
+    n_objects_to_remove = n_arguments + 1
+    vm.stack.shrink_stack_pointer(n_objects_to_remove)
+
+    result = function.func(*arguments)
+    if objs.is_error_object(result):
+        raise VirtualMachineError(
+            f"Error when executing builtin function `{function.name}:`\n" f"{str(result)}"
+        )
+    else:
+        vm.stack.push(result)
+
+
+def _execute_function_call(
+    function: objs.CompiledFunctionObject, vm: VirtualMachine, n_arguments: int, function_pointer: int
+) -> None:
+    if not n_arguments == function.n_arguments:
+        raise VirtualMachineError(
+            "The number of arguments passed into the function doesn't match the\n"
+            "number of function parameters.\n"
+            f"Number of passed arguments: {n_arguments}\n"
+            f"Number of parameters the function accepts: {function.n_arguments}"
+        )
+
+    # we want to return to just after the function (which we will then pop off the
+    # stack using OPRETURNVALUE or OPRETURN)
+    base_pointer = function_pointer + 1
+    frame = StackFrame(function, base_pointer=base_pointer)
+    vm.frames.push(frame)
+
+    # reserve `n_locals` entries on the stack for the function's local parameters
+    # note that the function's arguments are already on the stack, on top of it
+    vm.stack.advance_stack_pointer(function.n_locals)
 
 
 def _evaluate_index_expression(container: objs.Object, inside: objs.Object) -> objs.Object:
@@ -321,11 +365,15 @@ def _number_of_array_elements(instructions: code.Instructions, instr_ptr: int) -
 
 
 def _global_identifier_index(instructions: code.Instructions, instr_ptr: int) -> int:
-    return _read_position(instructions, instr_ptr, opcodes.OPSETGLOBAL_WIDTH)
+    return _read_position(instructions, instr_ptr, opcodes.OPGETGLOBAL_WIDTH)
 
 
 def _local_identifier_index(instructions: code.Instructions, instr_ptr: int) -> int:
-    return _read_position(instructions, instr_ptr, opcodes.OPSETLOCAL_WIDTH)
+    return _read_position(instructions, instr_ptr, opcodes.OPGETLOCAL_WIDTH)
+
+
+def _builtin_identifier_index(instructions: code.Instructions, instr_ptr: int) -> int:
+    return _read_position(instructions, instr_ptr, opcodes.OPGETBUILTIN_WIDTH)
 
 
 def _new_position_after_jump(vm: VirtualMachine, instr_ptr: int) -> int:
