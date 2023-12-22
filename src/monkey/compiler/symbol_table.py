@@ -11,8 +11,9 @@ import enum
 
 
 class SymbolScope(enum.Enum):
-    LOCAL = enum.auto()
+    BUILTIN = enum.auto()
     GLOBAL = enum.auto()
+    LOCAL = enum.auto()
 
 
 @dataclasses.dataclass
@@ -38,6 +39,12 @@ class SymbolTable:
             symbol_scope = SymbolScope.LOCAL
 
         new_symbol = Symbol(name, symbol_scope, self.n_definitions)
+        self.store[name] = new_symbol
+
+        return new_symbol
+
+    def define_builtin(self, name: str, index: int) -> Symbol:
+        new_symbol = Symbol(name, SymbolScope.BUILTIN, index)
         self.store[name] = new_symbol
 
         return new_symbol
