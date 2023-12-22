@@ -97,3 +97,33 @@ def test_nested_resolve_local():
     assert local_table1.resolve("d") == Symbol("d", SymbolScope.LOCAL, 1)
     assert local_table1.resolve("e") == Symbol("e", SymbolScope.LOCAL, 0)
     assert local_table1.resolve("f") == Symbol("f", SymbolScope.LOCAL, 1)
+
+
+def test_nested_resolve_builtin():
+    """
+    Make sure that the builtin functions always resolve to a symbol in the BUILTIN scope,
+    no matter how many times the symbol table has been enclosed in another one.
+    """
+    global_table = SymbolTable()
+    global_table.define_builtin("builtin0", 0)
+    global_table.define_builtin("builtin1", 1)
+    global_table.define_builtin("builtin2", 2)
+    global_table.define_builtin("builtin3", 3)
+
+    local_table0 = build_enclosed_symbol_table(global_table)
+    local_table1 = build_enclosed_symbol_table(local_table0)
+
+    assert global_table.resolve("builtin0") == Symbol("builtin0", SymbolScope.BUILTIN, 0)
+    assert global_table.resolve("builtin1") == Symbol("builtin1", SymbolScope.BUILTIN, 1)
+    assert global_table.resolve("builtin2") == Symbol("builtin2", SymbolScope.BUILTIN, 2)
+    assert global_table.resolve("builtin3") == Symbol("builtin3", SymbolScope.BUILTIN, 3)
+
+    assert local_table0.resolve("builtin0") == Symbol("builtin0", SymbolScope.BUILTIN, 0)
+    assert local_table0.resolve("builtin1") == Symbol("builtin1", SymbolScope.BUILTIN, 1)
+    assert local_table0.resolve("builtin2") == Symbol("builtin2", SymbolScope.BUILTIN, 2)
+    assert local_table0.resolve("builtin3") == Symbol("builtin3", SymbolScope.BUILTIN, 3)
+
+    assert local_table1.resolve("builtin0") == Symbol("builtin0", SymbolScope.BUILTIN, 0)
+    assert local_table1.resolve("builtin1") == Symbol("builtin1", SymbolScope.BUILTIN, 1)
+    assert local_table1.resolve("builtin2") == Symbol("builtin2", SymbolScope.BUILTIN, 2)
+    assert local_table1.resolve("builtin3") == Symbol("builtin3", SymbolScope.BUILTIN, 3)
