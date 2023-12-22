@@ -40,6 +40,7 @@ OPCODE_DEFINITIONS: dict[Opcode, OpcodeDefinition] = {
     opcodes.OPCALL: OpcodeDefinition("OPCALL", (opcodes.OPCALL_WIDTH,)),
     opcodes.OPRETURNVALUE: OpcodeDefinition("OPRETURNVALUE", ()),
     opcodes.OPRETURN: OpcodeDefinition("OPRETURN", ()),
+    opcodes.OPGETBUILTIN: OpcodeDefinition("OPGETBUILTIN", (opcodes.MAXIMUM_BUILTIN_BYTE_SIZE,)),
 }
 
 

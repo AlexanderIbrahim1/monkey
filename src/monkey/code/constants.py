@@ -28,3 +28,6 @@ MAXIMUM_HASH_BYTE_SIZE: int = 2
 
 # the number of bytes to describe the number of arguments a function can accept
 NUMBER_OF_ARGUMENTS_BYTE_SIZE: int = 1
+
+# number of bytes used to describe the number assigned to a builtin function
+MAXIMUM_BUILTIN_BYTE_SIZE: int = 1

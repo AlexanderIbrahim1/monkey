@@ -13,6 +13,7 @@ from monkey.code.constants import LOCAL_BINDING_BYTE_SIZE
 from monkey.code.constants import MAXIMUM_ARRAY_BYTE_SIZE
 from monkey.code.constants import MAXIMUM_HASH_BYTE_SIZE
 from monkey.code.constants import NUMBER_OF_ARGUMENTS_BYTE_SIZE
+from monkey.code.constants import MAXIMUM_BUILTIN_BYTE_SIZE
 
 OPCONSTANT: Opcode = b"\x00"
 OPPOP: Opcode = b"\x01"
@@ -40,6 +41,7 @@ OPRETURNVALUE: Opcode = b"\x22"
 OPRETURN: Opcode = b"\x23"
 OPSETLOCAL: Opcode = b"\x24"
 OPGETLOCAL: Opcode = b"\x25"
+OPGETBUILTIN: Opcode = b"\x26"
 
 # a dummy opcode used in situations where an opcode instance needs to exist
 OPDUMMY: Opcode = b"\xFF"
@@ -54,3 +56,4 @@ OPJUMPWHENFALSE_WIDTH: int = ADDRESS_POSITION_SIZE
 OPARRAY_WIDTH: int = MAXIMUM_ARRAY_BYTE_SIZE
 OPHASH_WIDTH: int = MAXIMUM_HASH_BYTE_SIZE
 OPCALL_WIDTH: int = NUMBER_OF_ARGUMENTS_BYTE_SIZE
+OPGETBUILTIN_WIDTH: int = MAXIMUM_BUILTIN_BYTE_SIZE
