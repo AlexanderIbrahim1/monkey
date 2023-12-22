@@ -176,6 +176,14 @@ def run(vm: VirtualMachine) -> None:
                 if not isinstance(function, objs.CompiledFunctionObject):
                     raise VirtualMachineError("Attempted to call a non-function.")
 
+                if not n_arguments == function.n_arguments:
+                    raise VirtualMachineError(
+                        "The number of arguments passed into the function doesn't match the\n"
+                        "number of function parameters.\n"
+                        f"Number of passed arguments: {n_arguments}\n"
+                        f"Number of parameters the function accepts: {function.n_arguments}"
+                    )
+
                 # we want to return to just after the function (which we will then pop off the
                 # stack using OPRETURNVALUE or OPRETURN)
                 base_pointer = function_pointer + 1

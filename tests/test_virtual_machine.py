@@ -542,17 +542,52 @@ class TestVirtualMachine:
     def test_function_call_with_arguments_twice(self, test_case: VirtualMachineTestCase):
         virtual_machine_test_case_internals(test_case)
 
-    @pytest.mark.skip
     @pytest.mark.parametrize(
         "input_text",
         [
             """
+            let func = fn() {};
+            func(1);
+            """,
+            """
             let func = fn() {
+                let x = 1;
+                let y = 2;
+            };
+            func(3);
+            """,
+            """
+            let func = fn(a) {
                 let x = 4;
                 let y = 5;
             };
-            func(1);
+            func();
+            """,
             """
+            let func = fn(a) {};
+            func();
+            """,
+            """
+            let func = fn(a, b) { return a + b; };
+            func();
+            """,
+            """
+            let func = fn(a, b) { return a + b; };
+            func(1);
+            """,
+            """
+            let func = fn(a, b) { return a + b; };
+            func(1, 2, 3);
+            """,
+            """
+            fn(a, b) { return a + b; }();
+            """,
+            """
+            fn(a, b) { return a + b; }(1);
+            """,
+            """
+            fn(a, b) { return a + b; }(1, 2, 3);
+            """,
         ],
     )
     def test_function_call_wrong_number_of_arguments_raises(self, input_text: str):

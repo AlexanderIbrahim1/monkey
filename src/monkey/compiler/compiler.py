@@ -367,6 +367,14 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
         case exprs.CallExpression():  # function, arguments
             compile(compiler, node.function)
 
+            # NOTE: I can't check that the number of arguments pass to the function matches
+            # the number of parameters that the function accepts, at this section. This is
+            # because the CallExpression doesn't just strictly hold a `FunctionLiteral`, it
+            # can hold lots of other expressions (that will eventually be evaluated as functions)
+            #
+            # So the compiler simply doesn't have enough information; we can only do the check
+            # at the VM level
+
             for arg in node.arguments:
                 compile(compiler, arg)
 
