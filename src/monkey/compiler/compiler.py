@@ -1,6 +1,4 @@
-import copy
 import dataclasses
-from typing import Optional
 
 from monkey.object import Object
 from monkey.parser import ASTNode
@@ -33,36 +31,14 @@ KeyValueExpressionPair = tuple[exprs.Expression, exprs.Expression]
 
 
 class Compiler:
-    def __init__(
-        self,
-        instructions: Optional[Instructions] = None,
-        constants: Optional[list[Object]] = None,
-        symbol_table: Optional[sym.SymbolTable] = None,
-        compilation_scopes: Optional[FixedStack[ScopeInstructions]] = None,
-    ) -> None:
-        if constants is None:
-            self._constants = []
-        else:
-            self._constants = constants
+    def __init__(self) -> None:
+        self._constants: list[Object] = []
 
-        if symbol_table is None:
-            # self.symbol_table: sym.SymbolTable = sym.SymbolTable()
-            self.symbol_table = sym.SymbolTable()
-        else:
-            # self.symbol_table: sym.SymbolTable = symbol_table
-            self.symbol_table = symbol_table
+        self._compilation_scopes = FixedStack[ScopeInstructions](MAX_COMPILATION_SCOPE_STACK_SIZE)
+        main_scope = ScopeInstructions()
+        self._compilation_scopes.push(main_scope)
 
-        if compilation_scopes is None:
-            self._compilation_scopes = FixedStack[ScopeInstructions](MAX_COMPILATION_SCOPE_STACK_SIZE)
-
-            if instructions is None:
-                main_scope = ScopeInstructions()
-            else:
-                main_scope = ScopeInstructions(instructions=instructions)
-
-            self._compilation_scopes.push(main_scope)
-        else:
-            self._compilation_scopes = copy.deepcopy(compilation_scopes)
+        self.symbol_table: sym.SymbolTable = sym.SymbolTable()
 
     @property
     def number_of_scopes(self) -> int:
