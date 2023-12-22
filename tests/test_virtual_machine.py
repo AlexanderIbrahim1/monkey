@@ -523,10 +523,40 @@ class TestVirtualMachine:
                 """,
                 30,
             ),
+            VirtualMachineTestCase(
+                """
+                let global_num = 10;
+                let sum_with_global = fn(a, b) {
+                    let c = a + b;
+                    c + global_num
+                };
+                let outer = fn() {
+                    sum_with_global(1, 2) + sum_with_global(3, 4) + global_num
+                };
+                outer() + global_num;
+                """,
+                50,
+            ),
         ],
     )
     def test_function_call_with_arguments_twice(self, test_case: VirtualMachineTestCase):
         virtual_machine_test_case_internals(test_case)
+
+    @pytest.mark.skip
+    @pytest.mark.parametrize(
+        "input_text",
+        [
+            """
+            let func = fn() {
+                let x = 4;
+                let y = 5;
+            };
+            func(1);
+            """
+        ],
+    )
+    def test_function_call_wrong_number_of_arguments_raises(self, input_text: str):
+        virtual_machine_test_case_raises_internals(input_text)
 
 
 def virtual_machine_test_case_internals(test_case: VirtualMachineTestCase):
