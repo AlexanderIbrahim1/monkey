@@ -34,3 +34,5 @@ from monkey.object.constants import TRUE_BOOL_OBJ
 from monkey.object.constants import FALSE_BOOL_OBJ
 
 from monkey.object.truthy import is_truthy
+
+from monkey.object.monkey_builtins import BUILTINS_DICT
