@@ -39,6 +39,8 @@ class Compiler:
         self._compilation_scopes.push(main_scope)
 
         self.symbol_table: sym.SymbolTable = sym.SymbolTable()
+        for i, builtin_name in enumerate(objs.BUILTINS_DICT):
+            self.symbol_table.define_builtin(builtin_name, i)
 
     @property
     def number_of_scopes(self) -> int:
@@ -258,10 +260,15 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             if symbol is None:
                 raise CompilationError(f"undefined variable: {node.value}")
 
-            if symbol.scope == sym.SymbolScope.GLOBAL:
-                compiler.emit(opcodes.OPGETGLOBAL, symbol.index)
-            else:
-                compiler.emit(opcodes.OPGETLOCAL, symbol.index)
+            match symbol.scope:
+                case sym.SymbolScope.BUILTIN:
+                    compiler.emit(opcodes.OPGETBUILTIN, symbol.index)
+                case sym.SymbolScope.GLOBAL:
+                    compiler.emit(opcodes.OPGETGLOBAL, symbol.index)
+                case sym.SymbolScope.LOCAL:
+                    compiler.emit(opcodes.OPGETLOCAL, symbol.index)
+                case _:
+                    raise CompilationError(f"Unreachable: invalid scope found: {symbol.scope}")
         case exprs.InfixExpression():
             # NOTE: if I wanted a simpler solution, I would have just implemented an opcode for the less
             #       than operator; however, for pedagogical purposes the book wants to emphasize the ability

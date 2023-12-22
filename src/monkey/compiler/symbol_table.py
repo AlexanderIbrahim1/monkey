@@ -28,9 +28,12 @@ class SymbolTable:
     store: dict[str, Symbol] = dataclasses.field(default_factory=dict)
     outer_table: Optional["SymbolTable"] = None
 
+    def __post_init__(self) -> None:
+        self._n_nonbuiltin_definitions: int = 0
+
     @property
     def n_definitions(self) -> int:
-        return len(self.store)
+        return self._n_nonbuiltin_definitions
 
     def define(self, name: str) -> Symbol:
         if self.outer_table is None:
@@ -38,8 +41,9 @@ class SymbolTable:
         else:
             symbol_scope = SymbolScope.LOCAL
 
-        new_symbol = Symbol(name, symbol_scope, self.n_definitions)
+        new_symbol = Symbol(name, symbol_scope, self._n_nonbuiltin_definitions)
         self.store[name] = new_symbol
+        self._n_nonbuiltin_definitions += 1
 
         return new_symbol
 

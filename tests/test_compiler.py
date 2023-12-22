@@ -4,6 +4,7 @@ from monkey.compiler import Compiler
 from monkey.compiler import compile
 from monkey.compiler import EmittedInstruction
 
+import monkey.object.monkey_builtins as monkey_builtins
 import monkey.code as code
 import monkey.code.opcodes as op
 
@@ -1099,7 +1100,87 @@ class TestCompiler:
             ),
         ],
     )
-    def test_function_call_with_arguments_twice(self, test_case: CompilerTestCase):
+    def test_function_call_with_arguments_and_global(self, test_case: CompilerTestCase):
+        perform_compiler_test_case(test_case)
+
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            CompilerTestCase(
+                """
+                len([]);
+                """,
+                (),
+                [
+                    # the identifier is a built-in (and thus has BUILTIN scope)
+                    (op.OPGETBUILTIN, (monkey_builtins.INDEX_MONKEY_BUILTIN_LEN,)),
+                    # we prepare to create an array; we still need to emit an OPARRAY instruction
+                    # even if there are no arguments
+                    (op.OPARRAY, (0,)),
+                    # we call the builtin
+                    (op.OPCALL, (1,)),
+                    # we have an expression statement; need to pop it off the stack
+                    (op.OPPOP, ()),
+                ],
+            ),
+            CompilerTestCase(
+                """
+                push([], 1);
+                """,
+                (1,),
+                [
+                    # the identifier is a built-in (and thus has BUILTIN scope)
+                    (op.OPGETBUILTIN, (monkey_builtins.INDEX_MONKEY_BUILTIN_PUSH,)),
+                    # we prepare to create an array; we still need to emit an OPARRAY instruction
+                    # even if there are no arguments
+                    (op.OPARRAY, (0,)),
+                    # the `1` about to get pushed into the array needs to be put on the stack
+                    # remember that the compiler loops over arguments left to right; so this has to
+                    # be compiler after the array
+                    (op.OPCONSTANT, (0,)),
+                    # we call the builtin
+                    (op.OPCALL, (2,)),
+                    # we have an expression statement; need to pop it off the stack
+                    (op.OPPOP, ()),
+                ],
+            ),
+            CompilerTestCase(
+                """
+                let ret0 = fn() {
+                    return len([]);
+                };
+                """,
+                (
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # the identifier is a built-in (and thus has BUILTIN scope)
+                                (op.OPGETBUILTIN, (monkey_builtins.INDEX_MONKEY_BUILTIN_LEN,)),
+                                # we prepare to create an array; we still need to emit an OPARRAY instruction
+                                # even if there are no arguments
+                                (op.OPARRAY, (0,)),
+                                # we call our builtin function, with a single argument (the empty array)
+                                (op.OPCALL, (1,)),
+                                # we need to return the value (pop off the function, put return value on the stack)
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        # no local bindings
+                        0,
+                        # no arguments
+                        0,
+                    ),
+                ),
+                [
+                    # the function itself is a constant, and it is our first (label it 0)
+                    (op.OPCONSTANT, (0,)),
+                    # the function is bound to a global name, and it is our first (label it 0)
+                    (op.OPSETGLOBAL, (0,)),
+                ],
+            ),
+        ],
+    )
+    def test_builtins(self, test_case: CompilerTestCase):
         perform_compiler_test_case(test_case)
 
 
