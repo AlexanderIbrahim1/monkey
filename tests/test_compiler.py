@@ -467,7 +467,7 @@ class TestCompiler:
                 ),
                 [
                     # the compiled function is a constant, so we can push it on the stack as one
-                    (op.OPCONSTANT, (2,)),
+                    (op.OPCLOSURE, (2, 0)),
                     # we have an expression statement; need to pop it off
                     (op.OPPOP, ()),
                 ],
@@ -497,7 +497,7 @@ class TestCompiler:
                 ),
                 [
                     # the compiled function is a constant, so we can push it on the stack as one
-                    (op.OPCONSTANT, (2,)),
+                    (op.OPCLOSURE, (2, 0)),
                     # we have an expression statement; need to pop it off
                     (op.OPPOP, ()),
                 ],
@@ -526,7 +526,7 @@ class TestCompiler:
                 ),
                 [
                     # the compiled function is a constant, so we can push it on the stack as one
-                    (op.OPCONSTANT, (2,)),
+                    (op.OPCLOSURE, (2, 0)),
                     # we have an expression statement; need to pop it off
                     (op.OPPOP, ()),
                 ],
@@ -548,7 +548,7 @@ class TestCompiler:
                 ),
                 [
                     # the compiled function is a constant, so we can push it on the stack as one
-                    (op.OPCONSTANT, (0,)),
+                    (op.OPCLOSURE, (0, 0)),
                     # we have an expression statement; need to pop it off
                     (op.OPPOP, ()),
                 ],
@@ -580,7 +580,7 @@ class TestCompiler:
                 ),
                 [
                     # the compiled function is a constant, so we can push it on the stack as one
-                    (op.OPCONSTANT, (1,)),
+                    (op.OPCLOSURE, (1, 0)),
                     # we are calling the function on top of the stack
                     (op.OPCALL, (0,)),
                     # we have an expression statement; we need to pop it off
@@ -606,7 +606,7 @@ class TestCompiler:
                 ),
                 [
                     # the compiled function is a constant, so we can push it on the stack as one
-                    (op.OPCONSTANT, (1,)),
+                    (op.OPCLOSURE, (1, 0)),
                     # bind variable '0' to the object on top of the stack (the compiled function)
                     (op.OPSETGLOBAL, (0,)),
                     # retrieve the variable referred to by '0' (the compiled function)
@@ -658,7 +658,7 @@ class TestCompiler:
                             [
                                 # the `inner` function is a constant; we put it on top of the stack
                                 # it is the second constant, so we assign it label 1
-                                (op.OPCONSTANT, (1,)),
+                                (op.OPCLOSURE, (1, 0)),
                                 # we bind the variable name `inner`
                                 # it is the first binding, so we assign it a label of `0`
                                 # the VM will map the index `0` in the bindings list, to the index `1` of the constants
@@ -678,7 +678,7 @@ class TestCompiler:
                 ),
                 [
                     # push the `outer` function as a constant to the stack
-                    (op.OPCONSTANT, (2,)),
+                    (op.OPCLOSURE, (2, 0)),
                     # `outer` is the first variable to be bound globally; set it to 0
                     # it gets popped off the stack, and into the globals
                     (op.OPSETGLOBAL, (0,)),
@@ -738,7 +738,7 @@ class TestCompiler:
                             [
                                 # the `inner` function is a constant; we put it on top of the stack
                                 # it is the second constant, so we assign it label 1
-                                (op.OPCONSTANT, (1,)),
+                                (op.OPCLOSURE, (1, 0)),
                                 # we bind the variable name `inner`
                                 # it is the first binding, so we assign it a label of `0`
                                 # the VM will map the index `0` in the bindings list, to the index `1` of the constants
@@ -758,7 +758,7 @@ class TestCompiler:
                 ),
                 [
                     # push the `outer` function as a constant to the stack
-                    (op.OPCONSTANT, (2,)),
+                    (op.OPCLOSURE, (2, 0)),
                     # `outer` is the first variable to be bound globally; set it to 0
                     # it gets popped off the stack, and into the globals
                     (op.OPSETGLOBAL, (0,)),
@@ -810,7 +810,7 @@ class TestCompiler:
                     (op.OPSETGLOBAL, (0,)),
                     # look for the constant function in the 'constants'; put it onto the stack
                     # the function is the second global name, so it is labelled 1
-                    (op.OPCONSTANT, (1,)),
+                    (op.OPCLOSURE, (1, 0)),
                     # this is an expression statement; we don't want it to linger on the stack
                     (op.OPPOP, ()),
                 ],
@@ -850,7 +850,7 @@ class TestCompiler:
                 [
                     # the function itself is a constant; look for it in the 'constants', and push it
                     # on top of the stack
-                    (op.OPCONSTANT, (1,)),
+                    (op.OPCLOSURE, (1, 0)),
                     # this is an expression statement; we don't want it to linger on the stack
                     (op.OPPOP, ()),
                 ],
@@ -885,7 +885,7 @@ class TestCompiler:
                 ),
                 [
                     # the function itself is a contant; it is the first, so label it as 0
-                    (op.OPCONSTANT, (0,)),
+                    (op.OPCLOSURE, (0, 0)),
                     # we have an expression statement, so we need to pop it off the stack
                     (op.OPPOP, ()),
                 ],
@@ -912,7 +912,7 @@ class TestCompiler:
                 ),
                 [
                     # the function itself is a constant; it is the first, so label it as 0
-                    (op.OPCONSTANT, (0,)),
+                    (op.OPCLOSURE, (0, 0)),
                     # we create a global binding for the name `one_arg` (pop off stack, put in globals)
                     (op.OPSETGLOBAL, (0,)),
                     # note that a let statement is not an expression statement; we don't pop the thing
@@ -945,7 +945,7 @@ class TestCompiler:
                 ),
                 [
                     # the function itself is a constant; it is the first, so label it as 0
-                    (op.OPCONSTANT, (0,)),
+                    (op.OPCLOSURE, (0, 0)),
                     # we create a global binding for the name `one_arg` (pop off stack, put in globals)
                     # note that a let statement is not an expression statement; we don't pop the thing
                     # off the top of the stack right away
@@ -990,7 +990,7 @@ class TestCompiler:
                 ),
                 [
                     # the function itself is a constant; it is the first, so label it as 0
-                    (op.OPCONSTANT, (0,)),
+                    (op.OPCLOSURE, (0, 0)),
                     # we create a global binding for the name `three_args` (pop off stack, put in globals)
                     # note that a let statement is not an expression statement; we don't pop the thing
                     # off the top of the stack right away
@@ -1048,7 +1048,7 @@ class TestCompiler:
                 [
                     (op.OPCONSTANT, (0,)),
                     (op.OPSETGLOBAL, (0,)),
-                    (op.OPCONSTANT, (1,)),
+                    (op.OPCLOSURE, (1, 0)),
                     (op.OPSETGLOBAL, (1,)),
                     (op.OPGETGLOBAL, (1,)),
                     (op.OPCONSTANT, (2,)),
@@ -1086,7 +1086,7 @@ class TestCompiler:
                 [
                     (op.OPCONSTANT, (0,)),
                     (op.OPSETGLOBAL, (0,)),
-                    (op.OPCONSTANT, (1,)),
+                    (op.OPCLOSURE, (1, 0)),
                     (op.OPSETGLOBAL, (1,)),
                     (op.OPGETGLOBAL, (1,)),
                     (op.OPCONSTANT, (2,)),
@@ -1173,7 +1173,7 @@ class TestCompiler:
                 ),
                 [
                     # the function itself is a constant, and it is our first (label it 0)
-                    (op.OPCONSTANT, (0,)),
+                    (op.OPCLOSURE, (0, 0)),
                     # the function is bound to a global name, and it is our first (label it 0)
                     (op.OPSETGLOBAL, (0,)),
                 ],

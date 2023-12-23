@@ -24,6 +24,18 @@ from monkey.virtual_machine.custom_exceptions import VirtualMachineError
 from monkey.virtual_machine.stack_frame import StackFrame
 
 
+# When creating a closure, we also need to pass in the free variables associated
+# with that closure; but we haven't implemented them yet. We need a dummy factory
+# that creates the free variables
+#
+# I didn't want to give the ClosureObject a default free variables list, because it
+# doesn't really make sense to give it a default (given the context of the problem).
+#
+# So I'm creating a temporary dummy factory for the free variables list
+def dummy_free_variables_factory() -> list[objs.Object]:
+    return []
+
+
 @dataclasses.dataclass
 class VirtualMachine:
     def __init__(self, bytecode: comp.Bytecode) -> None:
@@ -34,7 +46,9 @@ class VirtualMachine:
         dummy_locals = DUMMY_MAIN_FUNCTION_NUMBER_OF_LOCALS
         dummy_arguments = DUMMY_MAIN_FUNCTION_NUMBER_OF_ARGUMENTS
         main_function = objs.CompiledFunctionObject(bytecode.instructions, dummy_locals, dummy_arguments)
-        main_frame = StackFrame(main_function, base_pointer=0)
+        main_closure = objs.ClosureObject(main_function, dummy_free_variables_factory())
+
+        main_frame = StackFrame(main_closure, base_pointer=0)
         self.frames.push(main_frame)
 
         self.stack = FixedStack[objs.Object](MAX_VM_STACK_SIZE, default_element_factory=objs.DefaultObject)
@@ -182,8 +196,8 @@ def run(vm: VirtualMachine) -> None:
                 callable = vm.stack[function_pointer]
 
                 match callable:
-                    case objs.CompiledFunctionObject():
-                        _execute_function_call(callable, vm, n_arguments, function_pointer)
+                    case objs.ClosureObject():
+                        _execute_closure_call(callable, vm, n_arguments, function_pointer)
                     case objs.BuiltinObject():
                         _execute_builtin_call(callable, vm, n_arguments)
                     case _:
@@ -194,8 +208,8 @@ def run(vm: VirtualMachine) -> None:
 
                 # go back to the parent frame
                 current_frame = vm.frames.pop()
-                n_locals = current_frame.function.n_locals
-                n_arguments = current_frame.function.n_arguments
+                n_locals = current_frame.closure.function.n_locals
+                n_arguments = current_frame.closure.function.n_arguments
                 vm.stack.shrink_stack_pointer(n_locals + n_arguments)
 
                 # the function we just went through should be right under the returned value; it was
@@ -208,7 +222,7 @@ def run(vm: VirtualMachine) -> None:
                 # a function that ends with an `opcodes.OPRETURN` call doesn't put anything on the
                 # stack within its body; so we need to explicitly put NULL on the stack
                 current_frame = vm.frames.pop()
-                n_locals = current_frame.function.n_locals
+                n_locals = current_frame.closure.function.n_locals
                 vm.stack.shrink_stack_pointer(n_locals)
 
                 # because nothing is returned, the function we just went through should be on top of the
@@ -216,6 +230,22 @@ def run(vm: VirtualMachine) -> None:
                 vm.stack.pop()
 
                 vm.stack.push(objs.NULL_OBJ)
+            case opcodes.OPCLOSURE:
+                function_position = _function_position_in_constants(vm.instructions, vm.instruction_pointer)
+                vm.instruction_pointer += opcodes.OPCLOSURE_ARG0_WIDTH
+
+                _n_free_variables = _number_of_closure_free_variables(vm.instructions, vm.instruction_pointer)
+                vm.instruction_pointer += opcodes.OPCLOSURE_ARG1_WIDTH
+
+                function = vm.constants[function_position]
+                if not isinstance(function, objs.CompiledFunctionObject):
+                    raise VirtualMachineError(
+                        "Expected a compiled function object. Found object of type "
+                        f"'{OBJECT_TYPE_DICT[function.data_type()]}'"
+                    )
+
+                closure = objs.ClosureObject(function, dummy_free_variables_factory())
+                vm.stack.push(closure)
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
 
@@ -247,26 +277,27 @@ def _execute_builtin_call(
         vm.stack.push(result)
 
 
-def _execute_function_call(
-    function: objs.CompiledFunctionObject, vm: VirtualMachine, n_arguments: int, function_pointer: int
+def _execute_closure_call(
+    closure: objs.ClosureObject, vm: VirtualMachine, n_arguments: int, function_pointer: int
 ) -> None:
-    if not n_arguments == function.n_arguments:
+    if not n_arguments == closure.function.n_arguments:
         raise VirtualMachineError(
             "The number of arguments passed into the function doesn't match the\n"
             "number of function parameters.\n"
             f"Number of passed arguments: {n_arguments}\n"
-            f"Number of parameters the function accepts: {function.n_arguments}"
+            f"Number of parameters the function accepts: {closure.function.n_arguments}"
         )
 
     # we want to return to just after the function (which we will then pop off the
     # stack using OPRETURNVALUE or OPRETURN)
     base_pointer = function_pointer + 1
-    frame = StackFrame(function, base_pointer=base_pointer)
+    closure = objs.ClosureObject(closure.function, dummy_free_variables_factory())
+    frame = StackFrame(closure, base_pointer=base_pointer)
     vm.frames.push(frame)
 
     # reserve `n_locals` entries on the stack for the function's local parameters
     # note that the function's arguments are already on the stack, on top of it
-    vm.stack.advance_stack_pointer(function.n_locals)
+    vm.stack.advance_stack_pointer(closure.function.n_locals)
 
 
 def _evaluate_index_expression(container: objs.Object, inside: objs.Object) -> objs.Object:
@@ -383,6 +414,14 @@ def _new_position_after_jump(vm: VirtualMachine, instr_ptr: int) -> int:
 
 def _number_of_function_arguments(instructions: code.Instructions, instr_ptr: int) -> int:
     return _read_position(instructions, instr_ptr, opcodes.OPCALL_WIDTH)
+
+
+def _function_position_in_constants(instructions: code.Instructions, instr_ptr: int) -> int:
+    return _read_position(instructions, instr_ptr, opcodes.OPCLOSURE_ARG0_WIDTH)
+
+
+def _number_of_closure_free_variables(instructions: code.Instructions, instr_ptr: int) -> int:
+    return _read_position(instructions, instr_ptr, opcodes.OPCLOSURE_ARG1_WIDTH)
 
 
 def _new_position_after_jump_when_false(vm: VirtualMachine, instr_ptr: int) -> int:

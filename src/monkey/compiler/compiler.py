@@ -30,6 +30,13 @@ import monkey.compiler.symbol_table as sym
 KeyValueExpressionPair = tuple[exprs.Expression, exprs.Expression]
 
 
+# The OPCLOSURE takes the number of free variables as one of its two operands;
+# at this point in the development cycle, we haven't even implemented free
+# variables, but we still need a stand-in value for our current tests (that do
+# not use free variables at all)
+DUMMY_NUMBER_OF_FREE_VARIABLES: int = 0
+
+
 class Compiler:
     def __init__(self) -> None:
         self._constants: list[Object] = []
@@ -343,7 +350,7 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             compiled_function = objs.CompiledFunctionObject(instructions, n_locals, n_arguments)
 
             position = compiler.add_constant_and_get_position(compiled_function)
-            compiler.emit(opcodes.OPCONSTANT, position)
+            compiler.emit(opcodes.OPCLOSURE, position, DUMMY_NUMBER_OF_FREE_VARIABLES)
         case stmts.ReturnStatement():  # value
             compile(compiler, node.value)
             compiler.emit(opcodes.OPRETURNVALUE)

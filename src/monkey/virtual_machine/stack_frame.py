@@ -11,11 +11,11 @@ import monkey.object as objs
 
 @dataclasses.dataclass
 class StackFrame:
-    function: objs.CompiledFunctionObject
+    closure: objs.ClosureObject
     _: dataclasses.KW_ONLY
     base_pointer: int
     instruction_pointer: int = -1
 
     @property
     def instructions(self) -> code.Instructions:
-        return self.function.instructions
+        return self.closure.function.instructions
