@@ -44,6 +44,7 @@ OPCODE_DEFINITIONS: dict[Opcode, OpcodeDefinition] = {
     opcodes.OPCLOSURE: OpcodeDefinition(
         "OPCLOSURE", (opcodes.OPCLOSURE_ARG0_WIDTH, opcodes.OPCLOSURE_ARG1_WIDTH)
     ),
+    opcodes.OPGETFREE: OpcodeDefinition("OPGETFREE", (opcodes.OPGETFREE_WIDTH,)),
 }
 
 
