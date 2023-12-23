@@ -22,6 +22,7 @@ class ObjectType(enum.Enum):
     ARRAY = enum.auto()
     HASH = enum.auto()
     COMPILED_FUNCTION = enum.auto()
+    CLOSURE = enum.auto()
     DEFAULT = enum.auto()
 
 
@@ -37,5 +38,6 @@ OBJECT_TYPE_DICT: dict[ObjectType, str] = {
     ObjectType.ARRAY: "ARRAY",
     ObjectType.HASH: "HASH",
     ObjectType.COMPILED_FUNCTION: "COMPILED_FUNCTION",
+    ObjectType.CLOSURE: "CLOSURE",
     ObjectType.DEFAULT: "DEFAULT",
 }
