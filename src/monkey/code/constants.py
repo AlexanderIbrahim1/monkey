@@ -31,3 +31,6 @@ NUMBER_OF_ARGUMENTS_BYTE_SIZE: int = 1
 
 # number of bytes used to describe the number assigned to a builtin function
 MAXIMUM_BUILTIN_BYTE_SIZE: int = 1
+
+# number of bytes used to describe the maximum number of allowed free variables
+MAXIMUM_NUMBER_OF_FREE_VARIABLES_BYTE_SIZE: int = 1

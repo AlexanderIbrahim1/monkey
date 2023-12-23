@@ -124,9 +124,18 @@ def _format_instruction(definition: OpcodeDefinition, operands: list[int]) -> st
             f"Found: {len(operands)}"
         )
 
+    empty_space = " " * MAXIMUM_ADDRESS_DIGITS
+
     if n_expected_operands == 0:
-        return f"{definition.name:<16s}   " + " " * MAXIMUM_ADDRESS_DIGITS
+        formatted_0 = empty_space
+        formatted_1 = empty_space
     elif n_expected_operands == 1:
-        return f"{definition.name:<16s}   {operands[0]:0>{MAXIMUM_ADDRESS_DIGITS}d}"
+        formatted_0 = f"{operands[0]:0>{MAXIMUM_ADDRESS_DIGITS}d}"
+        formatted_1 = empty_space
+    elif n_expected_operands == 2:
+        formatted_0 = f"{operands[0]:0>{MAXIMUM_ADDRESS_DIGITS}d}"
+        formatted_1 = f"{operands[1]:0>{MAXIMUM_ADDRESS_DIGITS}d}"
     else:
         raise ValueError(f"Unable to format an instruction with '{n_expected_operands}' operands.")
+
+    return f"{definition.name:<16s}   {formatted_0}   {formatted_1}"
