@@ -1343,6 +1343,130 @@ class TestCompiler:
                     (op.OPPOP, ()),
                 ],
             ),
+            CompilerTestCase(
+                """
+                let global = 55;
+                fn() {
+                    let a = 66;
+                    return fn() {
+                        let b = 77;
+                        return fn() {
+                            let c = 88;
+                            return global + a + b + c;
+                        };
+                    };
+                };
+                """,
+                (
+                    # first thing we encounter is the global
+                    55,
+                    # before we compile the outer function, we have to compile `a`
+                    66,
+                    # before we compiler the next inner function, we have to compiler `b`
+                    77,
+                    # before we compiler the next inner function after that, we have to compiler `c`
+                    88,
+                    # the inner-most closure
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # get constant `c` (label 3) from the constants list, put on the stack
+                                (op.OPCONSTANT, (3,)),
+                                # create a local binding for `c` (it is the first, so label 0)
+                                (op.OPSETLOCAL, (0,)),
+                                # now to calculate the sum to be returned; from left to right
+                                # : get `global` (bound to 0 in globals) and `a` (0th free variable), and add
+                                (op.OPGETGLOBAL, (0,)),
+                                (op.OPGETFREE, (0,)),
+                                (op.OPADD, ()),
+                                # : the sum is still on top of the stack; get the next free (`b`), and add
+                                (op.OPGETFREE, (1,)),
+                                (op.OPADD, ()),
+                                # : the sum is still on top of the stack; get the next local (`c`), and add
+                                (op.OPGETLOCAL, (0,)),
+                                (op.OPADD, ()),
+                                # after returning, make sure this ends up on top of the stack
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        # one local binding (`c`)
+                        1,
+                        # no arguments
+                        0,
+                    ),
+                    # the second inner-most closure
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # get constant `b` (label 2) from the constants list, put on the stack
+                                (op.OPCONSTANT, (2,)),
+                                # create a local binding for `b` (it is the first, so label 0)
+                                (op.OPSETLOCAL, (0,)),
+                                # the closure to be returned uses two of the variables we know about:
+                                # in order from left to right in terms of usage inside the function:
+                                # - `a` (a free variable from this closure's POV)
+                                # - `b` (a local binding from this closure's POV)
+                                (op.OPGETFREE, (0,)),
+                                (op.OPGETLOCAL, (0,)),
+                                # the value to be returned is a closure;
+                                # - this closure is the 5th constant (the 4 integers have already been made constants)
+                                #   - so the first argument is `4`
+                                # - this closure takes 2 free variables
+                                #   - the parent free variable `a`, and the current binding (`b`)
+                                (op.OPCLOSURE, (4, 2)),
+                                # after returning, make sure this ends up on top of the stack
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        # one local binding (`b`)
+                        1,
+                        # no arguments
+                        0,
+                    ),
+                    # the outer function
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # get constant `a` (label 1) from the constants list, put on the stack
+                                (op.OPCONSTANT, (1,)),
+                                # create a local binding for `a` (it is the first, so label 0)
+                                (op.OPSETLOCAL, (0,)),
+                                # the closure to be returned uses one variable we know about:
+                                # in order from left to right in terms of usage inside the function:
+                                # - `a` (a local variable from this closure's POV)
+                                (op.OPGETLOCAL, (0,)),
+                                # the value to be returned is a closure;
+                                # - this closure is the 6th constant
+                                #   - the 4 integers, and the inner closure, have already been made constants
+                                #   - so the first argument is `5`
+                                # - this closure takes 1 free variables
+                                #   - the current binding `a`
+                                (op.OPCLOSURE, (5, 1)),
+                                # after returning, make sure this ends up on top of the stack
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        # one local binding (`a`)
+                        1,
+                        # no arguments
+                        0,
+                    ),
+                ),
+                [
+                    # the integer `55` is pushed on top of the stack, then bound to a global binding
+                    (op.OPCONSTANT, (0,)),
+                    (op.OPSETGLOBAL, (0,)),
+                    # the function at the global scope
+                    # we use OPCLOSURE, a special type of OPCONSTANT for closures
+                    # there are 6 constants that get compiled before it:
+                    # - the four integers `global`, `a`, `b`, `c`, as we work our way into the function
+                    # - the two inner closures
+                    # this outer function takes no free variables
+                    (op.OPCLOSURE, (6, 0)),
+                    # the outer function is written in an expression statement; we need to pop it off
+                    (op.OPPOP, ()),
+                ],
+            ),
         ],
     )
     def test_closure(self, case: CompilerTestCase):
