@@ -64,7 +64,7 @@ def test_resolve_local():
     assert local_table.resolve("d") == Symbol("d", SymbolScope.LOCAL, 1)
 
 
-def test_nested_resolve_local():
+def test_nested_resolve_global_local_free():
     global_table = SymbolTable()
     global_table.define("a")  # global level, entry 0
     global_table.define("b")  # global level, entry 1
@@ -93,8 +93,8 @@ def test_nested_resolve_local():
 
     assert local_table1.resolve("a") == Symbol("a", SymbolScope.GLOBAL, 0)
     assert local_table1.resolve("b") == Symbol("b", SymbolScope.GLOBAL, 1)
-    assert local_table1.resolve("c") == Symbol("c", SymbolScope.LOCAL, 0)
-    assert local_table1.resolve("d") == Symbol("d", SymbolScope.LOCAL, 1)
+    assert local_table1.resolve("c") == Symbol("c", SymbolScope.FREE, 0)
+    assert local_table1.resolve("d") == Symbol("d", SymbolScope.FREE, 1)
     assert local_table1.resolve("e") == Symbol("e", SymbolScope.LOCAL, 0)
     assert local_table1.resolve("f") == Symbol("f", SymbolScope.LOCAL, 1)
 
@@ -127,3 +127,23 @@ def test_nested_resolve_builtin():
     assert local_table1.resolve("builtin1") == Symbol("builtin1", SymbolScope.BUILTIN, 1)
     assert local_table1.resolve("builtin2") == Symbol("builtin2", SymbolScope.BUILTIN, 2)
     assert local_table1.resolve("builtin3") == Symbol("builtin3", SymbolScope.BUILTIN, 3)
+
+
+def test_resolve_unresolvable_free():
+    """Make sure that unresolvable names don't get automatically resolved to `FREE`"""
+    global_table = SymbolTable()
+    global_table.define("a")  # global level, entry 0
+
+    local_table0 = build_enclosed_symbol_table(global_table)
+    local_table0.define("b")  # local level, entry 0
+
+    local_table1 = build_enclosed_symbol_table(local_table0)
+    local_table1.define("c")  # local level, entry 0
+    local_table1.define("d")  # local level, entry 1
+
+    assert local_table1.resolve("a") == Symbol("a", SymbolScope.GLOBAL, 0)
+    assert local_table1.resolve("b") == Symbol("b", SymbolScope.FREE, 0)
+    assert local_table1.resolve("c") == Symbol("c", SymbolScope.LOCAL, 0)
+    assert local_table1.resolve("d") == Symbol("d", SymbolScope.LOCAL, 1)
+    assert local_table1.resolve("e") is None
+    assert local_table1.resolve("f") is None
