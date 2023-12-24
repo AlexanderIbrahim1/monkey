@@ -1015,7 +1015,7 @@ class TestCompiler:
         perform_compiler_test_case(case)
 
     @pytest.mark.parametrize(
-        "test_case",
+        "case",
         [
             CompilerTestCase(
                 """
@@ -1100,11 +1100,11 @@ class TestCompiler:
             ),
         ],
     )
-    def test_function_call_with_arguments_and_global(self, test_case: CompilerTestCase):
-        perform_compiler_test_case(test_case)
+    def test_function_call_with_arguments_and_global(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)
 
     @pytest.mark.parametrize(
-        "test_case",
+        "case",
         [
             CompilerTestCase(
                 """
@@ -1180,8 +1180,173 @@ class TestCompiler:
             ),
         ],
     )
-    def test_builtins(self, test_case: CompilerTestCase):
-        perform_compiler_test_case(test_case)
+    def test_builtins(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)
+
+    @pytest.mark.parametrize(
+        "case",
+        [
+            CompilerTestCase(
+                """
+                fn(a) {
+                    return fn(b) { a + b };
+                };
+                """,
+                (
+                    # the constant for the inner closure
+                    (
+                        # the bytecode instructions for the inner function
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # we go from left to right of the return value
+                                # the first variable `a` is a free variable; it is the first free
+                                # variable, and so gets the label 0
+                                (op.OPGETFREE, (0,)),
+                                # the second variable `b` is an argument, which is accessed
+                                # via a local binding; it is the first argument/binding (label 0)
+                                (op.OPGETLOCAL, (0,)),
+                                # add the two values together, push them on the stack
+                                (op.OPADD, ()),
+                                # make sure this sum ends up on top of the stack after returning
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        # no local bindings
+                        0,
+                        # 1 argument (`b`)
+                        1,
+                    ),
+                    # the constant for the outer function
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # the inner function uses the argument `a`, which we treat as a local binding
+                                # it is this function's first and only local binding: label it 0
+                                (op.OPGETLOCAL, (0,)),
+                                # the return value is a closure (treated as a special type of constant)
+                                # it gets its own opcode (OPCLOSURE)
+                                # it is the first (0th) constant seen so far (first operand is 0)
+                                # it takes one free variable (second operand is 1)
+                                (op.OPCLOSURE, (0, 1)),
+                                # make sure this closure ends up at the top of the stack after returning
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        # no local bindings
+                        0,
+                        # 1 argument (`a`)
+                        1,
+                    ),
+                ),
+                [
+                    # this value is a closure (treated as a special type of constant)
+                    # it gets its own opcode (OPCLOSURE)
+                    # it is the second constant seen so far (first operand is label 1)
+                    # it takes no free variable (second operand is 0)
+                    (op.OPCLOSURE, (1, 0)),
+                    # we have an expression statement; need to pop it off the stack
+                    (op.OPPOP, ()),
+                ],
+            ),
+            CompilerTestCase(
+                """
+                fn(a) {
+                    return fn(b) {
+                        return fn(c) {
+                            return a + b + c;
+                        };
+                    };
+                };
+                """,
+                (
+                    # the constant for the inner closure
+                    (
+                        # the bytecode instructions for the inner function
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # we go from left to right of the return value
+                                # the first variable `a` is a free variable; it is the first free
+                                # variable, and so gets the label 0
+                                (op.OPGETFREE, (0,)),
+                                # the second variable `b` is a free variable; it is the second free
+                                # variable, and so gets the label 1
+                                (op.OPGETFREE, (1,)),
+                                # we add these two together, and put the result on top of the stack
+                                (op.OPADD, ()),
+                                # the third variable `c` is an argument, which is accessed
+                                # via a local binding; it is the first argument/binding (label 0)
+                                (op.OPGETLOCAL, (0,)),
+                                # add the two values together, push them on the stack
+                                (op.OPADD, ()),
+                                # make sure this sum ends up on top of the stack after returning
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        # no local bindings
+                        0,
+                        # 1 argument (`c`)
+                        1,
+                    ),
+                    # the constant for the next inner function
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # the first variable `a` is a free variable; it is the first free
+                                # variable this function has seen, and so gets the label 0
+                                (op.OPGETFREE, (0,)),
+                                # the inner function uses the argument `b`, which we treat as a local binding
+                                # it is this function's first and only local binding: label it 0
+                                (op.OPGETLOCAL, (0,)),
+                                # the return value is a closure (treated as a special type of constant)
+                                # it gets its own opcode (OPCLOSURE)
+                                # it is the first (0th) constant seen so far (first operand is 0)
+                                # it takes two free variable (second operand is 2)
+                                (op.OPCLOSURE, (0, 2)),
+                                # make sure this closure ends up at the top of the stack after returning
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        # no local bindings
+                        0,
+                        # 1 argument (`b`)
+                        1,
+                    ),
+                    # the constant for the outer function
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # the inner function uses the argument `a`, which we treat as a local binding
+                                # it is this function's first and only local binding: label it 0
+                                (op.OPGETLOCAL, (0,)),
+                                # the return value is a closure (treated as a special type of constant)
+                                # it gets its own opcode (OPCLOSURE)
+                                # it is the eecond constant (label 1) seen so far (first operand is 1)
+                                # it takes one free variable (`a`) from the POV of the outer function (second operand is 1)
+                                (op.OPCLOSURE, (1, 1)),
+                                # make sure this closure ends up at the top of the stack after returning
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        # no local bindings
+                        0,
+                        # 1 argument (`a`)
+                        1,
+                    ),
+                ),
+                [
+                    # this value is a closure (treated as a special type of constant)
+                    # it gets its own opcode (OPCLOSURE)
+                    # it is the third constant seen so far (first operand is label 2)
+                    # it takes no free variable (second operand is 0)
+                    (op.OPCLOSURE, (2, 0)),
+                    # we have an expression statement; need to pop it off the stack
+                    (op.OPPOP, ()),
+                ],
+            ),
+        ],
+    )
+    def test_closure(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)
 
 
 # NOTE TO DEV: the number of locals in a function is the unique number of variables

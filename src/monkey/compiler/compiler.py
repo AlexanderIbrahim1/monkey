@@ -267,15 +267,7 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             if symbol is None:
                 raise CompilationError(f"undefined variable: {node.value}")
 
-            match symbol.scope:
-                case sym.SymbolScope.BUILTIN:
-                    compiler.emit(opcodes.OPGETBUILTIN, symbol.index)
-                case sym.SymbolScope.GLOBAL:
-                    compiler.emit(opcodes.OPGETGLOBAL, symbol.index)
-                case sym.SymbolScope.LOCAL:
-                    compiler.emit(opcodes.OPGETLOCAL, symbol.index)
-                case _:
-                    raise CompilationError(f"Unreachable: invalid scope found: {symbol.scope}")
+            _load_symbols(compiler, symbol)
         case exprs.InfixExpression():
             # NOTE: if I wanted a simpler solution, I would have just implemented an opcode for the less
             #       than operator; however, for pedagogical purposes the book wants to emphasize the ability
@@ -344,13 +336,19 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             n_arguments = len(node.parameters)
             n_locals = compiler.symbol_table.n_definitions - n_arguments
 
+            free_symbols = compiler.symbol_table.free_symbols
+            n_free_symbols = len(free_symbols)
+
             instructions = compiler.leave_scope()
+
+            for symbol in free_symbols:
+                _load_symbols(compiler, symbol)
 
             # ensures that the emitted instructions are stored in a separate object after compilation
             compiled_function = objs.CompiledFunctionObject(instructions, n_locals, n_arguments)
 
             position = compiler.add_constant_and_get_position(compiled_function)
-            compiler.emit(opcodes.OPCLOSURE, position, DUMMY_NUMBER_OF_FREE_VARIABLES)
+            compiler.emit(opcodes.OPCLOSURE, position, n_free_symbols)
         case stmts.ReturnStatement():  # value
             compile(compiler, node.value)
             compiler.emit(opcodes.OPRETURNVALUE)
@@ -372,3 +370,17 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             compiler.emit(opcodes.OPCALL, n_arguments)
         case _:
             raise CompilationError(f"Invalid node encountered: {node}")
+
+
+def _load_symbols(compiler: Compiler, symbol: sym.Symbol) -> None:
+    match symbol.scope:
+        case sym.SymbolScope.BUILTIN:
+            compiler.emit(opcodes.OPGETBUILTIN, symbol.index)
+        case sym.SymbolScope.FREE:
+            compiler.emit(opcodes.OPGETFREE, symbol.index)
+        case sym.SymbolScope.GLOBAL:
+            compiler.emit(opcodes.OPGETGLOBAL, symbol.index)
+        case sym.SymbolScope.LOCAL:
+            compiler.emit(opcodes.OPGETLOCAL, symbol.index)
+        case _:
+            raise CompilationError(f"Unreachable: invalid scope found: {symbol.scope}")

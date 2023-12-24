@@ -12,6 +12,7 @@ import enum
 
 class SymbolScope(enum.Enum):
     BUILTIN = enum.auto()
+    FREE = enum.auto()
     GLOBAL = enum.auto()
     LOCAL = enum.auto()
 
@@ -27,6 +28,7 @@ class Symbol:
 class SymbolTable:
     store: dict[str, Symbol] = dataclasses.field(default_factory=dict)
     outer_table: Optional["SymbolTable"] = None
+    free_symbols: list[Symbol] = dataclasses.field(default_factory=list)
 
     def __post_init__(self) -> None:
         self._n_nonbuiltin_definitions: int = 0
@@ -53,12 +55,29 @@ class SymbolTable:
 
         return new_symbol
 
+    def define_free(self, original: Symbol) -> Symbol:
+        self.free_symbols.append(original)
+
+        free_index = len(self.free_symbols) - 1
+        new_symbol = Symbol(original.name, SymbolScope.FREE, free_index)
+
+        self.store[original.name] = new_symbol
+
+        return new_symbol
+
     def resolve(self, name: str) -> Optional[Symbol]:
         symbol = self.store.get(name)
 
         # if the symbol couldn't be found locally, recursively try higher scopes
         if symbol is None and self.outer_table is not None:
             symbol = self.outer_table.resolve(name)
+
+            if symbol is None:
+                return symbol
+
+            if symbol.scope == SymbolScope.LOCAL or symbol.scope == SymbolScope.FREE:
+                free_symbol = self.define_free(symbol)
+                return free_symbol
 
         return symbol
 
