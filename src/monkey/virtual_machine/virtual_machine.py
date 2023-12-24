@@ -149,6 +149,13 @@ def run(vm: VirtualMachine) -> None:
 
                 object_to_push = BUILTINS_LIST[i_builtin]
                 vm.stack.push(object_to_push)
+            case opcodes.OPGETFREE:
+                i_free = _free_identifier_index(vm.instructions, vm.instruction_pointer)
+                vm.instruction_pointer += opcodes.OPGETFREE_WIDTH
+
+                current_frame = vm.frames.peek()
+                free_object = current_frame.closure.free_variables[i_free]
+                vm.stack.push(free_object)
             case opcodes.OPARRAY:
                 # the operand of the OPARRAY opcode is the number of elements in the array
                 n_elements = _number_of_array_elements(vm.instructions, vm.instruction_pointer)
@@ -234,7 +241,7 @@ def run(vm: VirtualMachine) -> None:
                 function_position = _function_position_in_constants(vm.instructions, vm.instruction_pointer)
                 vm.instruction_pointer += opcodes.OPCLOSURE_ARG0_WIDTH
 
-                _n_free_variables = _number_of_closure_free_variables(vm.instructions, vm.instruction_pointer)
+                n_free_variables = _number_of_closure_free_variables(vm.instructions, vm.instruction_pointer)
                 vm.instruction_pointer += opcodes.OPCLOSURE_ARG1_WIDTH
 
                 function = vm.constants[function_position]
@@ -244,7 +251,15 @@ def run(vm: VirtualMachine) -> None:
                         f"'{OBJECT_TYPE_DICT[function.data_type()]}'"
                     )
 
-                closure = objs.ClosureObject(function, dummy_free_variables_factory())
+                if n_free_variables != 0:
+                    i_free_start = vm.stack.size() - n_free_variables
+                    i_free_end = vm.stack.size()
+                    free_variables = vm.stack[i_free_start:i_free_end]
+                    vm.stack.shrink_stack_pointer(n_free_variables)
+                else:
+                    free_variables = []
+
+                closure = objs.ClosureObject(function, free_variables)
                 vm.stack.push(closure)
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
@@ -291,7 +306,7 @@ def _execute_closure_call(
     # we want to return to just after the function (which we will then pop off the
     # stack using OPRETURNVALUE or OPRETURN)
     base_pointer = function_pointer + 1
-    closure = objs.ClosureObject(closure.function, dummy_free_variables_factory())
+    # closure = objs.ClosureObject(closure.function, dummy_free_variables_factory())
     frame = StackFrame(closure, base_pointer=base_pointer)
     vm.frames.push(frame)
 
@@ -405,6 +420,10 @@ def _local_identifier_index(instructions: code.Instructions, instr_ptr: int) -> 
 
 def _builtin_identifier_index(instructions: code.Instructions, instr_ptr: int) -> int:
     return _read_position(instructions, instr_ptr, opcodes.OPGETBUILTIN_WIDTH)
+
+
+def _free_identifier_index(instructions: code.Instructions, instr_ptr: int) -> int:
+    return _read_position(instructions, instr_ptr, opcodes.OPGETFREE_WIDTH)
 
 
 def _new_position_after_jump(vm: VirtualMachine, instr_ptr: int) -> int:

@@ -702,6 +702,24 @@ class TestVirtualMachine:
     def test_builtins_raises(self, input_text: str):
         virtual_machine_test_case_raises_internals(input_text)
 
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            VirtualMachineTestCase(
+                """
+                let new_closure = fn(a) {
+                    return fn() { return a; };
+                };
+                let closure = new_closure(123);
+                closure();
+                """,
+                123,
+            ),
+        ],
+    )
+    def test_closures(self, test_case: VirtualMachineTestCase):
+        virtual_machine_test_case_internals(test_case)
+
 
 def virtual_machine_test_case_internals(test_case: VirtualMachineTestCase):
     """
