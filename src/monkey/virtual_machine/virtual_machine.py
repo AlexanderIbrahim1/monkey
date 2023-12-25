@@ -261,6 +261,10 @@ def run(vm: VirtualMachine) -> None:
 
                 closure = objs.ClosureObject(function, free_variables)
                 vm.stack.push(closure)
+            case opcodes.OPCURRENTCLOSURE:
+                current_frame = vm.frames.peek()
+                current_closure = current_frame.closure
+                vm.stack.push(current_closure)
             case _:
                 raise VirtualMachineError(f"Could not find a matching opcode: Found: {opcode!r}")
 

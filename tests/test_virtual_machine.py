@@ -796,6 +796,59 @@ class TestVirtualMachine:
     def test_closures(self, test_case: VirtualMachineTestCase):
         virtual_machine_test_case_internals(test_case)
 
+    @pytest.mark.parametrize(
+        "test_case",
+        [
+            VirtualMachineTestCase(
+                """
+                let countdown = fn(x) {
+                    if (x == 0) {
+                        return 0;
+                    } else {
+                        return countdown(x - 1);
+                    }
+                };
+                countdown(10);
+                """,
+                0,
+            ),
+            VirtualMachineTestCase(
+                """
+                let countdown = fn(x) {
+                    if (x == 0) {
+                        return 0;
+                    } else {
+                        return countdown(x - 1);
+                    }
+                };
+                let wrapper = fn() {
+                    countdown(10)
+                };
+                wrapper();
+                """,
+                0,
+            ),
+            VirtualMachineTestCase(
+                """
+                let wrapper = fn() {
+                    let countdown = fn(x) {
+                        if (x == 0) {
+                            return 0;
+                        } else {
+                            return countdown(x - 1);
+                        }
+                    };
+                    countdown(10);
+                };
+                wrapper();
+                """,
+                0,
+            ),
+        ],
+    )
+    def test_recursive_closures(self, test_case: VirtualMachineTestCase):
+        virtual_machine_test_case_internals(test_case)
+
 
 def virtual_machine_test_case_internals(test_case: VirtualMachineTestCase):
     """
