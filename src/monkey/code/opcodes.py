@@ -45,6 +45,7 @@ OPGETLOCAL: Opcode = b"\x25"
 OPGETBUILTIN: Opcode = b"\x26"
 OPCLOSURE: Opcode = b"\x27"
 OPGETFREE: Opcode = b"\x28"
+OPCURRENTCLOSURE: Opcode = b"\x29"
 
 # a dummy opcode used in situations where an opcode instance needs to exist
 OPDUMMY: Opcode = b"\xFF"
