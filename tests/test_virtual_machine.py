@@ -715,6 +715,82 @@ class TestVirtualMachine:
                 """,
                 123,
             ),
+            VirtualMachineTestCase(
+                """
+                let new_adder = fn(a, b) {
+                    return fn(c) { return a + b + c; };
+                };
+                let adder = new_adder(1, 2);
+                adder(8);
+                """,
+                11,
+            ),
+            VirtualMachineTestCase(
+                """
+                let new_adder = fn(a, b) {
+                    let c = a + b;
+                    let inner_adder = fn(d) {
+                        return c + d;
+                    };
+                    return inner_adder;
+                };
+                let adder = new_adder(1, 2);
+                adder(8);
+                """,
+                11,
+            ),
+            VirtualMachineTestCase(
+                """
+                let new_adder = fn(a, b) {
+                    let c = a + b;
+                    let inner_adder = fn(d) {
+                        let e = d + c;
+                        let inner_inner_adder = fn(f) {
+                            return e + f;
+                        };
+                        return inner_inner_adder;
+                    };
+                    return inner_adder;
+                };
+                let new_inner_adder = new_adder(1, 2);
+                let adder = new_inner_adder(3);
+                adder(8);
+                """,
+                14,
+            ),
+            VirtualMachineTestCase(
+                """
+                let a = 1;
+                let new_adder = fn(b) {
+                    let inner_adder = fn(c) {
+                        let inner_inner_adder = fn(d) {
+                            a + b + c + d
+                        };
+                        return inner_inner_adder;
+                    };
+                    return inner_adder;
+                };
+                let new_inner_adder = new_adder(1);
+                let adder = new_inner_adder(3);
+                adder(8);
+                """,
+                13,
+            ),
+            VirtualMachineTestCase(
+                """
+                let new_closure = fn(a, b) {
+                    let one = fn() { a };
+                    let two = fn() { b };
+                    let one_and_two = fn() {
+                        return one() + two();
+                    };
+                    return one_and_two;
+                };
+                let closure = new_closure(9, 90);
+                closure();
+                """,
+                99,
+            ),
         ],
     )
     def test_closures(self, test_case: VirtualMachineTestCase):
