@@ -37,4 +37,4 @@ class CompiledFunctionObject(Object):
         written_instructions = instructions_to_string(self.instructions)
         locals_line = f"[n_locals={self.n_locals}]"
         arguments_line = f"[n_arguments={self.n_arguments}]"
-        return f"COMPILED_FUNCTION[\n{written_instructions}\n]{locals_line}{arguments_line}"
+        return f"COMPILED_FUNCTION {{\n{written_instructions}\n{locals_line}\n{arguments_line}\n}}"
