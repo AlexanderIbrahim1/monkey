@@ -9,10 +9,13 @@ from typing import Optional
 import dataclasses
 import enum
 
+from monkey.compiler.constants import DUMMY_FUNCTION_SCOPE_INDEX
+
 
 class SymbolScope(enum.Enum):
     BUILTIN = enum.auto()
     FREE = enum.auto()
+    FUNCTION = enum.auto()
     GLOBAL = enum.auto()
     LOCAL = enum.auto()
 
@@ -51,6 +54,14 @@ class SymbolTable:
 
     def define_builtin(self, name: str, index: int) -> Symbol:
         new_symbol = Symbol(name, SymbolScope.BUILTIN, index)
+        self.store[name] = new_symbol
+
+        return new_symbol
+
+    def define_function_name(self, name: str) -> Symbol:
+        # the actual index of the symbol doesn't matter; we only use the fact that the symbol
+        # has FUNCTION scope to emit a particular opcode, which finds the correct index on its own
+        new_symbol = Symbol(name, SymbolScope.FUNCTION, DUMMY_FUNCTION_SCOPE_INDEX)
         self.store[name] = new_symbol
 
         return new_symbol

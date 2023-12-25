@@ -1472,6 +1472,65 @@ class TestCompiler:
     def test_closure(self, case: CompilerTestCase):
         perform_compiler_test_case(case)
 
+    @pytest.mark.parametrize(
+        "case",
+        [
+            CompilerTestCase(
+                """
+                let countdown = fn(x) {
+                    return countdown(x - 1);
+                };
+                countdown(1);
+                """,
+                (
+                    1,
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # upon trying to resolve the `countdown` identifier, the compiler will notice
+                                # that it is the name of the current function, and emit this opcode
+                                (op.OPCURRENTCLOSURE, ()),
+                                # get the argument (treated as local binding)
+                                # it is the first local binding/argument, and so is labelled 0
+                                (op.OPGETLOCAL, (0,)),
+                                # the `1` is the first constant encountered (label 0); put it on the stack
+                                (op.OPCONSTANT, (0,)),
+                                # subtract the two things on the stack
+                                (op.OPSUB, ()),
+                                # look up the function that corresponds to the identifer, and call it, with 1 argument
+                                (op.OPCALL, (1,)),
+                                # return the value; make sure the returned value is on top of the stack
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        # no local bindings
+                        0,
+                        # one argument
+                        1,
+                    ),
+                    1,
+                ),
+                [
+                    # create a function (constant) that takes 1 argument and uses 0 free variables
+                    (op.OPCLOSURE, (1, 0)),
+                    # make it a global binding
+                    (op.OPSETGLOBAL, (0,)),
+                    # we call it on the very next line; so put it on the stack again
+                    (op.OPGETGLOBAL, (0,)),
+                    # put its argument (the `1`) on top of the stack
+                    # this `1` is the third constant compiled so far, so it has label 2
+                    (op.OPCONSTANT, (2,)),
+                    # look up the function that corresponds to the identifer, and call it, with 1 argument
+                    (op.OPCALL, (1,)),
+                    # the function call ended up as an expression statement; pop it off the stack
+                    (op.OPPOP, ()),
+                ],
+            ),
+        ],
+    )
+    def test_recursive_closure(self, case: CompilerTestCase):
+        perform_compiler_test_case(case)
+
 
 # NOTE TO DEV: the number of locals in a function is the unique number of variables
 # that are defined in the function's body; not every constant gets a binding, so the

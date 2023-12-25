@@ -255,8 +255,8 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             alternative_jump_position = len(compiler.instructions)
             compiler.replace_operand(alternative_jump_instr_position, alternative_jump_position)
         case stmts.LetStatement():
-            compile(compiler, node.value)
             symbol = compiler.symbol_table.define(node.name.value)
+            compile(compiler, node.value)
 
             if symbol.scope == sym.SymbolScope.GLOBAL:
                 compiler.emit(opcodes.OPSETGLOBAL, symbol.index)
@@ -316,9 +316,12 @@ def compile(compiler: Compiler, node: ASTNode) -> None:
             compile(compiler, node.container)
             compile(compiler, node.inside)
             compiler.emit(opcodes.OPINDEX)
-        case exprs.FunctionLiteral():  # parameters, body
+        case exprs.FunctionLiteral():  # parameters, body, name
             # compile the body of the function in its own scope
             compiler.enter_scope()
+
+            if node.name is not None:
+                compiler.symbol_table.define_function_name(node.name)
 
             for param in node.parameters:
                 compiler.symbol_table.define(param.value)
@@ -378,6 +381,8 @@ def _load_symbols(compiler: Compiler, symbol: sym.Symbol) -> None:
             compiler.emit(opcodes.OPGETBUILTIN, symbol.index)
         case sym.SymbolScope.FREE:
             compiler.emit(opcodes.OPGETFREE, symbol.index)
+        case sym.SymbolScope.FUNCTION:
+            compiler.emit(opcodes.OPCURRENTCLOSURE)
         case sym.SymbolScope.GLOBAL:
             compiler.emit(opcodes.OPGETGLOBAL, symbol.index)
         case sym.SymbolScope.LOCAL:
