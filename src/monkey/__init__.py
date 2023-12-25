@@ -1,5 +1,6 @@
 from monkey.lexer import Lexer
 from monkey.parser import Parser
+from monkey.parser import Program
 from monkey.parser import parse_program
 from monkey.tokens import Literal
 from monkey.tokens import Token
