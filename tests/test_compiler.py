@@ -1511,7 +1511,9 @@ class TestCompiler:
                     1,
                 ),
                 [
-                    # create a function (constant) that takes 1 argument and uses 0 free variables
+                    # create a function (constant)
+                    # - it is the second constant seen so far (label 1)
+                    # - it uses no free variables (value 0)
                     (op.OPCLOSURE, (1, 0)),
                     # make it a global binding
                     (op.OPSETGLOBAL, (0,)),
@@ -1522,6 +1524,85 @@ class TestCompiler:
                     (op.OPCONSTANT, (2,)),
                     # look up the function that corresponds to the identifer, and call it, with 1 argument
                     (op.OPCALL, (1,)),
+                    # the function call ended up as an expression statement; pop it off the stack
+                    (op.OPPOP, ()),
+                ],
+            ),
+            CompilerTestCase(
+                """
+                let wrapper = fn() {
+                    let countdown = fn(x) {
+                        return countdown(x - 1);
+                    };
+                    return countdown(1);
+                };
+                wrapper();
+                """,
+                (
+                    1,
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # upon trying to resolve the `countdown` identifier, the compiler will notice
+                                # that it is the name of the current function, and emit this opcode
+                                (op.OPCURRENTCLOSURE, ()),
+                                # get the argument (treated as local binding)
+                                # it is the first local binding/argument, and so is labelled 0
+                                (op.OPGETLOCAL, (0,)),
+                                # the `1` is the first constant encountered (label 0); put it on the stack
+                                (op.OPCONSTANT, (0,)),
+                                # subtract the two things on the stack
+                                (op.OPSUB, ()),
+                                # look up the function that corresponds to the identifer, and call it, with 1 argument
+                                (op.OPCALL, (1,)),
+                                # return the value; make sure the returned value is on top of the stack
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        # no local bindings
+                        0,
+                        # one argument
+                        1,
+                    ),
+                    1,
+                    (
+                        code.make_instructions_from_opcode_operand_pairs(
+                            [
+                                # the closure `countdown`
+                                # - it is the second constant seen so far (label 1)
+                                # - it uses no free variables (value 0)
+                                (op.OPCLOSURE, (1, 0)),
+                                # we create a local binding for it (put into the store)
+                                # it is the first local binding; set it to 0
+                                (op.OPSETLOCAL, (0,)),
+                                # we are about to call a function; put it on top of the stack
+                                (op.OPGETLOCAL, (0,)),
+                                # the argument to the function (`1`) has a label of 2
+                                (op.OPCONSTANT, (2,)),
+                                # look up the function that corresponds to the identifer, and call it, with 1 argument
+                                (op.OPCALL, (1,)),
+                                # return the value; make sure the returned value is on top of the stack
+                                (op.OPRETURNVALUE, ()),
+                            ]
+                        ),
+                        # one local binding
+                        1,
+                        # no arguments
+                        0,
+                    ),
+                ),
+                [
+                    # create a function (constant)
+                    # - it is the fourth constant seen so far (label 3)
+                    # - it uses no free variables (value 0)
+                    (op.OPCLOSURE, (3, 0)),
+                    # make it a global binding
+                    (op.OPSETGLOBAL, (0,)),
+                    # we call it on the very next line; so put it on the stack again
+                    (op.OPGETGLOBAL, (0,)),
+                    # look up the function that corresponds to the identifer, and call it
+                    # - it takes no arguments (value 0)
+                    (op.OPCALL, (0,)),
                     # the function call ended up as an expression statement; pop it off the stack
                     (op.OPPOP, ()),
                 ],
