@@ -1,3 +1,7 @@
+from typing import Optional
+
+import pytest
+
 from monkey.parser.expressions import ArrayLiteral
 from monkey.parser.expressions import BooleanLiteral
 from monkey.parser.expressions import FunctionLiteral
@@ -61,7 +65,14 @@ def test_if_expression():
     assert str(expr) == "if (3 < 5) { 10 } else { 20 }"
 
 
-def test_function_literal():
+@pytest.mark.parametrize(
+    "name, output",
+    [
+        (None, "fn(x, y) { return (x + y); }"),
+        ("func", "func: fn(x, y) { return (x + y); }"),
+    ],
+)
+def test_function_literal(name: Optional[str], output: str):
     token = Token(token_types.FUNCTION, "fn")
 
     parameters = [
@@ -79,9 +90,9 @@ def test_function_literal():
     ret_statement = ReturnStatement(Token(token_types.RETURN, "return"), summation)
     body = BlockStatement(Token(token_types.LBRACE, "{"), [ret_statement])
 
-    expr = FunctionLiteral(token, parameters, body)
+    expr = FunctionLiteral(token, parameters, body, name)
 
-    assert str(expr) == "fn(x, y) { return (x + y); }"
+    assert str(expr) == output
 
 
 def test_array_literal():
