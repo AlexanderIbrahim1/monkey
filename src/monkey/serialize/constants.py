@@ -1,0 +1,8 @@
+"""
+This module contains constants used related to serialization.
+"""
+
+MONKEY_SOURCE_FILE_EXTENSION = "monkey"
+MONKEY_BYTECODE_FILE_EXTENSION = "monkeybyte"
+MONKEY_SOURCE_FILE_SUFFIX = f".{MONKEY_SOURCE_FILE_EXTENSION}"
+MONKEY_BYTECODE_FILE_SUFFIX = f".{MONKEY_BYTECODE_FILE_EXTENSION}"
