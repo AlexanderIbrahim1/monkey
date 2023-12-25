@@ -593,3 +593,17 @@ def test_empty_hash_literal():
     assert not parser.has_errors()
     assert program.number_of_statements() == 1
     assert program[0] == expected_statement
+
+
+def test_function_literal_with_name():
+    monkey_code = "let my_func = fn() {};"
+    lexer = Lexer(monkey_code)
+    parser = Parser(lexer)
+    program = parse_program(parser)
+
+    assert program.number_of_statements() == 1
+
+    statement = program[0]
+    assert isinstance(statement, LetStatement)
+    assert isinstance(statement.value, FunctionLiteral)
+    assert statement.value.name == "my_func"

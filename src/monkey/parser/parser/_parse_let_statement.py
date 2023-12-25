@@ -43,6 +43,9 @@ def parse_let_statement(
     if stmt_expr == FAIL_EXPR:
         return FAIL_STMT
 
+    if isinstance(stmt_expr, exprs.FunctionLiteral):
+        stmt_expr.name = stmt_identifier.value
+
     # make sure there's a semicolon to end it
     if not parser.expect_peek_and_next(token_types.SEMICOLON):
         return FAIL_STMT
